@@ -1,5 +1,5 @@
 {
-  "name": "test_test",
+  "name": "zero",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -19,6 +19,7 @@
   "devDependencies": {
     "@tauri-apps/cli": "^1.4.0",
     "@types/jest": "^29.5.5",
+    "@types/node": "^20.6.3",
     "@types/selenium-webdriver": "^4.1.16",
     "jest": "^29.7.0",
     "selenium-webdriver": "^4.12.0",

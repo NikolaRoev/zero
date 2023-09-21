@@ -6,7 +6,7 @@ authors = ["you"]
 license = ""
 repository = ""
 edition = "2021"
-rust-version = "1.67.1"
+rust-version = "1.72.0"
 
 [build-dependencies]
 tauri-build = { version = "1.4", features = [] }
