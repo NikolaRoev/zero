@@ -1,15 +1,12 @@
 {
-  "name": "zero",
-  "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "update-dependencies": "ncu -u && cd src-tauri && cargo upgrade --incompatible",
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "tauri-dev": "tauri dev",
-    "tauri-build": "tauri build --debug",
+    "lint": "tsc && eslint . --ext .ts && cd src-tauri && cargo clippy",
+    "dev": "vite dev",
+    "build": "vite build",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
     "unit-tests": "cd src-tauri && cargo test",
     "integration-tests": "tauri build && jest"
   },
@@ -18,12 +15,13 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.4.0",
-    "@types/jest": "^29.5.5",
     "@types/node": "^20.6.3",
-    "@types/selenium-webdriver": "^4.1.16",
-    "jest": "^29.7.0",
-    "selenium-webdriver": "^4.12.0",
-    "ts-jest": "^29.1.1",
+    "@typescript-eslint/eslint-plugin": "^6.7.2",
+    "@typescript-eslint/parser": "^6.7.2",
+    "eslint": "^8.50.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.28.1",
+    "sass": "^1.68.0",
     "typescript": "^5.2.2",
     "vite": "^4.4.9"
   }

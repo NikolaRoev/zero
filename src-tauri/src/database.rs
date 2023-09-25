@@ -29,6 +29,7 @@ pub struct Order {
     descending: bool
 }
 
+
 #[derive(Debug)]
 pub enum Error {
     NoConnection,
@@ -71,6 +72,13 @@ impl std::error::Error for Error {
         }
     }
 }
+
+impl serde::Serialize for Error {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: serde::ser::Serializer {
+        serializer.serialize_str(self.to_string().as_ref())
+    }
+}
+
 
 const TYPES: &[&str] = &["Manga", "Manhwa", "Manhua", "OEL", "Novel"];
 const FORMATS: &[&str] = &["Series", "One Shot", "Anthology"];
