@@ -141,17 +141,17 @@ impl Database {
 
             CREATE TABLE IF NOT EXISTS statuses (
                 id     INTEGER PRIMARY KEY,
-                status TEXT NOT NULL
+                status TEXT NOT NULL UNIQUE
             );
 
             CREATE TABLE IF NOT EXISTS types (
                 id   INTEGER PRIMARY KEY,
-                type TEXT NOT NULL
+                type TEXT NOT NULL UNIQUE
             );
 
             CREATE TABLE IF NOT EXISTS formats (
                 id     INTEGER PRIMARY KEY,
-                format TEXT NOT NULL
+                format TEXT NOT NULL UNIQUE
             );
 
 
