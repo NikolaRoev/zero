@@ -133,7 +133,7 @@ impl Database {
 
             CREATE TABLE IF NOT EXISTS work_creator (
                 work_id     INTEGER NOT NULL,
-                creator_id  TEXT NOT NULL,
+                creator_id  INTEGER NOT NULL,
                 PRIMARY KEY (work_id, creator_id),
                 FOREIGN KEY (work_id)    REFERENCES works    (id) ON DELETE CASCADE,
                 FOREIGN KEY (creator_id) REFERENCES creators (id) ON DELETE CASCADE
