@@ -1,3 +1,5 @@
+use std::{sync::{Mutex, MutexGuard}, ops::Deref};
+
 use rusqlite::named_params;
 
 
@@ -84,21 +86,26 @@ pub type DatabaseResult<T> = Result<T, Error>;
 
 #[derive(Default)]
 pub struct Database {
-    conn: Option<rusqlite::Connection>
+    conn: Mutex<Option<rusqlite::Connection>>
 }
 
 impl Database {
-    fn conn(&self) -> DatabaseResult<&rusqlite::Connection> {
-        self.conn.as_ref().ok_or(Error::NoConnection)
+    fn conn<'a>(guard: &'a MutexGuard<'a, Option<rusqlite::Connection>>) -> DatabaseResult<&'a rusqlite::Connection> {
+        guard.as_ref().ok_or(Error::NoConnection)
     }
 
+    fn guard(&self) -> MutexGuard<'_, Option<rusqlite::Connection>> {
+        self.conn.lock().unwrap()
+    }
+    
     pub fn open(&mut self, path: &str) -> DatabaseResult<()> {
         let mut conn = rusqlite::Connection::open(format!("{path}.db"))?;
         conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
         conn.backup(rusqlite::DatabaseName::Main, format!("{path}-backup.db"), None)?;
-        self.conn = Some(conn);
+        self.conn = Some(conn).into();
 
-        self.conn()?.execute_batch("
+        let guard = self.guard();
+        Self::conn(&guard)?.execute_batch("
             CREATE TABLE IF NOT EXISTS works (
                 id      INTEGER PRIMARY KEY,
                 name    TEXT NOT NULL,
@@ -216,7 +223,8 @@ impl Database {
     pub fn add_work(
         &self, name: &str, chapter: &str, status: &str, r#type: &str, format: &str, creators: &[i64]
     ) -> DatabaseResult<i64> {
-        let mut stmt = self.conn()?.prepare_cached("
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached("
             INSERT INTO works (name, chapter, status, type, format)
             VALUES (:name, :chapter, :status, :type, :format)
         ")?;
@@ -231,7 +239,8 @@ impl Database {
     }
 
     pub fn get_work(&self, id: i64) -> DatabaseResult<Work> {
-        let mut stmt = self.conn()?.prepare_cached("
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached("
             SELECT * FROM works WHERE id = :id
         ")?;
 
@@ -291,7 +300,8 @@ impl Database {
             }
         }
 
-        let mut stmt = self.conn()?.prepare_cached(&query)?;
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached(&query)?;
         let rows = stmt.query_map(rusqlite::params_from_iter(params), |row| {
             Ok(Work {
                 id: row.get(0)?,
@@ -309,7 +319,8 @@ impl Database {
     }
 
     pub fn get_work_creators(&self, work_id: i64) -> DatabaseResult<Vec<Creator>> {
-        let mut stmt = self.conn()?.prepare_cached("
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached("
             SELECT * FROM creators JOIN work_creator ON id = creator_id AND work_id = :work_id
         ")?;
 
@@ -325,7 +336,8 @@ impl Database {
     }
 
     pub fn add_creator(&self, name: &str, works: &[i64]) -> DatabaseResult<i64> {
-        let mut stmt = self.conn()?.prepare_cached("
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached("
             INSERT INTO creators (name) VALUES (:name)
         ")?;
 
@@ -337,7 +349,8 @@ impl Database {
     }
 
     pub fn get_creator(&self, id: i64) -> DatabaseResult<Creator> {
-        let mut stmt = self.conn()?.prepare_cached("
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached("
             SELECT * FROM creators WHERE id = :id
         ")?;
 
@@ -360,7 +373,8 @@ impl Database {
                 query.push_str(" DESC")
             }
         }
-        let mut stmt = self.conn()?.prepare_cached(&query)?;
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached(&query)?;
 
         let rows = stmt.query_map(named_params! {":name": format!("%{name}%")}, |row| {
             Ok(Creator {
@@ -374,7 +388,8 @@ impl Database {
     }
 
     pub fn get_creator_works(&self, creator_id: i64) -> DatabaseResult<Vec<Work>> {
-        let mut stmt = self.conn()?.prepare_cached("
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached("
             SELECT * FROM works JOIN work_creator ON id = work_id AND creator_id = :creator_id
         ")?;
 
@@ -395,7 +410,8 @@ impl Database {
     }
 
     pub fn remove(&self, table: &str, id: i64) -> DatabaseResult<()> {
-        let mut stmt = self.conn()?.prepare_cached(&format!(
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!(
             "DELETE FROM {table} WHERE id = :id"
         ))?;
 
@@ -411,7 +427,8 @@ impl Database {
     }
 
     pub fn update(&self, table: &str, column: &str, id: i64, value: &str) -> DatabaseResult<()> {
-        let mut stmt = self.conn()?.prepare_cached(&format!(
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!(
             "UPDATE {table} SET {column} = :value WHERE id = :id"
         ))?;
         
@@ -427,7 +444,8 @@ impl Database {
     }
 
     pub fn attach(&self, work_id: i64, creator_id: i64) -> DatabaseResult<()> {
-        let mut stmt = self.conn()?.prepare_cached("
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached("
             INSERT INTO work_creator (work_id, creator_id) VALUES (:work_id, :creator_id)
         ")?;
 
@@ -437,7 +455,8 @@ impl Database {
     }
 
     pub fn detach(&self, work_id: i64, creator_id: i64) -> DatabaseResult<()> {
-        let mut stmt = self.conn()?.prepare_cached(
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached(
             "DELETE FROM work_creator WHERE work_id = :work_id AND creator_id = :creator_id"
         )?;
 
@@ -478,7 +497,7 @@ mod tests {
     impl Drop for Context {
         fn drop(&mut self) {
             self.database.conn
-                .take()
+                .lock().unwrap().take()
                 .expect("No connection to database.")
                 .close()
                 .unwrap_or_else(|(_, err)| panic!("Failed to close {err}."));
