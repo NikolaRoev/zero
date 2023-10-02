@@ -80,9 +80,6 @@ impl serde::Serialize for Error {
 }
 
 
-const TYPES: &[&str] = &["Manga", "Manhwa", "Manhua", "OEL", "Novel"];
-const FORMATS: &[&str] = &["Series", "One Shot", "Anthology"];
-
 pub type DatabaseResult<T> = Result<T, Error>;
 
 #[derive(Default)]
@@ -93,18 +90,6 @@ pub struct Database {
 impl Database {
     fn conn(&self) -> DatabaseResult<&rusqlite::Connection> {
         self.conn.as_ref().ok_or(Error::NoConnection)
-    }
-
-    
-
-    fn verify_type(r#type: &str) -> DatabaseResult<()> {
-        if TYPES.contains(&r#type) { Ok(()) }
-        else { Err(Error::Database(format!("Invalid type '{}'", r#type))) }
-    }
-
-    fn verify_format(format: &str) -> DatabaseResult<()> {
-        if FORMATS.contains(&format) { Ok(()) }
-        else { Err(Error::Database(format!("Invalid format '{format}'"))) }
     }
 
     pub fn open(&mut self, path: &str) -> DatabaseResult<()> {
