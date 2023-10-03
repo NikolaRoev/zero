@@ -19,14 +19,13 @@ fn greet(database: tauri::State<Database>, name: &str) -> String {
 }
 
 fn main() {
-    log::init().unwrap_or_else(|err| panic!("Failed to init log: {err}."));
+    log::init();
+    log::info!("Started zero.");
 
-    
     let mut database = Database::default();
-    database.open("database.db").unwrap_or_else(|err| panic!("Failed to open database: {err}."));
+    database.open("database").unwrap_or_else(|err| panic!("Failed to open database: {err}."));
 
     
-
     tauri::Builder::default()
         .manage(database)
         .invoke_handler(tauri::generate_handler![greet])

@@ -1,5 +1,4 @@
-use std::{sync::{Mutex, MutexGuard}, ops::Deref};
-
+use std::sync::{Mutex, MutexGuard};
 use rusqlite::named_params;
 
 
