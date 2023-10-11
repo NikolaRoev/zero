@@ -35,15 +35,6 @@
     },
     "updater": {
       "active": false
-    },
-    "windows": [
-      {
-        "fullscreen": false,
-        "resizable": true,
-        "title": "0",
-        "width": 1024,
-        "height": 576
-      }
-    ]
+    }
   }
 }

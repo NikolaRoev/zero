@@ -1,6 +1,133 @@
-use std::sync::{Mutex, MutexGuard};
+use std::{sync::{Mutex, MutexGuard}, collections::HashMap};
 use rusqlite::named_params;
 
+
+
+const CREATE_QUERY: &str = "
+CREATE TABLE IF NOT EXISTS works (
+    id      INTEGER PRIMARY KEY,
+    name    TEXT NOT NULL,
+    chapter TEXT NOT NULL,
+    status  TEXT NOT NULL,
+    type    TEXT NOT NULL,
+    format  TEXT NOT NULL,
+    updated TEXT DEFAULT (DATETIME('NOW', 'LOCALTIME')) NOT NULL,
+    added   TEXT DEFAULT (DATETIME('NOW', 'LOCALTIME')) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS creators (
+    id    INTEGER PRIMARY KEY,
+    name  TEXT NOT NULL,
+    works INTEGER DEFAULT 0 NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS work_creator (
+    work_id     INTEGER NOT NULL,
+    creator_id  INTEGER NOT NULL,
+    PRIMARY KEY (work_id, creator_id),
+    FOREIGN KEY (work_id)    REFERENCES works    (id) ON DELETE CASCADE,
+    FOREIGN KEY (creator_id) REFERENCES creators (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS statuses (
+    id     INTEGER PRIMARY KEY,
+    status TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS types (
+    id   INTEGER PRIMARY KEY,
+    type TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS formats (
+    id     INTEGER PRIMARY KEY,
+    format TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS update_statuses (
+    id     INTEGER PRIMARY KEY,
+    status TEXT NOT NULL UNIQUE
+);
+
+
+CREATE TRIGGER IF NOT EXISTS check_work_insert
+    BEFORE INSERT
+    ON works
+    WHEN NEW.status NOT IN (SELECT status FROM statuses) OR
+         NEW.type NOT IN (SELECT type FROM types) OR
+         NEW.format NOT IN (SELECT format FROM formats)
+BEGIN
+    SELECT RAISE(ABORT, 'Invalid work');
+END;
+
+CREATE TRIGGER IF NOT EXISTS check_work_update
+    BEFORE UPDATE OF 'status', 'type', 'format'
+    ON works
+    WHEN NEW.status NOT IN (SELECT status FROM statuses) OR
+         NEW.type NOT IN (SELECT type FROM types) OR
+         NEW.format NOT IN (SELECT format FROM formats)
+BEGIN
+    SELECT RAISE(ABORT, 'Invalid work update value');
+END;
+
+CREATE TRIGGER IF NOT EXISTS update_work_chapter
+    AFTER UPDATE OF 'chapter'
+    ON works
+BEGIN
+    UPDATE works SET updated = DATETIME('NOW', 'LOCALTIME') WHERE id = NEW.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS update_status_insert
+    BEFORE INSERT
+    ON update_statuses
+    WHEN NEW.status NOT IN (SELECT status FROM statuses)
+BEGIN
+    SELECT RAISE(ABORT, 'Invalid update status');
+END;
+
+CREATE TRIGGER IF NOT EXISTS delete_status
+    BEFORE DELETE
+    ON statuses
+    WHEN (SELECT COUNT(*) FROM works WHERE status = OLD.status) > 0 OR
+         (SELECT COUNT(*) FROM update_statuses WHERE status = OLD.status) > 0
+BEGIN
+    SELECT RAISE(ABORT, 'Status still in use');
+END;
+
+CREATE TRIGGER IF NOT EXISTS delete_type
+    BEFORE DELETE
+    ON types
+    WHEN (SELECT COUNT(*) FROM works WHERE type = OLD.type) > 0
+BEGIN
+    SELECT RAISE(ABORT, 'Type still in use');
+END;
+
+CREATE TRIGGER IF NOT EXISTS delete_format
+    BEFORE DELETE
+    ON formats
+    WHEN (SELECT COUNT(*) FROM works WHERE format = OLD.format) > 0
+BEGIN
+    SELECT RAISE(ABORT, 'Format still in use');
+END;
+
+CREATE TRIGGER IF NOT EXISTS add_work
+    AFTER INSERT
+    ON work_creator
+BEGIN
+    UPDATE creators
+    SET works = (SELECT COUNT(*) FROM work_creator WHERE creator_id = NEW.creator_id)
+    WHERE id = NEW.creator_id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS remove_work
+    AFTER DELETE
+    ON work_creator
+BEGIN
+    UPDATE creators
+    SET works = (SELECT COUNT(*) FROM work_creator WHERE creator_id = OLD.creator_id)
+    WHERE id = OLD.creator_id;
+END;
+";
 
 pub struct Work {
     id: i64,
@@ -20,9 +147,10 @@ pub struct Creator {
 }
 
 pub struct Filter {
-    columns: Vec<String>,
+    selection: Vec<String>,
     by: String,
-    value: String
+    value: String,
+    restrictions: HashMap<String, Vec<String>>
 }
 
 pub struct Order {
@@ -31,57 +159,7 @@ pub struct Order {
 }
 
 
-#[derive(Debug)]
-pub enum Error {
-    NoConnection,
-    Database(String),
-    SQLite(rusqlite::Error)
-}
-
-impl PartialEq for Error {
-    fn eq(&self, other: &Error) -> bool {
-        match (self, other) {
-            (Error::NoConnection, Error::NoConnection) => true,
-            (Error::Database(msg1), Error::Database(msg2)) => msg1 == msg2,
-            (Error::SQLite(e1), Error::SQLite(e2)) => e1 == e2,
-            (..) => false
-        }
-    }
-}
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match *self {
-            Error::NoConnection => write!(f, "No connection to database"),
-            Error::Database(ref msg) => write!(f, "{}", msg),
-            Error::SQLite(ref err) => err.fmt(f),
-        }
-    }
-}
-
-impl From<rusqlite::Error> for Error {
-    fn from(err: rusqlite::Error) -> Self {
-        Error::SQLite(err)
-    }
-}
-
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {
-            Error::SQLite(ref err) => Some(err),
-            _ => None
-        }
-    }
-}
-
-impl serde::Serialize for Error {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: serde::ser::Serializer {
-        serializer.serialize_str(self.to_string().as_ref())
-    }
-}
-
-
-pub type DatabaseResult<T> = Result<T, Error>;
+pub type DatabaseResult<T> = Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Default)]
 pub struct Database {
@@ -90,11 +168,20 @@ pub struct Database {
 
 impl Database {
     fn conn<'a>(guard: &'a MutexGuard<'a, Option<rusqlite::Connection>>) -> DatabaseResult<&'a rusqlite::Connection> {
-        guard.as_ref().ok_or(Error::NoConnection)
+        guard.as_ref().ok_or("No connection to database.".into())
     }
 
     fn guard(&self) -> MutexGuard<'_, Option<rusqlite::Connection>> {
         self.conn.lock().unwrap()
+    }
+
+    pub fn add_item(&self, table: &str, column: &str, value: impl rusqlite::ToSql) -> DatabaseResult<i64> {
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!("
+            INSERT INTO {table} ({column}) VALUES (:value)
+        "))?;
+
+        Ok(stmt.insert(named_params! { ":value": value })?)
     }
     
     pub fn open(&mut self, path: &str) -> DatabaseResult<()> {
@@ -104,119 +191,7 @@ impl Database {
         self.conn = Some(conn).into();
 
         let guard = self.guard();
-        Self::conn(&guard)?.execute_batch("
-            CREATE TABLE IF NOT EXISTS works (
-                id      INTEGER PRIMARY KEY,
-                name    TEXT NOT NULL,
-                chapter TEXT NOT NULL,
-                status  TEXT NOT NULL,
-                type    TEXT NOT NULL,
-                format  TEXT NOT NULL,
-                updated TEXT DEFAULT (DATETIME('NOW', 'LOCALTIME')) NOT NULL,
-                added   TEXT DEFAULT (DATETIME('NOW', 'LOCALTIME')) NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS creators (
-                id    INTEGER PRIMARY KEY,
-                name  TEXT NOT NULL,
-                works INTEGER DEFAULT 0 NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS work_creator (
-                work_id     INTEGER NOT NULL,
-                creator_id  INTEGER NOT NULL,
-                PRIMARY KEY (work_id, creator_id),
-                FOREIGN KEY (work_id)    REFERENCES works    (id) ON DELETE CASCADE,
-                FOREIGN KEY (creator_id) REFERENCES creators (id) ON DELETE CASCADE
-            );
-
-            CREATE TABLE IF NOT EXISTS statuses (
-                id     INTEGER PRIMARY KEY,
-                status TEXT NOT NULL UNIQUE
-            );
-
-            CREATE TABLE IF NOT EXISTS types (
-                id   INTEGER PRIMARY KEY,
-                type TEXT NOT NULL UNIQUE
-            );
-
-            CREATE TABLE IF NOT EXISTS formats (
-                id     INTEGER PRIMARY KEY,
-                format TEXT NOT NULL UNIQUE
-            );
-
-
-            CREATE TRIGGER IF NOT EXISTS check_work_insert
-                BEFORE INSERT
-                ON works
-                WHEN NEW.status NOT IN (SELECT status FROM statuses) OR
-                     NEW.type NOT IN (SELECT type FROM types) OR
-                     NEW.format NOT IN (SELECT format FROM formats)
-            BEGIN
-                SELECT RAISE(ABORT, 'Invalid work');
-            END;
-
-            CREATE TRIGGER IF NOT EXISTS check_work_update
-                BEFORE UPDATE OF 'status', 'type', 'format'
-                ON works
-                WHEN NEW.status NOT IN (SELECT status FROM statuses) OR
-                     NEW.type NOT IN (SELECT type FROM types) OR
-                     NEW.format NOT IN (SELECT format FROM formats)
-            BEGIN
-                SELECT RAISE(ABORT, 'Invalid work update value');
-            END;
-
-            CREATE TRIGGER IF NOT EXISTS update_work_chapter
-                AFTER UPDATE OF 'chapter'
-                ON works
-            BEGIN
-                UPDATE works SET updated = DATETIME('NOW', 'LOCALTIME') WHERE id = NEW.id;
-            END;
-
-            CREATE TRIGGER IF NOT EXISTS delete_status
-                BEFORE DELETE
-                ON statuses
-                WHEN (SELECT COUNT(*) FROM works WHERE status = OLD.status) > 0
-            BEGIN
-                SELECT RAISE(ABORT, 'Status still in use');
-            END;
-
-            CREATE TRIGGER IF NOT EXISTS delete_type
-                BEFORE DELETE
-                ON types
-                WHEN (SELECT COUNT(*) FROM works WHERE type = OLD.type) > 0
-            BEGIN
-                SELECT RAISE(ABORT, 'Type still in use');
-            END;
-
-            CREATE TRIGGER IF NOT EXISTS delete_format
-                BEFORE DELETE
-                ON formats
-                WHEN (SELECT COUNT(*) FROM works WHERE format = OLD.format) > 0
-            BEGIN
-                SELECT RAISE(ABORT, 'Format still in use');
-            END;
-
-            CREATE TRIGGER IF NOT EXISTS add_work
-                AFTER INSERT
-                ON work_creator
-            BEGIN
-                UPDATE creators
-                SET works = (SELECT COUNT(*) FROM work_creator WHERE creator_id = NEW.creator_id)
-                WHERE id = NEW.creator_id;
-            END;
-
-            CREATE TRIGGER IF NOT EXISTS remove_work
-                AFTER DELETE
-                ON work_creator
-            BEGIN
-                UPDATE creators
-                SET works = (SELECT COUNT(*) FROM work_creator WHERE creator_id = OLD.creator_id)
-                WHERE id = OLD.creator_id;
-            END;
-        ")?;
-
-        Ok(())
+        Ok(Self::conn(&guard)?.execute_batch(CREATE_QUERY)?)
     }
 
     pub fn add_work(
@@ -262,34 +237,22 @@ impl Database {
     pub fn get_works(
         &self, 
         filter: Filter,
-        statuses: &[&str],
-        types: &[&str],
-        formats: &[&str],
         order: Option<Order>
     ) -> DatabaseResult<Vec<Work>>{
-        let helper = |column: &str, values: &[&str]| {
+        let helper = |column: &str, values: &Vec<String>| {
             let placeholders = vec!["?"; values.len()].join(",");
             format!(" AND {column} IN ({placeholders})")
         };
 
-        let mut query = format!("SELECT {filter} FROM works WHERE {by} LIKE ?",
-            filter = filter.columns.join(","),
-            by = filter.by);
-        let mut params = vec![filter.value.as_str()];
-        
-        if !statuses.is_empty() {
-            query.push_str(&helper("status", statuses));
-            params.extend_from_slice(statuses);
-        }
+        let mut query = format!("SELECT {columns} FROM works WHERE {by} LIKE ?",
+            columns = filter.selection.join(","),
+            by = filter.by
+        );
 
-        if !types.is_empty() {
-            query.push_str(&helper("type", types));
-            params.extend_from_slice(types);
-        }
-
-        if !formats.is_empty() {
-            query.push_str(&helper("format", formats));
-            params.extend_from_slice(formats);
+        let mut params = vec![filter.value];
+        for (column, values) in filter.restrictions.iter() {
+            query.push_str(&helper(column, values));
+            params.extend(values.to_vec());
         }
 
         if let Some(Order {by, descending}) = order {
@@ -335,12 +298,7 @@ impl Database {
     }
 
     pub fn add_creator(&self, name: &str, works: &[i64]) -> DatabaseResult<i64> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached("
-            INSERT INTO creators (name) VALUES (:name)
-        ")?;
-
-        let creator_id = stmt.insert(named_params! { ":name": name })?;
+        let creator_id = self.add_item("creators", "name", name)?;
 
         works.iter().try_for_each(|work_id| self.attach(*work_id, creator_id))?;
 
@@ -417,9 +375,9 @@ impl Database {
         let rows = stmt.execute(named_params! {":id": id})?;
         
         if rows != 1 {
-            return Err(Error::Database(format!(
+            return Err(format!(
                 "Expected to remove 1 item from table '{table}' not {rows}"
-            )));
+            ))?;
         }
 
         Ok(())
@@ -434,9 +392,9 @@ impl Database {
         let rows = stmt.execute(named_params! {":value": value, ":id": id})?;
 
         if rows != 1 {
-            return Err(Error::Database(format!(
+            return Err(format!(
                 "Expected to update 1 row of column '{column}' to value '{value}' in table '{table}' not {rows}"
-            )));
+            ))?;
         }
 
         Ok(())
@@ -462,9 +420,9 @@ impl Database {
         let rows = stmt.execute(named_params! {":work_id": work_id, ":creator_id": creator_id})?;
         
         if rows != 1 {
-            return Err(Error::Database(format!(
+            return Err(format!(
                 "Expected to detach 1 item not {rows}"
-            )));
+            ))?;
         }
 
         Ok(())
@@ -509,6 +467,8 @@ mod tests {
     #[test]
     fn test() {
         let database = &Context::new().database;
+        database.add_creator("test", &[]);
+        database.add_item("statuses", "status", "value");
         //let id = database.add_work("name", "chapter", "status", "r#type", "format", &[]).unwrap();
         //std::thread::sleep(std::time::Duration::from_secs(4));
         //database.update("works", "chapter", id, "12");

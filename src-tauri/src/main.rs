@@ -2,33 +2,23 @@
 
 mod log;
 mod database;
-
-use database::Database;
-
-#[derive(serde::Deserialize)]
-struct Test{
-    a: i64,
-    b: Option<String>
-}
-
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(database: tauri::State<Database>, name: &str) -> String {
-    let _ = database.add_creator("asdasd", &[]);
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+mod error;
+mod window;
+mod api;
+mod menu;
+mod handlers;
 
 fn main() {
-    log::init();
+    log::init().unwrap_or_else(|err| panic!("Failed to initialize log: {err}."));
     log::info!("Started zero.");
 
-    let mut database = Database::default();
-    database.open("database").unwrap_or_else(|err| panic!("Failed to open database: {err}."));
-
-    
     tauri::Builder::default()
-        .manage(database)
-        .invoke_handler(tauri::generate_handler![greet])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .setup(handlers::setup_handler)
+        .invoke_handler(tauri::generate_handler![
+            api::greet
+        ])
+        .on_menu_event(handlers::menu_event_handler)
+        .on_window_event(handlers::window_event_handler)
+        .build(tauri::generate_context!()).expect("Failed to build Tauri application.")
+        .run(handlers::run_event_handler);
 }
