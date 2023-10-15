@@ -175,41 +175,70 @@ impl Database {
         self.conn.lock().unwrap()
     }
 
-    pub fn add_item(&self, table: &str, column: &str, value: impl rusqlite::ToSql) -> DatabaseResult<i64> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!("
-            INSERT INTO {table} ({column}) VALUES (:value)
-        "))?;
-
-        Ok(stmt.insert(named_params! { ":value": value })?)
-    }
-    
     pub fn open(&mut self, path: &str) -> DatabaseResult<()> {
-        let mut conn = rusqlite::Connection::open(format!("{path}.db"))?;
+        let mut conn = rusqlite::Connection::open(path)?;
         conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
-        conn.backup(rusqlite::DatabaseName::Main, format!("{path}-backup.db"), None)?;
         self.conn = Some(conn).into();
 
         let guard = self.guard();
         Ok(Self::conn(&guard)?.execute_batch(CREATE_QUERY)?)
     }
 
-    pub fn add_work(
-        &self, name: &str, chapter: &str, status: &str, r#type: &str, format: &str, creators: &[i64]
-    ) -> DatabaseResult<i64> {
+    pub fn is_open(&self) -> bool {
         let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached("
-            INSERT INTO works (name, chapter, status, type, format)
-            VALUES (:name, :chapter, :status, :type, :format)
-        ")?;
+        guard.is_some()
+    }
 
-        let work_id = stmt.insert(named_params! {
-            ":name": name, ":chapter": chapter, ":status": status, ":type": r#type, ":format": format
-        })?;
+    pub fn path(&self) -> DatabaseResult<std::path::PathBuf> {
+        let guard = self.guard();
+        Ok(Self::conn(&guard)?.path().ok_or("Invalid path to database.")?.into())
+    }
 
-        creators.iter().try_for_each(|creator_id| self.attach(work_id, *creator_id))?;
+    pub fn add(&self, table: &str, params: Vec<(&str, &dyn rusqlite::ToSql)>) -> DatabaseResult<i64> {
+        let (columns, values): (Vec<&str>, Vec<&dyn rusqlite::ToSql>) = params.into_iter().unzip();
 
-        Ok(work_id)
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!("
+            INSERT INTO {table} ({columns}) VALUES ({placeholders})
+        ",
+        columns = columns.join(","),
+        placeholders = vec!["?"; values.len()].join(",")))?;
+
+        Ok(stmt.insert(rusqlite::params_from_iter(values))?)
+    }
+
+    pub fn remove(&self, table: &str, id: i64) -> DatabaseResult<()> {
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!(
+            "DELETE FROM {table} WHERE id = :id"
+        ))?;
+
+        let rows = stmt.execute(named_params! {":id": id})?;
+        
+        if rows != 1 {
+            return Err(format!(
+                "Expected to remove 1 item from table '{table}' not {rows}"
+            ))?;
+        }
+
+        Ok(())
+    }
+
+    pub fn update(&self, table: &str, column: &str, id: i64, value: &str) -> DatabaseResult<()> {
+        let guard = self.guard();
+        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!(
+            "UPDATE {table} SET {column} = :value WHERE id = :id"
+        ))?;
+        
+        let rows = stmt.execute(named_params! {":value": value, ":id": id})?;
+
+        if rows != 1 {
+            return Err(format!(
+                "Expected to update 1 row of column '{column}' to value '{value}' in table '{table}' not {rows}"
+            ))?;
+        }
+
+        Ok(())
     }
 
     pub fn get_work(&self, id: i64) -> DatabaseResult<Work> {
@@ -297,14 +326,6 @@ impl Database {
         rows.map(|row| Ok(row?)).collect()
     }
 
-    pub fn add_creator(&self, name: &str, works: &[i64]) -> DatabaseResult<i64> {
-        let creator_id = self.add_item("creators", "name", name)?;
-
-        works.iter().try_for_each(|work_id| self.attach(*work_id, creator_id))?;
-
-        Ok(creator_id)
-    }
-
     pub fn get_creator(&self, id: i64) -> DatabaseResult<Creator> {
         let guard = self.guard();
         let mut stmt = Self::conn(&guard)?.prepare_cached("
@@ -364,40 +385,6 @@ impl Database {
         })?;
 
         rows.map(|row| Ok(row?)).collect()
-    }
-
-    pub fn remove(&self, table: &str, id: i64) -> DatabaseResult<()> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!(
-            "DELETE FROM {table} WHERE id = :id"
-        ))?;
-
-        let rows = stmt.execute(named_params! {":id": id})?;
-        
-        if rows != 1 {
-            return Err(format!(
-                "Expected to remove 1 item from table '{table}' not {rows}"
-            ))?;
-        }
-
-        Ok(())
-    }
-
-    pub fn update(&self, table: &str, column: &str, id: i64, value: &str) -> DatabaseResult<()> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!(
-            "UPDATE {table} SET {column} = :value WHERE id = :id"
-        ))?;
-        
-        let rows = stmt.execute(named_params! {":value": value, ":id": id})?;
-
-        if rows != 1 {
-            return Err(format!(
-                "Expected to update 1 row of column '{column}' to value '{value}' in table '{table}' not {rows}"
-            ))?;
-        }
-
-        Ok(())
     }
 
     pub fn attach(&self, work_id: i64, creator_id: i64) -> DatabaseResult<()> {
@@ -467,10 +454,19 @@ mod tests {
     #[test]
     fn test() {
         let database = &Context::new().database;
-        database.add_creator("test", &[]);
-        database.add_item("statuses", "status", "value");
+
+        let test: Vec<(&str, &dyn rusqlite::ToSql)> = vec![("name", &"name"), ("chapter", &"chapter"), ("status", &"status"), ("type", &"type"), ("format", &"format")];
+        //database.add_creator("test", &[]);
+        database.add("statuses", vec![("status", &"status")]).unwrap();
+        database.add("types", vec![("type", &"type")]).unwrap();
+        database.add("formats", vec![("format", &"format")]).unwrap();
+        database.add("works",
+        test).unwrap();
+
         //let id = database.add_work("name", "chapter", "status", "r#type", "format", &[]).unwrap();
         //std::thread::sleep(std::time::Duration::from_secs(4));
         //database.update("works", "chapter", id, "12");
+
+        //creators.iter().try_for_each(|creator_id| self.attach(work_id, *creator_id))?;
     }
 }

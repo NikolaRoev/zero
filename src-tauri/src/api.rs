@@ -1,15 +1,13 @@
-use crate::database::Database;
+use crate::{database::Database, error::ZeroError};
 
 
-#[derive(serde::Deserialize)]
-struct Test{
-    a: i64,
-    b: Option<String>
-}
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-pub fn greet(database: tauri::State<Database>, name: &str) -> String {
-    let _ = database.add_creator("asdasd", &[]);
-    format!("Hello, {}! You've been greeted from Rust!", name)
+pub fn add_creator(database: tauri::State<Database>, name: String, works: Vec<i64>) -> Result<i64, ZeroError> {
+    log::info!("Adding creator: NAME - {name}, WORKS - {works:?}.");
+
+    let creator_id = database.add("creators", vec![("name", &name)])?;
+    works.iter().try_for_each(|work_id| database.attach(*work_id, creator_id))?;
+
+    Ok(creator_id)
 }

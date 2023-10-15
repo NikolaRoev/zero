@@ -1,3 +1,5 @@
+use tauri::Manager;
+
 pub struct Config {
     pub width: f64,
     pub height: f64,
@@ -22,7 +24,7 @@ fn load_config(label: &String) -> Result<Config, Box<dyn std::error::Error>> {
 }
 
 pub fn save_config(label: String, config: Config) -> Result<(), Box<dyn std::error::Error>> {
-    let mut ini = ini::Ini::load_from_file("config.ini").unwrap_or(ini::Ini::new());
+    let mut ini = ini::Ini::load_from_file("config.ini").unwrap_or_default();
 
     ini.with_section(Some(format!("window-{label}")))
         .set("width", config.width.to_string())
@@ -40,7 +42,8 @@ pub fn create_window(
     url: String,
     title: String,
     default_width: f64,
-    default_height: f64
+    default_height: f64,
+    menu: Option<tauri::Menu>
 ) -> Result<tauri::Window, Box<dyn std::error::Error>> {
     let mut builder = tauri::WindowBuilder::new(manager, &label, tauri::WindowUrl::App(url.into()))
         .title(title);
@@ -60,5 +63,40 @@ pub fn create_window(
         }
     }
 
+    if let Some(menu) = menu {
+        builder = builder.menu(menu);
+    }
+
     Ok(builder.build()?)
+}
+
+pub fn event_handler(event: tauri::GlobalWindowEvent) {
+    if let tauri::WindowEvent::CloseRequested { .. } = event.event() {
+        let window = event.window();
+        let monitor = window.current_monitor().unwrap().unwrap();
+        let scale = monitor.scale_factor();
+
+        if !window.is_minimized().unwrap() {
+            let size = window.inner_size().unwrap().to_logical::<f64>(scale);
+            let position =  window.outer_position().unwrap().to_logical::<f64>(scale);
+            let _ = save_config(window.label().to_string(), Config {
+                width: size.width,
+                height: size.height,
+                x: position.x,
+                y: position.y,
+                maximized: window.is_maximized().unwrap(),
+            });
+        }
+
+        //TODO: save state
+
+        if window.label() == "main" {
+            let mut all = window.app_handle().windows();
+            all.remove("main");
+            for window in all.values(){
+                //save state
+                window.close().unwrap()
+            }
+        }
+    }
 }

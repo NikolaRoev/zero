@@ -4,19 +4,21 @@ let greetInputEl: HTMLInputElement | null;
 let greetMsgEl: HTMLElement | null;
 
 async function greet() {
-  if (greetMsgEl && greetInputEl) {
+    if (greetMsgEl && greetInputEl) {
     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    greetMsgEl.textContent = await invoke("greet", {
-      name: greetInputEl.value,
-    });
-  }
+        const test = await invoke("add_creator", {
+            name: greetInputEl.value,
+            works: []
+        });
+        console.log(test);
+    }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  greetInputEl = document.querySelector("#greet-input");
-  greetMsgEl = document.querySelector("#greet-msg");
-  document.querySelector("#greet-form")?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    greet();
-  });
+    greetInputEl = document.querySelector("#greet-input");
+    greetMsgEl = document.querySelector("#greet-msg");
+    document.querySelector("#greet-form")?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        greet();
+    });
 });
