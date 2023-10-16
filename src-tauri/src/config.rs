@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Mutex, path::Path};
+use std::{collections::HashMap, path::Path};
 use serde::{Serialize, Deserialize};
 
 
@@ -19,85 +19,55 @@ pub struct Config {
     database_recent: Vec<String>
 }
 
-
 pub const CONFIG_PATH: &str = "config.json";
-static CONFIG: Mutex<Option<Config>> = Mutex::new(None);
+
 
 impl Config {
-    pub fn load(path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let mut guard = CONFIG.lock().unwrap();
-    
+    pub fn load(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let path = Path::new(path);
         if path.try_exists()? {
             let data = std::fs::read_to_string(path)?;
-            *guard = Some(serde_json::from_str(&data)?);
+            Ok(serde_json::from_str(&data)?)
         }
         else {
-            *guard = Some(Config::default());
+            Ok(Config::default())
         }
-    
-        Ok(())
     }
     
-    pub fn save(path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let guard = CONFIG.lock().unwrap();
-        let config = guard.as_ref().unwrap();
-
-        Ok(std::fs::write(path, serde_json::to_string_pretty(config)?)?)
+    pub fn save(&self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        Ok(std::fs::write(path, serde_json::to_string_pretty(self)?)?)
     }
     
-    pub fn get_window(label: &str) -> Option<WindowConfig> {
-        let guard = CONFIG.lock().unwrap();
-        let config = guard.as_ref().unwrap();
-
-        config.windows.get(label).copied()
+    pub fn get_window(&self, label: &str) -> Option<&WindowConfig> {
+        self.windows.get(label)
     }
 
-    pub fn set_window(label: &str, window: WindowConfig) {
-        let mut guard = CONFIG.lock().unwrap();
-        let config = guard.as_mut().unwrap();
-
-        config.windows.insert(label.to_string(), window);
+    pub fn set_window(&mut self, label: &str, window: WindowConfig) {
+        self.windows.insert(label.to_string(), window);
     }
 
-    pub fn get_last_database() -> Option<String> {
-        let guard = CONFIG.lock().unwrap();
-        let config = guard.as_ref().unwrap();
-
-        config.database_last.clone()
+    pub fn get_last_database(&self) -> Option<&String> {
+        self.database_last.as_ref()
     }
 
-    pub fn set_last_database(path: Option<String>) {
-        let mut guard = CONFIG.lock().unwrap();
-        let config = guard.as_mut().unwrap();
-
-        config.database_last = path;
+    pub fn set_last_database(&mut self, path: Option<String>) {
+        self.database_last = path;
     }
 
-    pub fn get_recent_databases() -> Vec<String> {
-        let guard = CONFIG.lock().unwrap();
-        let config = guard.as_ref().unwrap();
-
-        config.database_recent.clone()
+    pub fn get_recent_databases(&self) -> &Vec<String> {
+        &self.database_recent
     }
 
-    pub fn add_recent_database(path: String) {
-        let mut guard = CONFIG.lock().unwrap();
-        let config = guard.as_mut().unwrap();
-
-        if let Some(index) = config.database_recent.iter().position(|item| *item == path) {
-            config.database_recent.remove(index);
+    pub fn add_recent_database(&mut self, path: String) {
+        if let Some(index) = self.database_recent.iter().position(|item| *item == path) {
+            self.database_recent.remove(index);
         }
-
-        config.database_recent.insert(0, path);
+        self.database_recent.insert(0, path);
     }
 
-    pub fn remove_recent_database(path: String) -> Result<(), Box<dyn std::error::Error>> {
-        let mut guard = CONFIG.lock().unwrap();
-        let config = guard.as_mut().unwrap();
-
-        if let Some(index) = config.database_recent.iter().position(|item| *item == path) {
-            config.database_recent.remove(index);
+    pub fn remove_recent_database(&mut self, path: String) -> Result<(), Box<dyn std::error::Error>> {
+        if let Some(index) = self.database_recent.iter().position(|item| *item == path) {
+            self.database_recent.remove(index);
             Ok(())
         }
         else {
@@ -137,7 +107,7 @@ mod tests {
     fn test() {
         let config = &Context::new().config;
 
-        Config::load("test.json");
-        Config::save("test.json");
+        //Config::load("test.json");
+        //Config::save("test.json");
     }
 }

@@ -1,4 +1,6 @@
-use crate::config;
+use std::sync::Mutex;
+
+use crate::config::{self, Config};
 use tauri::Manager;
 
 
@@ -8,7 +10,7 @@ pub fn create_window(
     label: String,
     url: String,
     title: String,
-    config: Option<config::WindowConfig>,
+    config: Option<&config::WindowConfig>,
     default_size: (f64, f64),
     menu: Option<tauri::Menu>
 ) -> Result<tauri::Window, Box<dyn std::error::Error>> {
@@ -42,7 +44,10 @@ pub fn event_handler(event: tauri::GlobalWindowEvent) {
         if !window.is_minimized().unwrap() {
             let size = window.inner_size().unwrap().to_logical::<f64>(scale);
             let position =  window.outer_position().unwrap().to_logical::<f64>(scale);
-            crate::config::Config::set_window(window.label(), config::WindowConfig {
+
+            let config_state = window.state::<Mutex<Config>>();
+            let mut config = config_state.lock().unwrap();
+            config.set_window(window.label(), config::WindowConfig {
                 width: size.width,
                 height: size.height,
                 x: position.x,

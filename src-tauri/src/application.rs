@@ -1,18 +1,22 @@
+use std::sync::Mutex;
+
 use tauri::Manager;
+
+use crate::config::Config;
 
 
 
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-    crate::config::Config::load(crate::config::CONFIG_PATH)?;
+    let config = crate::config::Config::load(crate::config::CONFIG_PATH)?;
 
     crate::window::create_window(
         app,
         String::from("main"),
         String::from("index.html"),
         String::from("zero"),
-        crate::config::Config::get_window("main"),
+        config.get_window("main"),
         (1024.0, 576.0),
-        Some(crate::menu::create_main_menu())
+        Some(crate::menu::create_main_menu(config.get_recent_databases()))
     )?;
 
     crate::window::create_window(
@@ -20,24 +24,28 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         String::from("settings"),
         String::from("test.html"),
         String::from("Settings"),
-        crate::config::Config::get_window("settings"),
+        config.get_window("settings"),
         (600.0, 400.0),
         None
     )?;
 
     let mut database = crate::database::Database::default();
-    if let Some(last) = crate::config::Config::get_last_database() {
-        database.open(&last)?;
+    if let Some(last) = config.get_last_database() {
+        database.open(last)?;
     }
+
+    app.manage(Mutex::new(config));
     app.manage(database);
 
     Ok(())
 }
 
-pub fn callback(_: &tauri::AppHandle, event: tauri::RunEvent) {
+pub fn callback(app: &tauri::AppHandle, event: tauri::RunEvent) {
     match event {
         tauri::RunEvent::ExitRequested { .. } => {
-            crate::config::Config::save(crate::config::CONFIG_PATH).unwrap();
+            let config_state = app.state::<Mutex<Config>>();
+            let config = config_state.lock().unwrap();
+            config.save(crate::config::CONFIG_PATH).unwrap();
         },
         tauri::RunEvent::Exit => log::info!("Exited zero."),
         _ => {}

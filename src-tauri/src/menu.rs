@@ -1,10 +1,9 @@
 use tauri::{CustomMenuItem, Menu, Submenu, Manager};
 
-pub fn create_main_menu() -> Menu {
-    let recent_databases = crate::config::Config::get_recent_databases();
+pub fn create_main_menu(recent_databases: &Vec<String>) -> Menu {
     let mut recent_menu = Menu::new();
     for recent in recent_databases {
-        recent_menu = recent_menu.add_item(CustomMenuItem::new(&recent, &recent));
+        recent_menu = recent_menu.add_item(CustomMenuItem::new(recent, recent));
     }
 
     // File.
