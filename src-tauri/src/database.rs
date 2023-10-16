@@ -195,14 +195,14 @@ impl Database {
             if let Err((conn, err)) = conn.close() {
                 let mut guard = self.guard();
                 *guard = Some(conn);
-                return Err(err.into());
+                Err(err.into())
             }
             else {
-                return Ok(());
+                Ok(())
             }
         }
         else {
-            return Err("No connection to close.".into());
+            Err("No connection to close.".into())
         }
     }
 
@@ -435,8 +435,6 @@ impl Database {
 
 #[cfg(test)]
 mod tests {
-    use std::{str::FromStr, time::SystemTime};
-
     use super::*;
     use uuid::Uuid;
 

@@ -13,15 +13,10 @@ pub struct WindowConfig {
 }
 
 #[derive(Serialize, Deserialize, Default, Debug)]
-pub struct DatabaseConfig {
-    last: Option<String>,
-    recent: Vec<String>
-}
-
-#[derive(Serialize, Deserialize, Default, Debug)]
 pub struct Config {
     windows: HashMap<String, WindowConfig>,
-    database: DatabaseConfig,
+    database_last: Option<String>,
+    database_recent: Vec<String>
 }
 
 
@@ -69,40 +64,40 @@ impl Config {
         let guard = CONFIG.lock().unwrap();
         let config = guard.as_ref().unwrap();
 
-        config.database.last.clone()
+        config.database_last.clone()
     }
 
     pub fn set_last_database(path: Option<String>) {
         let mut guard = CONFIG.lock().unwrap();
         let config = guard.as_mut().unwrap();
 
-        config.database.last = path;
+        config.database_last = path;
     }
 
     pub fn get_recent_databases() -> Vec<String> {
         let guard = CONFIG.lock().unwrap();
         let config = guard.as_ref().unwrap();
 
-        config.database.recent.clone()
+        config.database_recent.clone()
     }
 
     pub fn add_recent_database(path: String) {
         let mut guard = CONFIG.lock().unwrap();
         let config = guard.as_mut().unwrap();
 
-        if let Some(index) = config.database.recent.iter().position(|item| *item == path) {
-            config.database.recent.remove(index);
+        if let Some(index) = config.database_recent.iter().position(|item| *item == path) {
+            config.database_recent.remove(index);
         }
 
-        config.database.recent.insert(0, path);
+        config.database_recent.insert(0, path);
     }
 
     pub fn remove_recent_database(path: String) -> Result<(), Box<dyn std::error::Error>> {
         let mut guard = CONFIG.lock().unwrap();
         let config = guard.as_mut().unwrap();
 
-        if let Some(index) = config.database.recent.iter().position(|item| *item == path) {
-            config.database.recent.remove(index);
+        if let Some(index) = config.database_recent.iter().position(|item| *item == path) {
+            config.database_recent.remove(index);
             Ok(())
         }
         else {

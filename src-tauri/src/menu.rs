@@ -1,13 +1,15 @@
 use tauri::{CustomMenuItem, Menu, Submenu, Manager};
 
 pub fn create_main_menu() -> Menu {
-    let one = CustomMenuItem::new("one", "one");
-    let two = CustomMenuItem::new("two", "two");
-    let test = Menu::new().add_item(one).add_item(two);
+    let recent_databases = crate::config::Config::get_recent_databases();
+    let mut recent_menu = Menu::new();
+    for recent in recent_databases {
+        recent_menu = recent_menu.add_item(CustomMenuItem::new(&recent, &recent));
+    }
 
     // File.
     let open = CustomMenuItem::new("open", "Open Database...");
-    let recent = Submenu::new("Open Recent", test);
+    let recent = Submenu::new("Open Recent", recent_menu);
     let close = CustomMenuItem::new("close", "Close Database");
     let exit = CustomMenuItem::new("exit", "Exit").accelerator("Alt+F4");
 
