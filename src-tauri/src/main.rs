@@ -2,6 +2,7 @@
 
 mod api;
 mod application;
+mod config;
 mod database;
 mod error;
 mod log;

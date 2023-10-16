@@ -178,15 +178,32 @@ impl Database {
     pub fn open(&mut self, path: &str) -> DatabaseResult<()> {
         let mut conn = rusqlite::Connection::open(path)?;
         conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
-        self.conn = Some(conn).into();
 
-        let guard = self.guard();
+        let mut guard = self.guard();
+        *guard = Some(conn);        
         Ok(Self::conn(&guard)?.execute_batch(CREATE_QUERY)?)
     }
 
     pub fn is_open(&self) -> bool {
         let guard = self.guard();
         guard.is_some()
+    }
+
+    pub fn close(&mut self) -> DatabaseResult<()> {
+        let conn = self.conn.lock().unwrap().take();
+        if let Some(conn) = conn {
+            if let Err((conn, err)) = conn.close() {
+                let mut guard = self.guard();
+                *guard = Some(conn);
+                return Err(err.into());
+            }
+            else {
+                return Ok(());
+            }
+        }
+        else {
+            return Err("No connection to close.".into());
+        }
     }
 
     pub fn path(&self) -> DatabaseResult<std::path::PathBuf> {
@@ -431,7 +448,7 @@ mod tests {
 
     impl Context {
         pub fn new() -> Self {
-            let name = Uuid::new_v4().to_string();
+            let name = format!("{}.db", Uuid::new_v4());
             let mut database = Database::default();
             database.open(&name).unwrap_or_else(|err| panic!("Failed to open database: {err}."));
             Context { name, database }
@@ -440,11 +457,7 @@ mod tests {
 
     impl Drop for Context {
         fn drop(&mut self) {
-            self.database.conn
-                .lock().unwrap().take()
-                .expect("No connection to database.")
-                .close()
-                .unwrap_or_else(|(_, err)| panic!("Failed to close {err}."));
+            self.database.close().unwrap_or_else(|err| panic!("Failed to close {err}."));
 
             //std::fs::remove_file(format!("{}.db", &self.name))
             //    .unwrap_or_else(|err| panic!("Failed to delete database: {err}."))

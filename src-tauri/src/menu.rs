@@ -9,7 +9,7 @@ pub fn create_main_menu() -> Menu {
     let open = CustomMenuItem::new("open", "Open Database...");
     let recent = Submenu::new("Open Recent", test);
     let close = CustomMenuItem::new("close", "Close Database");
-    let quit = CustomMenuItem::new("exit", "Exit");
+    let exit = CustomMenuItem::new("exit", "Exit").accelerator("Alt+F4");
 
     let file_menu = Menu::new()
         .add_item(open)
@@ -17,7 +17,7 @@ pub fn create_main_menu() -> Menu {
         .add_native_item(tauri::MenuItem::Separator)
         .add_item(close)
         .add_native_item(tauri::MenuItem::Separator)
-        .add_item(quit);
+        .add_item(exit);
     let file_submenu = Submenu::new("File", file_menu);
 
 

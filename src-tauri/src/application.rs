@@ -1,35 +1,45 @@
 use tauri::Manager;
 
-use crate::{window::{save_config, Config, create_window}, database::Database, menu::create_main_menu};
 
 
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-    let window = create_window(
+    crate::config::Config::load(crate::config::CONFIG_PATH)?;
+
+    crate::window::create_window(
         app,
         String::from("main"),
         String::from("index.html"),
         String::from("zero"),
-        1024.0,
-        576.0,
-        Some(create_main_menu())
+        crate::config::Config::get_window("main"),
+        (1024.0, 576.0),
+        Some(crate::menu::create_main_menu())
     )?;
 
-    let _ = tauri::WindowBuilder::new(app, "tre", tauri::WindowUrl::App("test.html".into()))
-        .build()?;
+    crate::window::create_window(
+        app,
+        String::from("settings"),
+        String::from("test.html"),
+        String::from("Settings"),
+        crate::config::Config::get_window("settings"),
+        (600.0, 400.0),
+        None
+    )?;
 
-    let mut database = Database::default();
-    database.open("database.db")?;
+    let mut database = crate::database::Database::default();
+    if let Some(last) = crate::config::Config::get_last_database() {
+        database.open(&last)?;
+    }
     app.manage(database);
 
     Ok(())
 }
 
-pub fn callback(app_handle: &tauri::AppHandle, event: tauri::RunEvent) {
+pub fn callback(_: &tauri::AppHandle, event: tauri::RunEvent) {
     match event {
-        tauri::RunEvent::ExitRequested { api, .. } => {
-          log::debug!("exit req");
+        tauri::RunEvent::ExitRequested { .. } => {
+            crate::config::Config::save(crate::config::CONFIG_PATH).unwrap();
         },
-        tauri::RunEvent::Exit => log::debug!("exit"),
+        tauri::RunEvent::Exit => log::info!("Exited zero."),
         _ => {}
     }
 }
