@@ -1,4 +1,4 @@
-use std::{sync::{Mutex, MutexGuard}, collections::HashMap};
+use std::collections::HashMap;
 use rusqlite::named_params;
 
 
@@ -163,38 +163,32 @@ pub type DatabaseResult<T> = Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Default)]
 pub struct Database {
-    conn: Mutex<Option<rusqlite::Connection>>
+    conn: Option<rusqlite::Connection>
 }
 
 impl Database {
-    fn conn<'a>(guard: &'a MutexGuard<'a, Option<rusqlite::Connection>>) -> DatabaseResult<&'a rusqlite::Connection> {
-        guard.as_ref().ok_or("No connection to database.".into())
-    }
-
-    fn guard(&self) -> MutexGuard<'_, Option<rusqlite::Connection>> {
-        self.conn.lock().unwrap()
+    fn conn(&self) -> DatabaseResult<&rusqlite::Connection> {
+        self.conn.as_ref().ok_or("No connection to database.".into())
     }
 
     pub fn open(&mut self, path: &str) -> DatabaseResult<()> {
         let mut conn = rusqlite::Connection::open(path)?;
         conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
+        conn.execute_batch(CREATE_QUERY)?;
 
-        let mut guard = self.guard();
-        *guard = Some(conn);        
-        Ok(Self::conn(&guard)?.execute_batch(CREATE_QUERY)?)
+        self.conn = Some(conn);        
+        Ok(())
     }
 
     pub fn is_open(&self) -> bool {
-        let guard = self.guard();
-        guard.is_some()
+        self.conn.is_some()
     }
 
     pub fn close(&mut self) -> DatabaseResult<()> {
-        let conn = self.conn.lock().unwrap().take();
+        let conn = self.conn.take();
         if let Some(conn) = conn {
             if let Err((conn, err)) = conn.close() {
-                let mut guard = self.guard();
-                *guard = Some(conn);
+                self.conn = Some(conn);
                 Err(err.into())
             }
             else {
@@ -207,15 +201,12 @@ impl Database {
     }
 
     pub fn path(&self) -> DatabaseResult<std::path::PathBuf> {
-        let guard = self.guard();
-        Ok(Self::conn(&guard)?.path().ok_or("Invalid path to database.")?.into())
+        Ok(self.conn()?.path().ok_or("Invalid path to database.")?.into())
     }
 
     pub fn add(&self, table: &str, params: Vec<(&str, &dyn rusqlite::ToSql)>) -> DatabaseResult<i64> {
         let (columns, values): (Vec<&str>, Vec<&dyn rusqlite::ToSql>) = params.into_iter().unzip();
-
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!("
+        let mut stmt = self.conn()?.prepare_cached(&format!("
             INSERT INTO {table} ({columns}) VALUES ({placeholders})
         ",
         columns = columns.join(","),
@@ -225,8 +216,7 @@ impl Database {
     }
 
     pub fn remove(&self, table: &str, id: i64) -> DatabaseResult<()> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!(
+        let mut stmt = self.conn()?.prepare_cached(&format!(
             "DELETE FROM {table} WHERE id = :id"
         ))?;
 
@@ -242,8 +232,7 @@ impl Database {
     }
 
     pub fn update(&self, table: &str, column: &str, id: i64, value: &str) -> DatabaseResult<()> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached(&format!(
+        let mut stmt = self.conn()?.prepare_cached(&format!(
             "UPDATE {table} SET {column} = :value WHERE id = :id"
         ))?;
         
@@ -259,8 +248,7 @@ impl Database {
     }
 
     pub fn get_work(&self, id: i64) -> DatabaseResult<Work> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached("
+        let mut stmt = self.conn()?.prepare_cached("
             SELECT * FROM works WHERE id = :id
         ")?;
 
@@ -308,8 +296,7 @@ impl Database {
             }
         }
 
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached(&query)?;
+        let mut stmt = self.conn()?.prepare_cached(&query)?;
         let rows = stmt.query_map(rusqlite::params_from_iter(params), |row| {
             Ok(Work {
                 id: row.get(0)?,
@@ -327,8 +314,7 @@ impl Database {
     }
 
     pub fn get_work_creators(&self, work_id: i64) -> DatabaseResult<Vec<Creator>> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached("
+        let mut stmt = self.conn()?.prepare_cached("
             SELECT * FROM creators JOIN work_creator ON id = creator_id AND work_id = :work_id
         ")?;
 
@@ -344,8 +330,7 @@ impl Database {
     }
 
     pub fn get_creator(&self, id: i64) -> DatabaseResult<Creator> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached("
+        let mut stmt = self.conn()?.prepare_cached("
             SELECT * FROM creators WHERE id = :id
         ")?;
 
@@ -368,9 +353,8 @@ impl Database {
                 query.push_str(" DESC")
             }
         }
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached(&query)?;
-
+        
+        let mut stmt = self.conn()?.prepare_cached(&query)?;
         let rows = stmt.query_map(named_params! {":name": format!("%{name}%")}, |row| {
             Ok(Creator {
                 id: row.get(0)?,
@@ -383,8 +367,7 @@ impl Database {
     }
 
     pub fn get_creator_works(&self, creator_id: i64) -> DatabaseResult<Vec<Work>> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached("
+        let mut stmt = self.conn()?.prepare_cached("
             SELECT * FROM works JOIN work_creator ON id = work_id AND creator_id = :creator_id
         ")?;
 
@@ -405,8 +388,7 @@ impl Database {
     }
 
     pub fn attach(&self, work_id: i64, creator_id: i64) -> DatabaseResult<()> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached("
+        let mut stmt = self.conn()?.prepare_cached("
             INSERT INTO work_creator (work_id, creator_id) VALUES (:work_id, :creator_id)
         ")?;
 
@@ -416,8 +398,7 @@ impl Database {
     }
 
     pub fn detach(&self, work_id: i64, creator_id: i64) -> DatabaseResult<()> {
-        let guard = self.guard();
-        let mut stmt = Self::conn(&guard)?.prepare_cached(
+        let mut stmt = self.conn()?.prepare_cached(
             "DELETE FROM work_creator WHERE work_id = :work_id AND creator_id = :creator_id"
         )?;
 

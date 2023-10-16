@@ -35,7 +35,7 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     app.manage(Mutex::new(config));
-    app.manage(database);
+    app.manage(Mutex::new(database));
 
     Ok(())
 }
