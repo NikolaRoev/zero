@@ -4,21 +4,14 @@ use tauri::{CustomMenuItem, Menu, Submenu, Manager};
 
 use crate::config::Config;
 
-pub fn create_main_menu(recent_databases: &Vec<String>) -> Menu {
-    let mut recent_menu = Menu::new();
-    for recent in recent_databases {
-        recent_menu = recent_menu.add_item(CustomMenuItem::new(recent, recent));
-    }
-
+pub fn create_main_menu() -> Menu {
     // File.
     let open = CustomMenuItem::new("open", "Open Database...");
-    let recent = Submenu::new("Open Recent", recent_menu);
     let close = CustomMenuItem::new("close", "Close Database");
     let exit = CustomMenuItem::new("exit", "Exit").accelerator("Alt+F4");
 
     let file_menu = Menu::new()
         .add_item(open)
-        .add_submenu(recent)
         .add_native_item(tauri::MenuItem::Separator)
         .add_item(close)
         .add_native_item(tauri::MenuItem::Separator)
@@ -76,9 +69,6 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
             event.window().close().unwrap();
             // open in browser (requires the `shell-open-api` feature)
             tauri::api::shell::open(&event.window().shell_scope(), "https://github.com/tauri-apps/tauri", None).unwrap();
-        },
-        recent if event.window().state::<Mutex<Config>>().lock().unwrap().get_recent_databases().contains(&recent.to_string()) => {
-            log::debug!("RECENT DB - {recent}");
         },
         id => {
             // do something with other events

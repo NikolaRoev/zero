@@ -16,7 +16,7 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         String::from("zero"),
         config.get_window("main"),
         (1024.0, 576.0),
-        Some(crate::menu::create_main_menu(config.get_recent_databases()))
+        Some(crate::menu::create_main_menu())
     )?;
 
     let mut database = crate::database::Database::default();
