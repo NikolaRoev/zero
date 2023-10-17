@@ -1,16 +1,9 @@
 use std::{collections::HashMap, path::Path};
 use serde::{Serialize, Deserialize};
+use crate::window::WindowConfig;
 
 
 
-#[derive(Serialize, Deserialize, Default, Debug, Copy, Clone)]
-pub struct WindowConfig {
-    pub width: f64,
-    pub height: f64,
-    pub x: f64,
-    pub y: f64,
-    pub maximized: bool
-}
 
 #[derive(Serialize, Deserialize, Default, Debug)]
 pub struct Config {

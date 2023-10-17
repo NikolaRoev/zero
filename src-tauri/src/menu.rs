@@ -1,4 +1,8 @@
+use std::sync::Mutex;
+
 use tauri::{CustomMenuItem, Menu, Submenu, Manager};
+
+use crate::config::Config;
 
 pub fn create_main_menu(recent_databases: &Vec<String>) -> Menu {
     let mut recent_menu = Menu::new();
@@ -54,17 +58,31 @@ pub fn create_main_menu(recent_databases: &Vec<String>) -> Menu {
         .add_submenu(help_submenu)
 }
 
-pub fn event_handler(event: tauri::WindowMenuEvent) {    
+pub fn event_handler(event: tauri::WindowMenuEvent) {
     match event.menu_item_id() {
-      "exit" => {
-        //FIXME: Does not trigger closerequested, will be fixed in 2.0.
-        event.window().close().unwrap();
-        // open in browser (requires the `shell-open-api` feature)
-        tauri::api::shell::open(&event.window().shell_scope(), "https://github.com/tauri-apps/tauri", None).unwrap();
-      }
-      id => {
-        // do something with other events
-        println!("got menu event: {}", id);
-      }
+        "settings" => {
+            crate::window::create_window(
+                &event.window().app_handle(),
+                String::from("settings"),
+                String::from("test.html"),
+                String::from("Settings"),
+                event.window().state::<Mutex<Config>>().lock().unwrap().get_window("settings"),
+                (600.0, 400.0),
+                None
+            ).unwrap();
+        },
+        "exit" => {
+            //FIXME: Does not trigger closerequested, will be fixed in 2.0.
+            event.window().close().unwrap();
+            // open in browser (requires the `shell-open-api` feature)
+            tauri::api::shell::open(&event.window().shell_scope(), "https://github.com/tauri-apps/tauri", None).unwrap();
+        },
+        recent if event.window().state::<Mutex<Config>>().lock().unwrap().get_recent_databases().contains(&recent.to_string()) => {
+            log::debug!("RECENT DB - {recent}");
+        },
+        id => {
+            // do something with other events
+            println!("got menu event: {}", id);
+        }
     }
 }

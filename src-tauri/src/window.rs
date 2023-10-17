@@ -1,16 +1,26 @@
 use std::sync::Mutex;
 
-use crate::config::{self, Config};
+use crate::config::Config;
+use serde::{Serialize, Deserialize};
 use tauri::Manager;
 
 
+#[derive(Serialize, Deserialize, Default, Debug, Copy, Clone)]
+pub struct WindowConfig {
+    pub width: f64,
+    pub height: f64,
+    pub x: f64,
+    pub y: f64,
+    pub maximized: bool
+}
+
 
 pub fn create_window(
-    manager: &tauri::App,
+    manager: &tauri::AppHandle,
     label: String,
     url: String,
     title: String,
-    config: Option<&config::WindowConfig>,
+    config: Option<&WindowConfig>,
     default_size: (f64, f64),
     menu: Option<tauri::Menu>
 ) -> Result<tauri::Window, Box<dyn std::error::Error>> {
@@ -47,7 +57,7 @@ pub fn event_handler(event: tauri::GlobalWindowEvent) {
 
             let config_state = window.state::<Mutex<Config>>();
             let mut config = config_state.lock().unwrap();
-            config.set_window(window.label(), config::WindowConfig {
+            config.set_window(window.label(), WindowConfig {
                 width: size.width,
                 height: size.height,
                 x: position.x,
