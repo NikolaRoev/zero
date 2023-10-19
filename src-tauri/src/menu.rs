@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::sync::Mutex;
 
 use tauri::api::dialog::{FileDialogBuilder, MessageDialogBuilder, MessageDialogButtons, MessageDialogKind};
@@ -77,12 +78,12 @@ pub fn create_main_menu() -> Menu {
         .add_submenu(help_submenu)
 }
 
-pub fn set_recent_menu(handle: MenuHandle, recent_databases: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+pub fn set_recent_menu(handle: MenuHandle, recent_databases: &[PathBuf]) -> Result<(), Box<dyn std::error::Error>> {
     for (index, id) in RECENT_MENU_ITEMS.iter().enumerate() {
         let item = handle.get_item(id);
 
         if let Some(database) = recent_databases.get(index) {
-            item.set_title(format!("{id}. {database}"))?;
+            item.set_title(format!("{id}. {}", database.display()))?;
             item.set_enabled(true)?;
         }
         else {

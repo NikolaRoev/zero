@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::Path};
+use std::{collections::HashMap, path::{Path, PathBuf}, ffi::OsString};
 use serde::{Serialize, Deserialize};
 use crate::window::WindowConfig;
 
@@ -8,8 +8,8 @@ use crate::window::WindowConfig;
 #[derive(Serialize, Deserialize, Default, Debug)]
 pub struct Config {
     windows: HashMap<String, WindowConfig>,
-    database_last: Option<String>,
-    database_recent: Vec<String>
+    database_last: Option<PathBuf>,
+    database_recent: Vec<PathBuf>
 }
 
 pub const CONFIG_PATH: &str = "config.json";
@@ -38,32 +38,32 @@ impl Config {
         self.windows.insert(label.to_string(), window);
     }
 
-    pub fn get_last_database(&self) -> Option<&String> {
+    pub fn get_last_database(&self) -> Option<&PathBuf> {
         self.database_last.as_ref()
     }
 
-    pub fn set_last_database(&mut self, path: Option<String>) {
+    pub fn set_last_database(&mut self, path: Option<PathBuf>) {
         self.database_last = path;
     }
 
-    pub fn get_recent_databases(&self) -> &Vec<String> {
+    pub fn get_recent_databases(&self) -> &Vec<PathBuf> {
         &self.database_recent
     }
 
-    pub fn add_recent_database(&mut self, path: String) {
+    pub fn add_recent_database(&mut self, path: PathBuf) {
         if let Some(index) = self.database_recent.iter().position(|item| *item == path) {
             self.database_recent.remove(index);
         }
         self.database_recent.insert(0, path);
     }
 
-    pub fn remove_recent_database(&mut self, path: String) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn remove_recent_database(&mut self, path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         if let Some(index) = self.database_recent.iter().position(|item| *item == path) {
             self.database_recent.remove(index);
             Ok(())
         }
         else {
-            Err(format!("Recent database '{path}' did not exist").into())
+            Err(format!("Recent database '{path:?}' did not exist").into())
         }
     }
 }

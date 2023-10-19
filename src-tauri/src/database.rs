@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, ffi::OsString, path::{Path, PathBuf}};
 use rusqlite::named_params;
 
 
@@ -171,7 +171,7 @@ impl Database {
         self.conn.as_ref().ok_or("No connection to database.".into())
     }
 
-    pub fn open(&mut self, path: impl AsRef<std::path::Path>) -> DatabaseResult<()> {
+    pub fn open(&mut self, path: &PathBuf) -> DatabaseResult<()> {
         let mut conn = rusqlite::Connection::open(path)?;
         conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
         conn.execute_batch(CREATE_QUERY)?;
@@ -416,18 +416,20 @@ impl Database {
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use super::*;
     use uuid::Uuid;
 
 
     struct Context {
-        name: String,
+        name: PathBuf,
         database: Database
     }
 
     impl Context {
         pub fn new() -> Self {
-            let name = format!("{}.db", Uuid::new_v4());
+            let name = PathBuf::from(&format!("{}.db", Uuid::new_v4()));
             let mut database = Database::default();
             database.open(&name).unwrap_or_else(|err| panic!("Failed to open database: {err}."));
             Context { name, database }

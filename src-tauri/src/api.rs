@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::{sync::Mutex, ffi::OsString, path::PathBuf};
 
 use tauri::Manager;
 
@@ -11,17 +11,17 @@ pub fn open_database(
     app_handle: tauri::AppHandle,
     config: tauri::State<Mutex<Config>>,
     database: tauri::State<Mutex<Database>>,
-    path: impl AsRef<std::path::Path>
+    path: PathBuf
 ) -> Result<(), String> {
-    log::info!("Opening database: PATH - {}.", path.as_ref().display());
+    log::info!("Opening database: PATH - {path:?}.");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let mut db_guard = database.lock().unwrap();
         db_guard.open(&path)?;
 
         let mut config_guard = config.lock().unwrap();
-        config_guard.set_last_database(Some(path.as_ref().to_str().unwrap_or_default().to_string()));
-        config_guard.add_recent_database(path.as_ref().to_str().unwrap_or_default().to_string());
+        config_guard.set_last_database(Some(path.clone()));
+        config_guard.add_recent_database(path);
 
         let window = app_handle.get_window("main").unwrap();
         set_recent_menu(window.menu_handle(), config_guard.get_recent_databases())?;
