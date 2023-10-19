@@ -6,10 +6,6 @@
     "distDir": "../dist",
     "withGlobalTauri": true
   },
-  "package": {
-    "productName": "zero",
-    "version": "1.0.0"
-  },
   "tauri": {
     "allowlist": {
       "all": false,

@@ -16,15 +16,14 @@ pub const CONFIG_PATH: &str = "config.json";
 
 
 impl Config {
-    pub fn load(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn load(&mut self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
         let path = Path::new(path);
         if path.try_exists()? {
             let data = std::fs::read_to_string(path)?;
-            Ok(serde_json::from_str(&data)?)
+            *self = serde_json::from_str(&data)?;
         }
-        else {
-            Ok(Config::default())
-        }
+
+        Ok(())
     }
     
     pub fn save(&self, path: &str) -> Result<(), Box<dyn std::error::Error>> {

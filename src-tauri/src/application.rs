@@ -1,15 +1,17 @@
 use std::sync::Mutex;
-
 use tauri::Manager;
 
-use crate::config::Config;
+use crate::{config::Config, menu::set_recent_menu};
 
 
 
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-    let config = crate::config::Config::load(crate::config::CONFIG_PATH)?;
+    let mut config = crate::config::Config::default();
+    if let Err(err) = config.load(crate::config::CONFIG_PATH) {
+        log::error!("Failed to load config: {err}.");
+    }
 
-    crate::window::create_window(
+    let window = crate::window::create_window(
         &app.app_handle(),
         String::from("main"),
         String::from("index.html"),
@@ -18,6 +20,8 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         (1024.0, 576.0),
         Some(crate::menu::create_main_menu())
     )?;
+
+    set_recent_menu(window.menu_handle(), config.get_recent_databases())?;
 
     let mut database = crate::database::Database::default();
     if let Some(last) = config.get_last_database() {

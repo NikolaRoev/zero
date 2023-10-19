@@ -171,12 +171,12 @@ impl Database {
         self.conn.as_ref().ok_or("No connection to database.".into())
     }
 
-    pub fn open(&mut self, path: &str) -> DatabaseResult<()> {
+    pub fn open(&mut self, path: impl AsRef<std::path::Path>) -> DatabaseResult<()> {
         let mut conn = rusqlite::Connection::open(path)?;
         conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
         conn.execute_batch(CREATE_QUERY)?;
 
-        self.conn = Some(conn);        
+        self.conn = Some(conn);
         Ok(())
     }
 

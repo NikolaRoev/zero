@@ -1,17 +1,43 @@
 use std::sync::Mutex;
 
-use tauri::{CustomMenuItem, Menu, Submenu, Manager};
+use tauri::api::dialog::{FileDialogBuilder, MessageDialogBuilder, MessageDialogButtons, MessageDialogKind};
+use tauri::api::shell;
+use tauri::{webview_version, VERSION, ClipboardManager};
+use tauri::{CustomMenuItem, Menu, Submenu, Manager, window::MenuHandle};
 
-use crate::config::Config;
+use crate::api;
+use crate::{config::Config, api::add_creator, database::Database};
+
+
+pub const RECENT_MENU_ITEMS: [&str; 5] = ["1", "2", "3", "4", "5"];
+
 
 pub fn create_main_menu() -> Menu {
     // File.
+    let new = CustomMenuItem::new("new", "New Database...");
     let open = CustomMenuItem::new("open", "Open Database...");
+
+    let mut recent_menu = Menu::new();
+    for index in RECENT_MENU_ITEMS {
+        recent_menu = recent_menu.add_item(CustomMenuItem::new(index, format!("{index}.")).disabled());
+    }
+    let more = CustomMenuItem::new("more", "More...");
+    let clear = CustomMenuItem::new("clear", "Clear Recently Opened");
+    recent_menu = recent_menu
+        .add_native_item(tauri::MenuItem::Separator)
+        .add_item(more)
+        .add_native_item(tauri::MenuItem::Separator)
+        .add_item(clear);
+
+    let recent = Submenu::new("Open Recent", recent_menu);
+
     let close = CustomMenuItem::new("close", "Close Database");
     let exit = CustomMenuItem::new("exit", "Exit").accelerator("Alt+F4");
 
     let file_menu = Menu::new()
+        .add_item(new)
         .add_item(open)
+        .add_submenu(recent)
         .add_native_item(tauri::MenuItem::Separator)
         .add_item(close)
         .add_native_item(tauri::MenuItem::Separator)
@@ -29,7 +55,7 @@ pub fn create_main_menu() -> Menu {
 
     // Help.
     let repository = CustomMenuItem::new("repository", "Repository");
-    let dev_tools = CustomMenuItem::new("dev_tools", "Toggle Developer Tools");
+    let dev_tools = CustomMenuItem::new("dev_tools", "Open Developer Tools").accelerator("Ctrl+Shift+I");
     let check_for_updates = CustomMenuItem::new("check_for_updates", "Check for Updates...");
     let about = CustomMenuItem::new("about", "About");
 
@@ -51,8 +77,59 @@ pub fn create_main_menu() -> Menu {
         .add_submenu(help_submenu)
 }
 
+pub fn set_recent_menu(handle: MenuHandle, recent_databases: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    for (index, id) in RECENT_MENU_ITEMS.iter().enumerate() {
+        let item = handle.get_item(id);
+
+        if let Some(database) = recent_databases.get(index) {
+            item.set_title(format!("{id}. {database}"))?;
+            item.set_enabled(true)?;
+        }
+        else {
+            item.set_enabled(false)?;
+        }
+    }
+    Ok(())
+}
+
 pub fn event_handler(event: tauri::WindowMenuEvent) {
     match event.menu_item_id() {
+        "new" => {
+            FileDialogBuilder::new()
+                .set_title("New Database")
+                .set_file_name("database")
+                .add_filter("Database", &["db"])
+                .save_file(move |path| {
+                if let Some(path) = path {
+                    let window = event.window();
+                    let _ = api::open_database(
+                        window.app_handle(),
+                        window.state::<Mutex<Config>>(),
+                        window.state::<Mutex<Database>>(),
+                        path
+                    );
+                }
+            });
+        },
+        "open" => {
+            FileDialogBuilder::new()
+                .set_title("Open Database")
+                .add_filter("Database", &["db"])
+                .pick_file(move |path| {
+                if let Some(path) = path {
+                    let window = event.window();
+                    let _ = api::open_database(
+                        window.app_handle(),
+                        window.state::<Mutex<Config>>(),
+                        window.state::<Mutex<Database>>(),
+                        path
+                    );
+                }
+            })
+        },
+        x if RECENT_MENU_ITEMS.contains(&x) => {
+            log::debug!("recent");
+        },
         "settings" => {
             crate::window::create_window(
                 &event.window().app_handle(),
@@ -66,13 +143,36 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
         },
         "exit" => {
             //FIXME: Does not trigger closerequested, will be fixed in 2.0.
-            event.window().close().unwrap();
-            // open in browser (requires the `shell-open-api` feature)
-            tauri::api::shell::open(&event.window().shell_scope(), "https://github.com/tauri-apps/tauri", None).unwrap();
+            event.window().close().unwrap();            
         },
-        id => {
-            // do something with other events
-            println!("got menu event: {}", id);
-        }
+        "repository" => {
+            if let Err(err) = shell::open(&event.window().shell_scope(), "https://github.com/NikolaRoev/zero", None) {
+                log::error!("Failed to open repository: {err}.");
+            }
+            event.window().close_devtools();
+        },
+        "dev_tools" => event.window().open_devtools(),
+        "about" => {
+            let handle = event.window().app_handle();
+
+            let message = format!(
+                "Version: {}\nTauri: {}\nWebView/WebKit: {}",
+                handle.package_info().version,
+                VERSION,
+                webview_version().unwrap_or("UNKNOWN".to_string())
+            );
+
+            MessageDialogBuilder::new("zero", &message)
+                .buttons(MessageDialogButtons::OkCancelWithLabels("Copy".to_string(), "Ok".to_string()))
+                .kind(MessageDialogKind::Info)
+                .show(move |result| {
+                    if result {
+                        if let Err(err) = handle.clipboard_manager().write_text(message) {
+                            log::error!("Failed to set clipboard: {err}.");
+                        }
+                    }
+                });
+        },
+        invalid => log::error!("Invalid menu event: '{invalid}'.")
     }
 }
