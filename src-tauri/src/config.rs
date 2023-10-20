@@ -66,6 +66,10 @@ impl Config {
             Err(format!("Recent database '{path:?}' did not exist").into())
         }
     }
+
+    pub fn clear_recent_databases(&mut self) {
+        self.database_recent.clear();
+    }
 }
 
 

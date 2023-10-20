@@ -24,9 +24,7 @@ pub fn open_database(
         config_guard.add_recent_database(path);
 
         let window = app_handle.get_window("main").unwrap();
-        set_recent_menu(window.menu_handle(), config_guard.get_recent_databases())?;
-
-        Ok(())
+        set_recent_menu(window.menu_handle(), config_guard.get_recent_databases())
     };
 
     match inner() {
@@ -36,6 +34,30 @@ pub fn open_database(
         },
         Err(err) => {
             let message = format!("Failed to open database: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
+pub fn close_database(
+    database: tauri::State<Mutex<Database>>,
+) -> Result<(), String> {
+    log::info!("Closing database.");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let mut db_guard = database.lock().unwrap();
+        db_guard.close()
+    };
+
+    match inner() {
+        Ok(()) => {
+            log::info!("Closed database.");
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to close database: {err}.");
             log::error!("{message}");
             Err(message)
         }

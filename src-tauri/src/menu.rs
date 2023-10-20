@@ -15,8 +15,8 @@ pub const RECENT_MENU_ITEMS: [&str; 5] = ["1", "2", "3", "4", "5"];
 
 pub fn create_main_menu() -> Menu {
     // File.
-    let new = CustomMenuItem::new("new", "New Database...");
-    let open = CustomMenuItem::new("open", "Open Database...");
+    let new = CustomMenuItem::new("new", "New...");
+    let open = CustomMenuItem::new("open", "Open...");
 
     let mut recent_menu = Menu::new();
     for index in RECENT_MENU_ITEMS {
@@ -32,7 +32,7 @@ pub fn create_main_menu() -> Menu {
 
     let recent = Submenu::new("Open Recent", recent_menu);
 
-    let close = CustomMenuItem::new("close", "Close Database");
+    let close = CustomMenuItem::new("close", "Close");
     let exit = CustomMenuItem::new("exit", "Exit").accelerator("Alt+F4");
 
     let file_menu = Menu::new()
@@ -87,6 +87,7 @@ pub fn set_recent_menu(handle: MenuHandle, recent_databases: &[PathBuf]) -> Resu
             item.set_enabled(true)?;
         }
         else {
+            item.set_title(format!("{id}."))?;
             item.set_enabled(false)?;
         }
     }
@@ -128,8 +129,41 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
                 }
             })
         },
-        x if RECENT_MENU_ITEMS.contains(&x) => {
-            log::debug!("recent");
+        label if RECENT_MENU_ITEMS.contains(&label) => {
+            let window = event.window();
+            let index = RECENT_MENU_ITEMS.iter().position(|&item| item == label).unwrap();
+            let config = window.state::<Mutex<Config>>();
+            let guard = config.lock().unwrap();
+            let recent = guard.get_recent_databases().get(index).unwrap().clone();
+            drop(guard);
+
+            let _ = api::open_database(
+                window.app_handle(),
+                window.state::<Mutex<Config>>(),
+                window.state::<Mutex<Database>>(),
+                recent
+            );
+        },
+        "more" => {
+            //TODO
+        },
+        "clear" => {
+            let window = event.window();
+            let state = window.state::<Mutex<Config>>();
+            let mut config = state.lock().unwrap();
+            config.clear_recent_databases();
+
+            if let Err(err) = set_recent_menu(window.menu_handle(), config.get_recent_databases()) {
+                log::error!("Failed to set recent menu after clearing: {err}.");
+            }
+        },
+        "close" => {
+            let window = event.window();
+            if api::close_database(window.state::<Mutex<Database>>()).is_ok() {
+                if let Err(err) = window.app_handle().emit_to("main", "closed-database", ()) {
+                    log::error!("Failed to send 'closed-database' event: {err}.");
+                }
+            }
         },
         "settings" => {
             crate::window::create_window(
@@ -153,6 +187,9 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
             event.window().close_devtools();
         },
         "dev_tools" => event.window().open_devtools(),
+        "check_for_updates" => {
+            //TODO
+        },
         "about" => {
             let handle = event.window().app_handle();
 

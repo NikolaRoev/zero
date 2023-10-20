@@ -39,7 +39,9 @@ pub fn callback(app: &tauri::AppHandle, event: tauri::RunEvent) {
         tauri::RunEvent::ExitRequested { .. } => {
             let config_state = app.state::<Mutex<Config>>();
             let config = config_state.lock().unwrap();
-            config.save(crate::config::CONFIG_PATH).unwrap();
+            if let Err(err) = config.save(crate::config::CONFIG_PATH) {
+                log::error!("Failed to save config: {err}.");
+            }
         },
         tauri::RunEvent::Exit => log::info!("Exited zero."),
         _ => {}
