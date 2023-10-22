@@ -160,7 +160,7 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
         "close" => {
             let window = event.window();
             if api::close_database(window.state::<Mutex<Database>>()).is_ok() {
-                if let Err(err) = window.app_handle().emit_to("main", "closed-database", ()) {
+                if let Err(err) = window.app_handle().emit_all("closed-database", ()) {
                     log::error!("Failed to send 'closed-database' event: {err}.");
                 }
             }
@@ -169,7 +169,7 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
             crate::window::create_window(
                 &event.window().app_handle(),
                 String::from("settings"),
-                String::from("test.html"),
+                String::from("settings.html"),
                 String::from("Settings"),
                 event.window().state::<Mutex<Config>>().lock().unwrap().get_window("settings"),
                 (600.0, 400.0),
