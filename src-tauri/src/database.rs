@@ -5,14 +5,14 @@ use rusqlite::named_params;
 
 const CREATE_QUERY: &str = "
 CREATE TABLE IF NOT EXISTS works (
-    id      INTEGER PRIMARY KEY,
-    name    TEXT NOT NULL,
-    chapter TEXT NOT NULL,
-    status  TEXT NOT NULL,
-    type    TEXT NOT NULL,
-    format  TEXT NOT NULL,
-    updated TEXT DEFAULT (DATETIME('NOW', 'LOCALTIME')) NOT NULL,
-    added   TEXT DEFAULT (DATETIME('NOW', 'LOCALTIME')) NOT NULL
+    id       INTEGER PRIMARY KEY,
+    name     TEXT NOT NULL,
+    progress TEXT NOT NULL,
+    status   TEXT NOT NULL,
+    type     TEXT NOT NULL,
+    format   TEXT NOT NULL,
+    updated  TEXT DEFAULT (DATETIME('NOW', 'LOCALTIME')) NOT NULL,
+    added    TEXT DEFAULT (DATETIME('NOW', 'LOCALTIME')) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS creators (
@@ -70,8 +70,8 @@ BEGIN
     SELECT RAISE(ABORT, 'Invalid work update value');
 END;
 
-CREATE TRIGGER IF NOT EXISTS update_work_chapter
-    AFTER UPDATE OF 'chapter'
+CREATE TRIGGER IF NOT EXISTS update_work_progress
+    AFTER UPDATE OF 'progress'
     ON works
 BEGIN
     UPDATE works SET updated = DATETIME('NOW', 'LOCALTIME') WHERE id = NEW.id;
@@ -132,7 +132,7 @@ END;
 pub struct Work {
     id: i64,
     name: String,
-    chapter: String,
+    progress: String,
     status: String,
     r#type: String,
     format: String,
@@ -259,7 +259,7 @@ impl Database {
             Ok(Work {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                chapter: row.get(2)?,
+                progress: row.get(2)?,
                 status: row.get(3)?,
                 r#type: row.get(4)?,
                 format: row.get(5)?,
@@ -304,7 +304,7 @@ impl Database {
             Ok(Work {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                chapter: row.get(2)?,
+                progress: row.get(2)?,
                 status: row.get(3)?,
                 r#type: row.get(4)?,
                 format: row.get(5)?,
@@ -378,7 +378,7 @@ impl Database {
             Ok(Work {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                chapter: row.get(2)?,
+                progress: row.get(2)?,
                 status: row.get(3)?,
                 r#type: row.get(4)?,
                 format: row.get(5)?,
@@ -452,7 +452,7 @@ mod tests {
     fn test() {
         let database = &Context::new().database;
 
-        let test: Vec<(&str, &dyn rusqlite::ToSql)> = vec![("name", &"name"), ("chapter", &"chapter"), ("status", &"status"), ("type", &"type"), ("format", &"format")];
+        let test: Vec<(&str, &dyn rusqlite::ToSql)> = vec![("name", &"name"), ("progress", &"progress"), ("status", &"status"), ("type", &"type"), ("format", &"format")];
         //database.add_creator("test", &[]);
         database.add("statuses", vec![("status", &"status")]).unwrap();
         database.add("types", vec![("type", &"type")]).unwrap();
@@ -460,9 +460,9 @@ mod tests {
         database.add("works",
         test).unwrap();
 
-        //let id = database.add_work("name", "chapter", "status", "r#type", "format", &[]).unwrap();
+        //let id = database.add_work("name", "progress", "status", "r#type", "format", &[]).unwrap();
         //std::thread::sleep(std::time::Duration::from_secs(4));
-        //database.update("works", "chapter", id, "12");
+        //database.update("works", "progress", id, "12");
 
         //creators.iter().try_for_each(|creator_id| self.attach(work_id, *creator_id))?;
     }

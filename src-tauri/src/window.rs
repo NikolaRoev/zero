@@ -2,7 +2,7 @@ use std::sync::Mutex;
 
 use crate::config::Config;
 use serde::{Serialize, Deserialize};
-use tauri::Manager;
+use tauri::{Manager, PhysicalSize};
 
 
 #[derive(Serialize, Deserialize, Default, Debug, Copy, Clone)]
@@ -28,10 +28,14 @@ pub fn create_window(
         .title(title);
 
     if let Some(config) = config {
-        builder = builder
-            .inner_size(config.width, config.height)
-            .position(config.x, config.y)
-            .maximized(config.maximized);
+        if config.maximized {
+            builder = builder
+                .inner_size(config.width, config.height)
+                .position(config.x, config.y);
+        }
+        else {
+            builder = builder.maximized(config.maximized);
+        }
     }
     else {
         let (width, height) = default_size;
@@ -52,14 +56,16 @@ pub fn event_handler(event: tauri::GlobalWindowEvent) {
         let scale = monitor.scale_factor();
 
         if !window.is_minimized().unwrap() {
-            let size = window.inner_size().unwrap().to_logical::<f64>(scale);
-            let position =  window.outer_position().unwrap().to_logical::<f64>(scale);
+            let size = window.inner_size().unwrap().to_logical(scale);
+            let position =  window.outer_position().unwrap().to_logical(scale);
 
             let config_state = window.state::<Mutex<Config>>();
             let mut config = config_state.lock().unwrap();
+
+            //FIXME: Accounts for the size of the menu.
             config.set_window(window.label(), WindowConfig {
                 width: size.width,
-                height: size.height,
+                height: size.height + window.menu_handle().is_visible().map(|visible| if visible { 20.0 } else { 0.0 }).unwrap(),
                 x: position.x,
                 y: position.y,
                 maximized: window.is_maximized().unwrap()
