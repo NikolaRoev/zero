@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 use tauri::Manager;
 
-use crate::{config::Config, menu::set_recent_menu};
+use crate::{config::Config, menu::{set_recent_menu, set_menu_state}};
 
 
 
@@ -21,11 +21,16 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         Some(crate::menu::create_main_menu())
     )?;
 
-    set_recent_menu(window.menu_handle(), config.get_recent_databases())?;
+    let menu_handle = window.menu_handle();
+    set_recent_menu(&menu_handle, config.get_recent_databases())?;
 
     let mut database = crate::database::Database::default();
     if let Some(last) = config.get_last_database() {
         database.open(last)?;
+        set_menu_state(&menu_handle, true)?;
+    }
+    else {
+        set_menu_state(&menu_handle, false)?;
     }
 
     app.manage(Mutex::new(config));

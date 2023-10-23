@@ -1,14 +1,15 @@
 use std::{sync::Mutex, ffi::OsString, path::PathBuf};
 
-use tauri::Manager;
+use tauri::{Manager, Window};
 
-use crate::{database::Database, error::ZeroError, menu::set_recent_menu, config::Config};
+use crate::{database::Database, error::ZeroError, menu::{set_recent_menu, set_menu_state}, config::Config};
 
 
 
 #[tauri::command]
 pub fn open_database(
     app_handle: tauri::AppHandle,
+    window: tauri::Window,
     config: tauri::State<Mutex<Config>>,
     database: tauri::State<Mutex<Database>>,
     path: PathBuf
@@ -23,8 +24,11 @@ pub fn open_database(
         config_guard.set_last_database(Some(path.clone()));
         config_guard.add_recent_database(path);
 
-        let window = app_handle.get_window("main").unwrap();
-        set_recent_menu(window.menu_handle(), config_guard.get_recent_databases())
+        let menu_handle = window.menu_handle();
+        set_recent_menu(&menu_handle, config_guard.get_recent_databases())?;
+        set_menu_state(&menu_handle, true)?;
+
+        Ok(window.emit("opened-database", ())?)
     };
 
     match inner() {
@@ -42,13 +46,23 @@ pub fn open_database(
 
 #[tauri::command]
 pub fn close_database(
+    app_handle: tauri::AppHandle,
+    window: tauri::Window,
+    config: tauri::State<Mutex<Config>>,
     database: tauri::State<Mutex<Database>>,
 ) -> Result<(), String> {
     log::info!("Closing database.");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let mut db_guard = database.lock().unwrap();
-        db_guard.close()
+        db_guard.close()?;
+
+        let mut config_guard = config.lock().unwrap();
+        config_guard.set_last_database(None);
+
+        set_menu_state(&window.menu_handle(), false)?;
+
+        Ok(app_handle.emit_all("closed-database", ())?)
     };
 
     match inner() {

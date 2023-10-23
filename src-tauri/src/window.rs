@@ -29,12 +29,12 @@ pub fn create_window(
 
     if let Some(config) = config {
         if config.maximized {
+            builder = builder.maximized(config.maximized);
+        }
+        else {
             builder = builder
                 .inner_size(config.width, config.height)
                 .position(config.x, config.y);
-        }
-        else {
-            builder = builder.maximized(config.maximized);
         }
     }
     else {
