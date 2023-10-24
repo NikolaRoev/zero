@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ffi::OsString, path::{Path, PathBuf}};
+use std::{collections::HashMap, path::PathBuf};
 use rusqlite::named_params;
 
 
@@ -146,6 +146,11 @@ pub struct Creator {
     works: i64
 }
 
+pub struct Value {
+    id: i64,
+    value: String
+}
+
 pub struct Filter {
     selection: Vec<String>,
     by: String,
@@ -205,6 +210,18 @@ impl Database {
 
     pub fn path(&self) -> DatabaseResult<std::path::PathBuf> {
         Ok(self.conn()?.path().ok_or("Invalid path to database.")?.into())
+    }
+
+    pub fn get(&self, table: &str) -> DatabaseResult<Vec<Value>> {
+        let mut stmt = self.conn()?.prepare_cached(&format!("SELECT * FROM {table}"))?;
+        let rows = stmt.query_map([], |row| {
+            Ok(Value {
+                id: row.get(0)?,
+                value: row.get(1)?
+            })
+        })?;
+
+        rows.map(|row| Ok(row?)).collect()
     }
 
     pub fn add(&self, table: &str, params: Vec<(&str, &dyn rusqlite::ToSql)>) -> DatabaseResult<i64> {

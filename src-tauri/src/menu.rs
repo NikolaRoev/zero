@@ -112,7 +112,6 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
                 if let Some(path) = path {
                     let window = event.window();
                     let _ = api::open_database(
-                        window.app_handle(),
                         window.clone(),
                         window.state::<Mutex<Config>>(),
                         window.state::<Mutex<Database>>(),
@@ -129,7 +128,6 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
                 if let Some(path) = path {
                     let window = event.window();
                     let _ = api::open_database(
-                        window.app_handle(),
                         window.clone(),
                         window.state::<Mutex<Config>>(),
                         window.state::<Mutex<Database>>(),
@@ -147,7 +145,6 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
             drop(guard);
 
             let _ = api::open_database(
-                window.app_handle(),
                 window.clone(),
                 window.state::<Mutex<Config>>(),
                 window.state::<Mutex<Database>>(),

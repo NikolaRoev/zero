@@ -1,14 +1,17 @@
-use std::{sync::Mutex, ffi::OsString, path::PathBuf};
+use std::{sync::Mutex, path::PathBuf};
 
-use tauri::{Manager, Window};
+use tauri::Manager;
 
-use crate::{database::Database, error::ZeroError, menu::{set_recent_menu, set_menu_state}, config::Config};
-
+use crate::{database::Database, menu::{set_recent_menu, set_menu_state}, config::Config};
 
 
 #[tauri::command]
+pub fn error(message: String) {
+    log::error!("[UI] {}", message);
+}
+
+#[tauri::command]
 pub fn open_database(
-    app_handle: tauri::AppHandle,
     window: tauri::Window,
     config: tauri::State<Mutex<Config>>,
     database: tauri::State<Mutex<Database>>,
@@ -42,6 +45,13 @@ pub fn open_database(
             Err(message)
         }
     }
+}
+
+#[tauri::command]
+pub fn database_is_open(database: tauri::State<Mutex<Database>>) -> bool {
+    log::info!("Checking if database is open.");
+    let db_guard = database.lock().unwrap();
+    db_guard.is_open()
 }
 
 #[tauri::command]

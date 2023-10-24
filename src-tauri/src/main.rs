@@ -4,7 +4,6 @@ mod api;
 mod application;
 mod config;
 mod database;
-mod error;
 mod log;
 mod menu;
 mod window;
@@ -16,6 +15,10 @@ fn main() {
     tauri::Builder::default()
         .setup(application::setup)
         .invoke_handler(tauri::generate_handler![
+            api::error,
+            api::open_database,
+            api::database_is_open,
+            api::close_database,
             api::add_creator
         ])
         .on_menu_event(menu::event_handler)
