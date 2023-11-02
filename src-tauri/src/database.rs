@@ -11,14 +11,17 @@ CREATE TABLE IF NOT EXISTS works (
     status   TEXT NOT NULL,
     type     TEXT NOT NULL,
     format   TEXT NOT NULL,
-    updated  TEXT DEFAULT (DATETIME('NOW', 'LOCALTIME')) NOT NULL,
-    added    TEXT DEFAULT (DATETIME('NOW', 'LOCALTIME')) NOT NULL
+    updated  TEXT NOT NULL DEFAULT (DATETIME('NOW', 'LOCALTIME')),
+    added    TEXT NOT NULL DEFAULT (DATETIME('NOW', 'LOCALTIME')),
+    FOREIGN KEY (status) REFERENCES statuses (status),
+    FOREIGN KEY (type)   REFERENCES types    (type),
+    FOREIGN KEY (format) REFERENCES formats  (format)
 );
 
 CREATE TABLE IF NOT EXISTS creators (
     id    INTEGER PRIMARY KEY,
     name  TEXT NOT NULL,
-    works INTEGER DEFAULT 0 NOT NULL
+    works INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS work_creator (
@@ -30,8 +33,9 @@ CREATE TABLE IF NOT EXISTS work_creator (
 );
 
 CREATE TABLE IF NOT EXISTS statuses (
-    id     INTEGER PRIMARY KEY,
-    status TEXT NOT NULL UNIQUE
+    id        INTEGER PRIMARY KEY,
+    status    TEXT NOT NULL UNIQUE,
+    is_update INTEGER NOT NULL CHECK (is_update IN (0, 1)) DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS types (
@@ -44,70 +48,12 @@ CREATE TABLE IF NOT EXISTS formats (
     format TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS update_statuses (
-    id     INTEGER PRIMARY KEY,
-    status TEXT NOT NULL UNIQUE
-);
-
-
-CREATE TRIGGER IF NOT EXISTS check_work_insert
-    BEFORE INSERT
-    ON works
-    WHEN NEW.status NOT IN (SELECT status FROM statuses) OR
-         NEW.type NOT IN (SELECT type FROM types) OR
-         NEW.format NOT IN (SELECT format FROM formats)
-BEGIN
-    SELECT RAISE(ABORT, 'Invalid work');
-END;
-
-CREATE TRIGGER IF NOT EXISTS check_work_update
-    BEFORE UPDATE OF 'status', 'type', 'format'
-    ON works
-    WHEN NEW.status NOT IN (SELECT status FROM statuses) OR
-         NEW.type NOT IN (SELECT type FROM types) OR
-         NEW.format NOT IN (SELECT format FROM formats)
-BEGIN
-    SELECT RAISE(ABORT, 'Invalid work update value');
-END;
 
 CREATE TRIGGER IF NOT EXISTS update_work_progress
     AFTER UPDATE OF 'progress'
     ON works
 BEGIN
     UPDATE works SET updated = DATETIME('NOW', 'LOCALTIME') WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER IF NOT EXISTS update_status_insert
-    BEFORE INSERT
-    ON update_statuses
-    WHEN NEW.status NOT IN (SELECT status FROM statuses)
-BEGIN
-    SELECT RAISE(ABORT, 'Invalid update status');
-END;
-
-CREATE TRIGGER IF NOT EXISTS delete_status
-    BEFORE DELETE
-    ON statuses
-    WHEN (SELECT COUNT(*) FROM works WHERE status = OLD.status) > 0 OR
-         (SELECT COUNT(*) FROM update_statuses WHERE status = OLD.status) > 0
-BEGIN
-    SELECT RAISE(ABORT, 'Status still in use');
-END;
-
-CREATE TRIGGER IF NOT EXISTS delete_type
-    BEFORE DELETE
-    ON types
-    WHEN (SELECT COUNT(*) FROM works WHERE type = OLD.type) > 0
-BEGIN
-    SELECT RAISE(ABORT, 'Type still in use');
-END;
-
-CREATE TRIGGER IF NOT EXISTS delete_format
-    BEFORE DELETE
-    ON formats
-    WHEN (SELECT COUNT(*) FROM works WHERE format = OLD.format) > 0
-BEGIN
-    SELECT RAISE(ABORT, 'Format still in use');
 END;
 
 CREATE TRIGGER IF NOT EXISTS add_work
@@ -129,6 +75,7 @@ BEGIN
 END;
 ";
 
+#[derive(serde::Serialize, Debug)]
 pub struct Work {
     id: i64,
     name: String,
@@ -140,22 +87,36 @@ pub struct Work {
     added: String
 }
 
+#[derive(serde::Serialize, Debug)]
 pub struct Creator {
     id: i64,
     name: String,
     works: i64
 }
 
-pub struct Value {
+#[derive(serde::Serialize, Debug)]
+pub struct Status {
+    pub id: i64,
+    pub status: String,
+    pub is_update: bool
+}
+
+#[derive(serde::Serialize, Debug)]
+pub struct Type {
     id: i64,
-    value: String
+    r#type: String
+}
+
+#[derive(serde::Serialize, Debug)]
+pub struct Format {
+    id: i64,
+    format: String
 }
 
 pub struct Filter {
-    selection: Vec<String>,
-    by: String,
-    value: String,
-    restrictions: HashMap<String, Vec<String>>
+    pub by: String,
+    pub value: String,
+    pub restrictions: HashMap<String, Vec<String>>
 }
 
 pub struct Order {
@@ -212,18 +173,6 @@ impl Database {
         Ok(self.conn()?.path().ok_or("Invalid path to database.")?.into())
     }
 
-    pub fn get(&self, table: &str) -> DatabaseResult<Vec<Value>> {
-        let mut stmt = self.conn()?.prepare_cached(&format!("SELECT * FROM {table}"))?;
-        let rows = stmt.query_map([], |row| {
-            Ok(Value {
-                id: row.get(0)?,
-                value: row.get(1)?
-            })
-        })?;
-
-        rows.map(|row| Ok(row?)).collect()
-    }
-
     pub fn add(&self, table: &str, params: Vec<(&str, &dyn rusqlite::ToSql)>) -> DatabaseResult<i64> {
         let (columns, values): (Vec<&str>, Vec<&dyn rusqlite::ToSql>) = params.into_iter().unzip();
         let mut stmt = self.conn()?.prepare_cached(&format!("
@@ -251,7 +200,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn update(&self, table: &str, column: &str, id: i64, value: &str) -> DatabaseResult<()> {
+    pub fn update(&self, table: &str, column: &str, id: i64, value: &dyn rusqlite::ToSql) -> DatabaseResult<()> {
         let mut stmt = self.conn()?.prepare_cached(&format!(
             "UPDATE {table} SET {column} = :value WHERE id = :id"
         ))?;
@@ -259,9 +208,7 @@ impl Database {
         let rows = stmt.execute(named_params! {":value": value, ":id": id})?;
 
         if rows != 1 {
-            return Err(format!(
-                "Expected to update 1 row of column '{column}' to value '{value}' in table '{table}' not {rows}"
-            ))?;
+            return Err(format!("Expected to update 1 row not {rows}"))?;
         }
 
         Ok(())
@@ -298,12 +245,11 @@ impl Database {
             format!(" AND {column} IN ({placeholders})")
         };
 
-        let mut query = format!("SELECT {columns} FROM works WHERE {by} LIKE ?",
-            columns = filter.selection.join(","),
+        let mut query = format!("SELECT * FROM works WHERE {by} LIKE ?",
             by = filter.by
         );
 
-        let mut params = vec![filter.value];
+        let mut params = vec![format!("%{}%", filter.value)];
         for (column, values) in filter.restrictions.iter() {
             query.push_str(&helper(column, values));
             params.extend(values.to_vec());
@@ -407,6 +353,48 @@ impl Database {
         rows.map(|row| Ok(row?)).collect()
     }
 
+    pub fn get_statuses(&self, update: bool) -> DatabaseResult<Vec<Status>> {
+        let mut query = String::from("SELECT * FROM statuses");
+        if update {
+            query.push_str(" WHERE is_update = 1");
+        }
+
+        let mut stmt = self.conn()?.prepare_cached(&query)?;
+        let rows = stmt.query_map([], |row| {
+            Ok(Status {
+                id: row.get(0)?,
+                status: row.get(1)?,
+                is_update: row.get(2)?
+            })
+        })?;
+
+        rows.map(|row| Ok(row?)).collect()
+    }
+
+    pub fn get_types(&self) -> DatabaseResult<Vec<Type>> {
+        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM types")?;
+        let rows = stmt.query_map([], |row| {
+            Ok(Type {
+                id: row.get(0)?,
+                r#type: row.get(1)?
+            })
+        })?;
+
+        rows.map(|row| Ok(row?)).collect()
+    }
+
+    pub fn get_formats(&self) -> DatabaseResult<Vec<Format>> {
+        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM formats")?;
+        let rows = stmt.query_map([], |row| {
+            Ok(Format {
+                id: row.get(0)?,
+                format: row.get(1)?
+            })
+        })?;
+
+        rows.map(|row| Ok(row?)).collect()
+    }
+
     pub fn attach(&self, work_id: i64, creator_id: i64) -> DatabaseResult<()> {
         let mut stmt = self.conn()?.prepare_cached("
             INSERT INTO work_creator (work_id, creator_id) VALUES (:work_id, :creator_id)
@@ -477,6 +465,12 @@ mod tests {
         database.add("works",
         test).unwrap();
 
+        database.update("statuses", "is_update", 1, &true).unwrap();
+
+        let test = database.get_statuses(false).unwrap();
+        for t in test {
+            println!("{} {} {}", t.id, t.status, t.is_update);
+        }
         //let id = database.add_work("name", "progress", "status", "r#type", "format", &[]).unwrap();
         //std::thread::sleep(std::time::Duration::from_secs(4));
         //database.update("works", "progress", id, "12");

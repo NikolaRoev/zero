@@ -19,7 +19,18 @@ fn main() {
             api::open_database,
             api::database_is_open,
             api::close_database,
-            api::add_creator
+            api::get_update_works,
+            api::add_creator,
+            api::add_status,
+            api::get_statuses,
+            api::update_status,
+            api::remove_status,
+            api::add_type,
+            api::get_types,
+            api::remove_type,
+            api::add_format,
+            api::get_formats,
+            api::remove_format,
         ])
         .on_menu_event(menu::event_handler)
         .on_window_event(window::event_handler)
