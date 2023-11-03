@@ -13,6 +13,12 @@ type Work = {
     added: string
 }
 
+type Creator = {
+    id: number,
+    name: string,
+    works: number
+}
+
 type Status = {
     id: number,
     status: string,
@@ -39,8 +45,20 @@ export function databaseIsOpen(): Promise<boolean> {
     return invoke("database_is_open");
 }
 
+export function getWorks(): Promise<Work[]> {
+
+}
+
 export function getUpdateWorks(nameFilter: string): Promise<Work[]> {
     return invoke("get_update_works", { nameFilter: nameFilter });
+}
+
+export function updateWorkName(id: number, name: string): Promise<void> {
+    return invoke("update_work_name", { id: id, name: name });
+}
+
+export function updateWorkProgress(id: number, progress: string): Promise<void> {
+    return invoke("update_work_progress", { id: id, progress: progress });
 }
 
 export function addStatus(status: string): Promise<void> {

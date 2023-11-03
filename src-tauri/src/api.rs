@@ -119,6 +119,48 @@ pub fn get_update_works(database: tauri::State<Mutex<Database>>, name_filter: St
 }
 
 #[tauri::command]
+pub fn update_work_name(database: tauri::State<Mutex<Database>>, id: i64, name: String) -> Result<(), String> {
+    log::info!("Updating work {id}: name - {name}.");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let guard = database.lock().unwrap();
+        guard.update("works", "name", id, &name)
+    };
+
+    match inner() {
+        Ok(()) => {
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to update work name: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
+pub fn update_work_progress(database: tauri::State<Mutex<Database>>, id: i64, progress: String) -> Result<(), String> {
+    log::info!("Updating work {id}: progress - {progress}.");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let guard = database.lock().unwrap();
+        guard.update("works", "progress", id, &progress)
+    };
+
+    match inner() {
+        Ok(()) => {
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to update work progress: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
 pub fn add_creator(database: tauri::State<Mutex<Database>>, name: String, works: Vec<i64>) -> Result<i64, String> {
     log::info!("Adding creator: NAME - {name}, WORKS - {works:?}.");
 

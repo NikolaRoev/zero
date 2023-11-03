@@ -20,6 +20,8 @@ fn main() {
             api::database_is_open,
             api::close_database,
             api::get_update_works,
+            api::update_work_name,
+            api::update_work_progress,
             api::add_creator,
             api::add_status,
             api::get_statuses,

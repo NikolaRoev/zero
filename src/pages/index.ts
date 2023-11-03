@@ -1,6 +1,7 @@
 import "../../utility/tabs";
 import *  as api from "../api";
 import { listen } from "@tauri-apps/api/event";
+import { updateLibrary } from "./library";
 import { updateUpdate } from "./update";
 
 
@@ -21,6 +22,7 @@ function updateApplication() {
     applicationContainer.classList.remove("util-hidden");
 
     updateUpdate();
+    updateLibrary();
 }
 
 
@@ -41,3 +43,5 @@ api.databaseIsOpen().then((isOpen) => {
         updateStartup();
     }
 }).catch((reason) => { alert(reason); });
+
+//TODO: Ignore the tabs thingy, we should anyways update on button click....

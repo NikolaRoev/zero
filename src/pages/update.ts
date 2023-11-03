@@ -18,7 +18,7 @@ export function updateUpdate() {
             nameInput.value = work.name;
             nameInput.spellcheck = false;
             nameInput.addEventListener("input", () => {
-                //TODO
+                api.updateWorkName(work.id, nameInput.value).catch((reason) => { alert(reason); });
             });
             container.appendChild(nameInput);
 
@@ -26,7 +26,7 @@ export function updateUpdate() {
             progressInput.value = work.progress;
             progressInput.spellcheck = false;
             progressInput.addEventListener("input", () => {
-                //TODO
+                api.updateWorkProgress(work.id, progressInput.value).catch((reason) => { alert(reason); });
             });
             container.appendChild(progressInput);
 

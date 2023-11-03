@@ -15,18 +15,95 @@
     <!-- Application -->
     <div id="application-container" class="util-hidden">
       <div class="util-tab-bar">
-        <button id="update-tab-button" class="util-tab-button util-active">Update</button>
-        <button id="library-tab-button" class="util-tab-button">Library</button>
+        <button id="update-tab-button" class="util-tab-button util-active" data-util-tab-page-id="update-tab-page">Update</button>
+        <button id="library-tab-button" class="util-tab-button" data-util-tab-page-id="library-tab-page">Library</button>
       </div>
-      <div class="util-tab-container">
-        <!-- Update -->
-        <div id="update-tab-page" class="util-tab-page" data-util-tab-button-id="update-tab-button">
-          <input id="update-search" placeholder="Find" type="search" spellcheck="false">
-          <div id="update-list"></div>
+      <!-- Update -->
+      <div id="update-tab-page">
+        <input id="update-search" placeholder="Find" type="search">
+        <div id="update-list"></div>
+      </div>
+      <!-- Library -->
+      <div id="library-tab-page">
+        <div class="util-tab-bar">
+          <button id="works-tab-button" class="util-tab-button util-active" data-util-tab-page-id="works-tab-page">Works</button>
+          <button id="creators-tab-button" class="util-tab-button" data-util-tab-page-id="creators-tab-page">Creators</button>
+          <button id="add-work-tab-button" class="util-tab-button" data-util-tab-page-id="add-work-tab-page">Add Work</button>
+          <button id="add-creator-tab-button" class="util-tab-button" data-util-tab-page-id="add-creator-tab-page">Add Creator</button>
         </div>
-        <!-- Library -->
-        <div id="library-tab-page" class="util-tab-page" data-util-tab-button-id="library-tab-button">
+        <!-- Works -->
+        <div id="works-tab-page">
+          <input id="works-search" placeholder="Find" type="search">
+          <select id="works-by-select">
+            <option value="name">Name</option>
+            <option value="progress">Progress</option>
+          </select>
+          <fieldset>
+            <legend>Status</legend>
+            <div id="status-fieldset-container"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Type</legend>
+            <div id="type-fieldset-container"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Format</legend>
+            <div id="format-fieldset-container"></div>
+          </fieldset>
+          <table id="works-table">
+            <thead id="works-table-header" data-sort-by="" data-sort-descending="">
+              <tr>
+                <th id="work-id-header"></th>
+                <th id="work-name-header">Name</th>
+                <th id="work-progress-header">Progress</th>
+                <th id="work-updated-header">Updated</th>
+                <th id="work-added-header">Added</th>
+              </tr>
+            </thead>
+            <tbody id="works-table-body"></tbody>
+          </table>
+        </div>
+        <!-- Creators -->
+        <div id="creators-tab-page">
+          <input id="creators-search" placeholder="Find" type="search">
+          <table id="creators-table">
+            <thead>
+              <tr>
+                <th id="creator-id-header"></th>
+                <th id="creator-name-header">Name</th>
+                <th id="creator-works-header">Works</th>
+              </tr>
+            </thead>
+            <tbody id="creators-table-body"></tbody>
+          </table>
+        </div>
+        <!-- Add Work -->
+        <div id="add-work-tab-page">
+          <form id="add-work-form" action="">
+            <label for="add-work-name">Name:</label>
+            <input id="add-work-name" type="text" required="required">
 
+            <label for="add-work-progress">Progress:</label>
+            <input id="add-work-progress" type="text" required="required">
+
+            <label for="add-work-status">Status:</label>
+            <select id="add-work-status"></select>
+
+            <label for="add-work-type">Type:</label>
+            <select id="add-work-type"></select>
+
+            <label for="add-work-format">Format:</label>
+            <select id="add-work-format"></select>
+            <button>Add</button>
+          </form>
+        </div>
+        <!-- Add Creator -->
+        <div id="add-creator-tab-page" class="util-tab-page">
+          <form id="add-creator-form" action="">
+            <label for="add-creator-name">Name:</label>
+            <input id="add-creator-name" type="text" required="required">
+            <button>Add</button>
+          </form>
         </div>
       </div>
     </div>
