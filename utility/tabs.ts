@@ -1,55 +1,63 @@
+function getTabPage(tabButton: HTMLElement): HTMLElement {
+    if (tabButton.dataset.utilTabPageId === undefined) {
+        throw Error(`Missing tab page id data attribute for '${tabButton.id}'.`);
+    }
+
+    const tabPage = document.getElementById(tabButton.dataset.utilTabPageId);
+    if (tabPage === null) {
+        throw Error(`Missing tab page element with id '${tabButton.dataset.utilTabPageId}'.`);
+    }
+    return tabPage;
+}
+
+function makeTab(targetTabButton: HTMLElement, tabButtons: HTMLCollectionOf<HTMLElement>) {
+    const targetTabPage = getTabPage(targetTabButton);
+    if (!targetTabButton.classList.contains("util-active")) {
+        targetTabPage.classList.add("util-hidden");
+    }
+
+    targetTabButton.addEventListener("click", () => {
+        if (!targetTabButton.classList.contains("util-active")) {
+            targetTabButton.classList.add("util-active");
+            targetTabPage.classList.remove("util-hidden");
+
+            for (const tabButton of tabButtons) {
+                if (tabButton.id !== targetTabButton.id) {
+                    tabButton.classList.remove("util-active");
+                    getTabPage(tabButton).classList.add("util-hidden");
+                }
+            }
+        }
+    });
+}
+
+function makeTabs(tabBar: HTMLElement) {
+    const tabButtons = tabBar.getElementsByClassName("util-tab-button") as HTMLCollectionOf<HTMLElement>;
+    for (const tabButton of tabButtons) {
+        makeTab(tabButton, tabButtons);
+    }
+}
+
 /**
- * Registers all confirm buttons (elements with the `util-confirm-button` class) on import.
- * Must be imported before all other `click` listeners are added to any confirm button.
+ * Modifies all HTML structures in the following format to behave like tabs:
  * 
- * Each confirm button should have the custom data attribute `data-util-confirm`
- * for the confirmation state text.
+ * <div class="tab-bar">
+ *   <button class="tab-button active" id="first-tab-button" data-tab-page-id="first-tab">First</button>
+ *   <button class="tab-button" id="second-tab-button" data-tab-page-id="second-tab">Second</button>
+ *   ...
+ * </div>
+ * <div id="first-tab">...</div>
+ * <div id="second-tab">...</div>
+ * ...
  * 
- * Optionally, each confirm button can have the custom data attribute `data-util-delay`
- * for a custom delay duration before returning to the initial state. Default is `1500` ms.
+ * The button with the 'active' class will have its tab as the initially selected one.
+ * After a tab button is clicked the 'active' class will be added to it,
+ * the 'hidden' class will be removed from its page and added to all other pages.
  */
 
 (() => {
     const tabBars = document.getElementsByClassName("util-tab-bar") as HTMLCollectionOf<HTMLElement>;
-
     for (const tabBar of tabBars) {
-        const tabButtons = tabBar.getElementsByClassName("util-tab-button") as HTMLCollectionOf<HTMLElement>;
-
-        const tabPages: HTMLElement[] = [];
-        for (const tabButton of tabButtons) {
-            if (tabButton.dataset.utilTabPageId === undefined) {
-                throw Error("");
-            }
-            const tabPage = document.getElementById(tabButton.dataset.utilTabPageId);
-
-            if (tabPage === null) {
-                throw Error("");
-            }
-            if (!tabButton.classList.contains("util-active")) {
-                tabPage.classList.add("util-hidden");
-            }
-            tabPages.push(tabPage);
-        }
-
-        for (const tabButton of tabButtons) {
-            tabButton.addEventListener("click", () => {
-                if (!tabButton.classList.contains("util-active")) {
-                    tabButton.classList.add("util-active");
-        
-                    for (let j = 0; j < tabButtons.length; ++j) {
-                        if (tabButtons[j]?.id !== tabButton.id) {
-                            tabButtons[j]?.classList.remove("util-active");
-                        }
-    
-                        if (tabPages[j]?.id === tabButton.dataset.utilTabPageId) {
-                            tabPages[j]?.classList.remove("util-hidden");
-                        }
-                        else {
-                            tabPages[j]?.classList.add("util-hidden");
-                        }
-                    }
-                }
-            });
-        }
+        makeTabs(tabBar);
     }
 })();

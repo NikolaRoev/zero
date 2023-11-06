@@ -13,6 +13,17 @@ type Work = {
     added: string
 }
 
+type UpdateWork = {
+    id: number,
+    name: string,
+    progress: string,
+    status: string,
+    type: string,
+    format: string,
+    updated: string,
+    added: string
+}
+
 type Creator = {
     id: number,
     name: string,
@@ -49,8 +60,8 @@ export function getWorks(): Promise<Work[]> {
 
 }
 
-export function getUpdateWorks(nameFilter: string): Promise<Work[]> {
-    return invoke("get_update_works", { nameFilter: nameFilter });
+export function getUpdateWorks(name: string): Promise<UpdateWork[]> {
+    return invoke("get_update_works", { name: name });
 }
 
 export function updateWorkName(id: number, name: string): Promise<void> {

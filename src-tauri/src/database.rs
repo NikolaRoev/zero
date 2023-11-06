@@ -88,6 +88,13 @@ pub struct Work {
 }
 
 #[derive(serde::Serialize, Debug)]
+pub struct UpdateWork {
+    id: i64,
+    name: String,
+    progress: String,
+}
+
+#[derive(serde::Serialize, Debug)]
 pub struct Creator {
     id: i64,
     name: String,
@@ -236,7 +243,7 @@ impl Database {
     }
 
     pub fn get_works(
-        &self, 
+        &self,
         filter: Filter,
         order: Option<Order>
     ) -> DatabaseResult<Vec<Work>>{
@@ -273,6 +280,24 @@ impl Database {
                 format: row.get(5)?,
                 updated: row.get(6)?,
                 added: row.get(7)?,
+            })
+        })?;
+
+        rows.map(|row| Ok(row?)).collect()
+    }
+
+    pub fn get_update_works(&self, name: String) -> DatabaseResult<Vec<UpdateWork>> {
+        let mut stmt = self.conn()?.prepare_cached("
+            SELECT works.id, works.name, works.progress
+            FROM works
+            JOIN statuses ON works.status = statuses.status
+            WHERE works.name LIKE :name AND statuses.is_update = 1
+        ")?;
+        let rows = stmt.query_map(named_params! {":name": format!("%{name}%")}, |row| {
+            Ok(UpdateWork {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                progress: row.get(2)?
             })
         })?;
 
@@ -353,13 +378,8 @@ impl Database {
         rows.map(|row| Ok(row?)).collect()
     }
 
-    pub fn get_statuses(&self, update: bool) -> DatabaseResult<Vec<Status>> {
-        let mut query = String::from("SELECT * FROM statuses");
-        if update {
-            query.push_str(" WHERE is_update = 1");
-        }
-
-        let mut stmt = self.conn()?.prepare_cached(&query)?;
+    pub fn get_statuses(&self) -> DatabaseResult<Vec<Status>> {
+        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM statuses")?;
         let rows = stmt.query_map([], |row| {
             Ok(Status {
                 id: row.get(0)?,
@@ -467,7 +487,7 @@ mod tests {
 
         database.update("statuses", "is_update", 1, &true).unwrap();
 
-        let test = database.get_statuses(false).unwrap();
+        let test = database.get_statuses().unwrap();
         for t in test {
             println!("{} {} {}", t.id, t.status, t.is_update);
         }

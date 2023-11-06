@@ -8,7 +8,8 @@ import { updateUpdate } from "./update";
 
 const startupContainer = document.getElementById("startup-container") as HTMLDivElement;
 const applicationContainer = document.getElementById("application-container") as HTMLDivElement;
-
+const updateTabButton = document.getElementById("update-tab-button") as HTMLButtonElement;
+const libraryTabButton = document.getElementById("library-tab-button") as HTMLButtonElement;
 
 
 function updateStartup() {
@@ -22,8 +23,17 @@ function updateApplication() {
     applicationContainer.classList.remove("util-hidden");
 
     updateUpdate();
-    updateLibrary();
+    //updateLibrary();
 }
+
+
+updateTabButton.addEventListener("click", () => {
+    updateUpdate();
+});
+
+libraryTabButton.addEventListener("click", () => {
+    updateLibrary();
+});
 
 
 await listen("closed-database", () => {
@@ -43,5 +53,3 @@ api.databaseIsOpen().then((isOpen) => {
         updateStartup();
     }
 }).catch((reason) => { alert(reason); });
-
-//TODO: Ignore the tabs thingy, we should anyways update on button click....
