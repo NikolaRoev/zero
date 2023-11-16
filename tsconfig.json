@@ -19,7 +19,6 @@
     "useUnknownInCatchVariables": true,
   
     // Modules:
-    "allowImportingTsExtensions": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
@@ -35,6 +34,7 @@
   
     // Language and Environment:
     "target": "ESNext",
+    "jsx": "preserve",
   
     // Completeness:
     "skipLibCheck": true,
