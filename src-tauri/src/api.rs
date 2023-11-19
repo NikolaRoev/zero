@@ -121,7 +121,7 @@ pub fn get_works(database: tauri::State<Mutex<Database>>) -> Result<Vec<Work>, S
 
 #[tauri::command]
 pub fn get_update_works(database: tauri::State<Mutex<Database>>, name: String) -> Result<Vec<UpdateWork>, String> {
-    log::info!("Getting update works.");
+    log::info!("Getting update works: name - {name}.");
 
     let inner = || -> Result<Vec<UpdateWork>, Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();

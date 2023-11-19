@@ -56,12 +56,12 @@ type UpdateWorksListProps = {
 }
 
 function UpdateWorksList({ height, width, updateWorks, onNameChange, onProgressChange }: UpdateWorksListProps) {
-    const createItemData = memoize((itemData: UpdateWorksListItemData) => ({
-        updateWorks: itemData.updateWorks,
-        onNameChange: itemData.onNameChange,
-        onProgressChange: itemData.onProgressChange
-    }));
-    const itemData = createItemData({updateWorks, onNameChange, onProgressChange});
+    //const createItemData = memoize((itemData: UpdateWorksListItemData) => ({
+    //    updateWorks: itemData.updateWorks,
+    //    onNameChange: itemData.onNameChange,
+    //    onProgressChange: itemData.onProgressChange
+    ////}));
+    //const itemData = createItemData();
 
 
     function generateItemKey(index: number, data: UpdateWorksListItemData): number {
@@ -78,7 +78,7 @@ function UpdateWorksList({ height, width, updateWorks, onNameChange, onProgressC
             itemKey={generateItemKey}
             height={height}
             itemCount={updateWorks.length}
-            itemData={itemData}
+            itemData={{updateWorks, onNameChange, onProgressChange}}
             itemSize={80}
             width={width}
         >{UpdateRow}</List>
@@ -87,18 +87,19 @@ function UpdateWorksList({ height, width, updateWorks, onNameChange, onProgressC
 
 
 function useUpdateWorks() {
-    const [filter, setFilter] = useState("");
+    const [filter, setFilter] = useState("a");
     const [updateWorks, setUpdateWorks] = useState<UpdateWork[]>([]);
   
-    const getUpdateWorks = useCallback(() => {
+    const getUpdateWorks = () => {
         api.getUpdateWorks(filter).then((value) => {
             setUpdateWorks(value);
         }).catch((reason) => { alert(reason); });
-    }, [filter]);
+        console.log("eelo");
+    };
 
     useEffect(() => {
         getUpdateWorks();
-    }, [filter, getUpdateWorks]);
+    }, [filter]);
 
     useEffect(() => {
         listen(api.CHANGED_STATUS_UPDATE_EVENT, () => {
@@ -106,15 +107,15 @@ function useUpdateWorks() {
         }).catch(async (reason) => {
             await api.error(`Failed to listen for changed status update event in Update tab: ${reason}`);
         });
-    }, [getUpdateWorks]);
+    }, []);
   
     return { filter, setFilter, updateWorks, setUpdateWorks, getUpdateWorks };
 }
 
 
 export default function UpdateTab() {
-    const { filter, setFilter, updateWorks, setUpdateWorks, getUpdateWorks } = useUpdateWorks();
     const filterInput = useRef<HTMLInputElement>(null);
+    const { filter, setFilter, updateWorks, setUpdateWorks, getUpdateWorks } = useUpdateWorks();
 
 
     useEffect(() => {

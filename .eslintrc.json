@@ -75,7 +75,7 @@
           "jsx": true
         }
       },
-      "plugins": ["react-refresh"],
+      "plugins": ["react-refresh", "react-hooks"],
       "rules": {
         // Overrides.
         "@typescript-eslint/consistent-type-definitions": "off",
