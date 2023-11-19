@@ -1,5 +1,5 @@
-import "../../utility/tabs";
-import *  as api from "../api";
+/*import "../../utility/tabs";
+import *  as api from "../../api";
 import { appWindow } from "@tauri-apps/api/window";
 import { listen } from "@tauri-apps/api/event";
 import { makeConfirmButton } from "../../utility/confirm-button";
@@ -129,3 +129,18 @@ await listen("closed-database", () => {
 updateStatuses();
 updateTypes();
 updateFormats();
+*/
+
+import "../styles.css";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import SettingsApp from "./SettingsApp";
+
+
+
+const root = document.getElementById("root") as HTMLDivElement;
+ReactDOM.createRoot(root).render(
+    <React.StrictMode>
+        <SettingsApp />
+    </React.StrictMode>
+);

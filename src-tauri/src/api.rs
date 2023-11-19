@@ -89,6 +89,33 @@ pub fn close_database(
 }
 
 #[tauri::command]
+pub fn get_works(database: tauri::State<Mutex<Database>>) -> Result<Vec<Work>, String> {
+    log::info!("Getting works.");
+
+    let inner = || -> Result<Vec<Work>, Box<dyn std::error::Error>>  {
+        let guard = database.lock().unwrap();
+        let filter: Filter = Filter{
+            by: "name".to_string(),
+            value: "".to_string(),
+            restrictions: HashMap::new()
+        };
+        guard.get_works(filter, None)
+    };
+
+    match inner() {
+        Ok(works) => {
+            //log::info!("Got update works: {update_works:?}.");
+            Ok(works)
+        },
+        Err(err) => {
+            let message = format!("Failed to get works: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
 pub fn get_update_works(database: tauri::State<Mutex<Database>>, name: String) -> Result<Vec<UpdateWork>, String> {
     log::info!("Getting update works.");
 
@@ -99,7 +126,7 @@ pub fn get_update_works(database: tauri::State<Mutex<Database>>, name: String) -
 
     match inner() {
         Ok(update_works) => {
-            log::info!("Got update works: {update_works:?}.");
+            //log::info!("Got update works: {update_works:?}.");
             Ok(update_works)
         },
         Err(err) => {

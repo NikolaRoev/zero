@@ -1,4 +1,4 @@
-import "../../utility/tabs";
+/*import "../../utility/tabs";
 import *  as api from "../api";
 import { listen } from "@tauri-apps/api/event";
 import { updateLibrary } from "./library";
@@ -53,3 +53,18 @@ api.databaseIsOpen().then((isOpen) => {
         updateStartup();
     }
 }).catch((reason) => { alert(reason); });
+*/
+
+import "../styles.css";
+import MainApp from "./MainApp";
+import React from "react";
+import ReactDOM from "react-dom/client";
+
+
+
+const root = document.getElementById("root") as HTMLDivElement;
+ReactDOM.createRoot(root).render(
+    <React.StrictMode>
+        <MainApp />
+    </React.StrictMode>
+);

@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 
 
 
-type Work = {
+export type Work = {
     id: number,
     name: string,
     progress: string,
@@ -13,35 +13,30 @@ type Work = {
     added: string
 }
 
-type UpdateWork = {
+export type UpdateWork = {
     id: number,
     name: string,
     progress: string,
-    status: string,
-    type: string,
-    format: string,
-    updated: string,
-    added: string
 }
 
-type Creator = {
+export type Creator = {
     id: number,
     name: string,
     works: number
 }
 
-type Status = {
+export type Status = {
     id: number,
     status: string,
     is_update: boolean
 }
 
-type Type = {
+export type Type = {
     id: number,
     type: string
 }
 
-type Format = {
+export type Format = {
     id: number,
     format: string
 }
@@ -57,7 +52,7 @@ export function databaseIsOpen(): Promise<boolean> {
 }
 
 export function getWorks(): Promise<Work[]> {
-
+    return invoke("get_works");
 }
 
 export function getUpdateWorks(name: string): Promise<UpdateWork[]> {

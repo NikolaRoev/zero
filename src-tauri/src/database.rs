@@ -146,7 +146,7 @@ impl Database {
 
     pub fn open(&mut self, path: &PathBuf) -> DatabaseResult<()> {
         let mut conn = rusqlite::Connection::open(path)?;
-        conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
+        //conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
         conn.backup(rusqlite::DatabaseName::Main, path.with_extension("backup.db"), Some(|progress| {
             log::info!("Backing up: {}/{}.", progress.pagecount - progress.remaining, progress.pagecount);
         }))?;

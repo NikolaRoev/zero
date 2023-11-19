@@ -2,43 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="./styles.scss" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Settings</title>
-    <script type="module" src="./settings.ts"></script>
+    <script type="module" src="./settings/settings.tsx"></script>
   </head>
   <body>
-    <div class="util-tab-bar">
-      <button id="statuses-tab-button" class="util-tab-button util-active" data-util-tab-page-id="statuses-tab-page">Statuses</button>
-      <button id="types-tab-button" class="util-tab-button" data-util-tab-page-id="types-tab-page">Types</button>
-      <button id="formats-tab-button" class="util-tab-button" data-util-tab-page-id="formats-tab-page">Formats</button>
-    </div>
-    <!-- Statuses -->
-    <div id="statuses-tab-page" class="util-tab-page" data-util-tab-button-id="statuses-tab-button">
-      <form id="statuses-form" action="">
-        <label for="status-input">Status:</label>
-        <input id="status-input" required>
-        <button>Add</button>
-      </form>
-      <div id="statuses-list"></div>
-    </div>
-    <!-- Types -->
-    <div id="types-tab-page" class="util-tab-page" data-util-tab-button-id="types-tab-button">
-      <form id="types-form" action="">
-        <label for="type-input">Type:</label>
-        <input id="type-input" required>
-        <button>Add</button>
-      </form>
-      <div id="types-list"></div>
-    </div>
-    <!-- Formats -->
-    <div id="formats-tab-page" class="util-tab-page" data-util-tab-button-id="formats-tab-button">
-      <form id="formats-form" action="">
-        <label for="format-input">Format:</label>
-        <input id="format-input" required>
-        <button>Add</button>
-      </form>
-      <div id="formats-list"></div>
-    </div>
+    <div id="root"></div>
   </body>
 </html>
