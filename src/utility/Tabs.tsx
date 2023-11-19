@@ -34,7 +34,7 @@ type TabsProps = {
     className?: string
 }
 
-export default function Tabs({ children, className }: TabsProps) {
+export function Tabs({ children, className }: TabsProps) {
     const [index, setIndex] = useState(0);
 
 

@@ -1,4 +1,4 @@
-import Tabs, { Tab, TabBar, TabButton, TabsContents } from "../../utility/Tabs";
+import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../utility/Tabs";
 import UpdateTab from "./update/UpdateTab";
 
 

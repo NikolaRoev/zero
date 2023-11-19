@@ -2,14 +2,12 @@ import { useState } from "react";
 
 
 
-type ConfirmButtonProps = {
-    initialSrc: string,
-    confirmSrc: string,
+type DeleteButtonProps = {
     onClick: () => void,
     title: string
 }
 
-export default function ConfirmButton({ initialSrc, confirmSrc, onClick, title }: ConfirmButtonProps) {
+export default function DeleteButton({ onClick, title }: DeleteButtonProps) {
     const [triggered, setTriggered] = useState(false);
 
 
@@ -32,6 +30,6 @@ export default function ConfirmButton({ initialSrc, confirmSrc, onClick, title }
             className="min-w-[32px] min-h-[32px] flex items-center justify-center hover:bg-gray active:bg-dark-gray"
             onClick={handleClick}
             title={title}
-        ><img src={triggered ? confirmSrc  : initialSrc} /></button>
+        ><img src={triggered ? "/icons/x-circle.svg" : "/icons/trash.svg"} /></button>
     );
 }

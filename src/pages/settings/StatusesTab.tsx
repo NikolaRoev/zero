@@ -1,6 +1,8 @@
+import * as api from "../../api";
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
-import { type Status, addStatus, getStatuses as apiGetStatuses, removeStatus as apiRemoveStatus, updateStatus } from "../../api";
 import Button from "../../utility/Button";
+import DeleteButton from "../../utility/ConfirmButton";
+import type { Status } from "../../api";
 
 
 
@@ -18,7 +20,10 @@ function StatusesList({ statuses, removeStatus, toggleStatus }: StatusesListProp
                 checked={status.is_update}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => { toggleStatus(status.id, event.target.checked); }}
             />
-            <button onClick={() => { removeStatus(status.id); }}>REMOVE</button>
+            <DeleteButton
+                onClick={() => { removeStatus(status.id); } }
+                title={`Remove status "${status.status}".`}
+            />
         </div>
     ));
 
@@ -30,7 +35,7 @@ function useStatuses() {
     const [statuses, setStatuses] = useState<Status[]>([]);
   
     const getStatuses = () => {
-        apiGetStatuses().then((value) => {
+        api.getStatuses().then((value) => {
             setStatuses(value);
         }).catch((reason) => { alert(reason); });
     };
@@ -50,7 +55,8 @@ export default function StatusesTab() {
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        addStatus(statusInput).then(() => {
+        api.addStatus(statusInput).then(() => {
+            setStatusInput("");
             getStatuses();
         }).catch((reason) => {
             getStatuses();
@@ -59,7 +65,7 @@ export default function StatusesTab() {
     }
 
     function removeStatus(id: number) {
-        apiRemoveStatus(id).then(() => {
+        api.removeStatus(id).then(() => {
             getStatuses();
         }).catch((reason) => {
             getStatuses();
@@ -68,7 +74,7 @@ export default function StatusesTab() {
     }
 
     function toggleStatus(id: number, isUpdate: boolean) {
-        updateStatus(id, isUpdate).then(() => {
+        api.updateStatus(id, isUpdate).then(() => {
             getStatuses();
         }).catch((reason) => {
             getStatuses();
@@ -80,9 +86,8 @@ export default function StatusesTab() {
     return (
         <>
             <form onSubmit={handleSubmit}>
-                <label htmlFor="status-input">Status:</label>
                 <input
-                    id="status-input"
+                    placeholder="Status"
                     value={statusInput}
                     onInput={(event: ChangeEvent<HTMLInputElement>) => { setStatusInput(event.target.value); }}
                 />

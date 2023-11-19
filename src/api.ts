@@ -44,6 +44,7 @@ export type Format = {
 
 
 export function error(message: string): Promise<void> {
+    console.error(message);
     return invoke("error", { message: message });
 }
 
