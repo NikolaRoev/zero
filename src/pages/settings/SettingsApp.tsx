@@ -11,7 +11,7 @@ import { useEffect } from "react";
 
 export default function SettingsApp() {
     useEffect(() => {
-        listen("closed-database", () => {
+        listen(api.CLOSED_DATABASE_EVENT, () => {
             appWindow.close().catch(async (reason) => {
                 await api.error(`Failed to close settings on database closed event: ${reason}.`);
             });

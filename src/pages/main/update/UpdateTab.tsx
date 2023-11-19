@@ -1,7 +1,9 @@
+import * as api from "../../../api";
 import { FixedSizeList as List, areEqual } from "react-window";
 import React, { type ChangeEvent, memo, useCallback, useEffect, useRef, useState } from "react";
-import { type UpdateWork, getUpdateWorks, updateWorkName, updateWorkProgress } from "../../../api";
 import AutoSizer from "react-virtualized-auto-sizer";
+import type { UpdateWork } from "../../../api";
+import { listen } from "@tauri-apps/api/event";
 import memoize from "memoize-one";
 
 
@@ -88,22 +90,30 @@ function useUpdateWorks() {
     const [filter, setFilter] = useState("");
     const [updateWorks, setUpdateWorks] = useState<UpdateWork[]>([]);
   
-    const getWorks = useCallback(() => {
-        getUpdateWorks(filter).then((value) => {
+    const getUpdateWorks = useCallback(() => {
+        api.getUpdateWorks(filter).then((value) => {
             setUpdateWorks(value);
         }).catch((reason) => { alert(reason); });
     }, [filter]);
 
     useEffect(() => {
-        getWorks();
-    }, [filter, getWorks]);
+        getUpdateWorks();
+    }, [filter, getUpdateWorks]);
+
+    useEffect(() => {
+        listen(api.CHANGED_STATUS_UPDATE_EVENT, () => {
+            getUpdateWorks();
+        }).catch(async (reason) => {
+            await api.error(`Failed to listen for changed status update event in Update tab: ${reason}`);
+        });
+    }, [getUpdateWorks]);
   
-    return { filter, setFilter, updateWorks, setUpdateWorks, getWorks };
+    return { filter, setFilter, updateWorks, setUpdateWorks, getUpdateWorks };
 }
 
 
 export default function UpdateTab() {
-    const { filter, setFilter, updateWorks, setUpdateWorks, getWorks } = useUpdateWorks();
+    const { filter, setFilter, updateWorks, setUpdateWorks, getUpdateWorks } = useUpdateWorks();
     const filterInput = useRef<HTMLInputElement>(null);
 
 
@@ -133,9 +143,9 @@ export default function UpdateTab() {
             }
         }));
 
-        updateWorkName(id, value).catch((reason) => {
-            getWorks();
-            console.error(`Failed to update work name in Update tab: ${reason}.`);
+        api.updateWorkName(id, value).catch((reason) => {
+            getUpdateWorks();
+            alert(reason);
         });
     }
 
@@ -149,9 +159,9 @@ export default function UpdateTab() {
             }
         }));
 
-        updateWorkProgress(id, value).catch((reason) => {
-            getWorks();
-            console.error(`Failed to update work progress in Update tab: ${reason}.`);
+        api.updateWorkProgress(id, value).catch((reason) => {
+            getUpdateWorks();
+            alert(reason);
         });
     }
 

@@ -3,6 +3,7 @@ import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import Button from "../../utility/Button";
 import DeleteButton from "../../utility/DeleteButton";
 import type { Status } from "../../api";
+import { emit } from "@tauri-apps/api/event";
 
 
 
@@ -74,8 +75,9 @@ export default function StatusesTab() {
     }
 
     function toggleStatus(id: number, isUpdate: boolean) {
-        api.updateStatus(id, isUpdate).then(() => {
+        api.updateStatus(id, isUpdate).then(async () => {
             getStatuses();
+            await emit(api.CHANGED_STATUS_UPDATE_EVENT);
         }).catch((reason) => {
             getStatuses();
             alert(reason);

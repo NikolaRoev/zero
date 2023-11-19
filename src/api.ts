@@ -2,6 +2,12 @@ import { invoke } from "@tauri-apps/api/tauri";
 
 
 
+export const OPENED_DATABASE_EVENT = "opened-database";
+export const CLOSED_DATABASE_EVENT = "closed-database";
+export const CHANGED_STATUS_UPDATE_EVENT = "changed-status-update";
+
+
+
 export type Work = {
     id: number,
     name: string,

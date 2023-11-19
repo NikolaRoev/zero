@@ -5,6 +5,10 @@ use tauri::Manager;
 use crate::{database::{Database, Status, Type, Format, Work, Filter, UpdateWork}, menu::{set_recent_menu, set_menu_state}, config::Config};
 
 
+const OPENED_DATABASE_EVENT: &str = "opened-database";
+const CLOSED_DATABASE_EVENT: &str = "closed-database";
+
+
 #[tauri::command]
 pub fn error(message: String) {
     log::error!("[UI] {}", message);
@@ -31,7 +35,7 @@ pub fn open_database(
         set_recent_menu(&menu_handle, config_guard.get_recent_databases())?;
         set_menu_state(&menu_handle, true)?;
 
-        Ok(window.emit("opened-database", ())?)
+        Ok(window.emit(OPENED_DATABASE_EVENT, ())?)
     };
 
     match inner() {
@@ -72,7 +76,7 @@ pub fn close_database(
 
         set_menu_state(&window.menu_handle(), false)?;
 
-        Ok(app_handle.emit_all("closed-database", ())?)
+        Ok(app_handle.emit_all(CLOSED_DATABASE_EVENT, ())?)
     };
 
     match inner() {
