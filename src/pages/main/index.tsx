@@ -36,6 +36,8 @@ libraryTabButton.addEventListener("click", () => {
 });
 
 
+
+
 await listen("closed-database", () => {
     updateStartup();
 });

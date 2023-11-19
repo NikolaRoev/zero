@@ -1,7 +1,7 @@
 import * as api from "../../api";
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import Button from "../../utility/Button";
-import DeleteButton from "../../utility/ConfirmButton";
+import DeleteButton from "../../utility/DeleteButton";
 import type { Type } from "../../api";
 
 
@@ -75,6 +75,7 @@ export default function TypesTab() {
                     placeholder="Type"
                     value={typeInput}
                     onInput={(event: ChangeEvent<HTMLInputElement>) => { setTypeInput(event.target.value); }}
+                    required
                 />
                 <Button>Add</Button>
             </form>

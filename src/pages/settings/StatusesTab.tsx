@@ -1,7 +1,7 @@
 import * as api from "../../api";
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import Button from "../../utility/Button";
-import DeleteButton from "../../utility/ConfirmButton";
+import DeleteButton from "../../utility/DeleteButton";
 import type { Status } from "../../api";
 
 
@@ -90,6 +90,7 @@ export default function StatusesTab() {
                     placeholder="Status"
                     value={statusInput}
                     onInput={(event: ChangeEvent<HTMLInputElement>) => { setStatusInput(event.target.value); }}
+                    required
                 />
                 <Button>Add</Button>
             </form>
