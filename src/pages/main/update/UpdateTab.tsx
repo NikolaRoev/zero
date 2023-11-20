@@ -124,7 +124,7 @@ export default function UpdateTab() {
     }, []);
 
     useEffect(() => {
-        listen(api.CHANGED_STATUS_UPDATE_EVENT, () => {
+        listen(api.CHANGED_STATUS_ISUPDATE_EVENT, () => {
             getUpdateWorks(filterInput.current?.value ?? "");
         }).catch(async (reason) => {
             await api.error(`Failed to listen for changed status update event in Update tab: ${reason}`);

@@ -3,7 +3,7 @@ use std::sync::Mutex;
 
 use tauri::api::dialog::{FileDialogBuilder, MessageDialogBuilder, MessageDialogButtons, MessageDialogKind};
 use tauri::api::shell;
-use tauri::{webview_version, VERSION, ClipboardManager};
+use tauri::{webview_version, VERSION, ClipboardManager, Window};
 use tauri::{CustomMenuItem, Menu, Submenu, Manager, window::MenuHandle};
 
 use crate::api;
@@ -174,15 +174,20 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
             );
         },
         "settings" => {
-            crate::window::create_window(
-                &event.window().app_handle(),
-                String::from("settings"),
-                String::from("settings.html"),
-                String::from("Settings"),
-                event.window().state::<Mutex<Config>>().lock().unwrap().get_window("settings"),
-                (600.0, 400.0),
-                None
-            ).unwrap();
+            if let Some(settings_window) = event.window().app_handle().get_window("settings") {
+                settings_window.set_focus().unwrap();
+            }
+            else {
+                crate::window::create_window(
+                    &event.window().app_handle(),
+                    String::from("settings"),
+                    String::from("settings.html"),
+                    String::from("Settings"),
+                    event.window().state::<Mutex<Config>>().lock().unwrap().get_window("settings"),
+                    (600.0, 400.0),
+                    None
+                ).unwrap();
+            }
         },
         "exit" => {
             //FIXME: Does not trigger closerequested, will be fixed in 2.0.

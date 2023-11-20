@@ -4,7 +4,10 @@ import { invoke } from "@tauri-apps/api/tauri";
 
 export const OPENED_DATABASE_EVENT = "opened-database";
 export const CLOSED_DATABASE_EVENT = "closed-database";
-export const CHANGED_STATUS_UPDATE_EVENT = "changed-status-update";
+export const CHANGED_STATUS_ISUPDATE_EVENT = "changed-status-isupdate";
+export const ADDED_STATUS_EVENT = "added-status";
+export const ADDED_TYPE_EVENT = "added-type";
+export const ADDED_FORMAT_EVENT = "added-format";
 
 
 

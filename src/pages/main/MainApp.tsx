@@ -1,6 +1,7 @@
 import * as api from "../../api";
 import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../utility/Tabs";
 import { useEffect, useState } from "react";
+import LibraryTab from "./library/LibraryTab";
 import UpdateTab from "./update/UpdateTab";
 import { listen } from "@tauri-apps/api/event";
 
@@ -45,7 +46,7 @@ function MainScreen() {
             </TabBar>
             <TabsContents className="flex grow flex-col">
                 <Tab><UpdateTab /></Tab>
-                <Tab><div>library</div></Tab>
+                <Tab><LibraryTab /></Tab>
             </TabsContents>
         </Tabs>
     );

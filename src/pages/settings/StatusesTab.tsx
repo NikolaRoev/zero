@@ -56,9 +56,10 @@ export default function StatusesTab() {
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        api.addStatus(statusInput).then(() => {
+        api.addStatus(statusInput).then(async () => {
             setStatusInput("");
             getStatuses();
+            await emit(api.ADDED_STATUS_EVENT);
         }).catch((reason) => {
             getStatuses();
             alert(reason);
@@ -77,7 +78,7 @@ export default function StatusesTab() {
     function toggleStatus(id: number, isUpdate: boolean) {
         api.updateStatus(id, isUpdate).then(async () => {
             getStatuses();
-            await emit(api.CHANGED_STATUS_UPDATE_EVENT);
+            await emit(api.CHANGED_STATUS_ISUPDATE_EVENT);
         }).catch((reason) => {
             getStatuses();
             alert(reason);
