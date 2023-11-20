@@ -1,34 +1,20 @@
 import * as api from "../../../api";
-import { type CSSProperties, type ChangeEvent, memo, useCallback, useEffect, useRef, useState } from "react";
-import { FixedSizeList as List, areEqual } from "react-window";
-import AutoSizer from "react-virtualized-auto-sizer";
+import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import type { UpdateWork } from "../../../api";
+import { Virtuoso } from "react-virtuoso";
 import { listen } from "@tauri-apps/api/event";
 
 
 
-type UpdateWorksListItemData = {
-    updateWorks: UpdateWork[],
+type UpdateWorkRowProps = {
+    updateWork: UpdateWork,
     onNameChange: (id: number, value: string) => void,
     onProgressChange: (id: number, value: string) => void
 }
 
-type UpdateRowProps = {
-    index: number,
-    style: CSSProperties,
-    data: UpdateWorksListItemData
-}
-
-const UpdateRow = memo(({ index, style, data }: UpdateRowProps) => {
-    const { updateWorks, onNameChange, onProgressChange } = data;
-    const updateWork = updateWorks[index];
-    if (!updateWork) {
-        throw Error("Invalid update work for row generation.");
-    }
-
-
+function UpdateWorkRow({ updateWork, onNameChange, onProgressChange }: UpdateWorkRowProps) {
     return (
-        <div style={style} className="p-[10px] flex flex-col">
+        <div className="p-[10px] flex flex-col">
             <input
                 className="grow"
                 value={updateWork.name}
@@ -42,45 +28,6 @@ const UpdateRow = memo(({ index, style, data }: UpdateRowProps) => {
                 spellCheck={false}
             />
         </div>
-    );
-}, areEqual);
-
-
-type UpdateWorksListProps = {
-    height: number,
-    width: number,
-    updateWorks: UpdateWork[],
-    onNameChange: (id: number, value: string) => void,
-    onProgressChange: (id: number, value: string) => void
-}
-
-function UpdateWorksList({ height, width, updateWorks, onNameChange, onProgressChange }: UpdateWorksListProps) {
-    //const createItemData = memoize((itemData: UpdateWorksListItemData) => ({
-    //    updateWorks: itemData.updateWorks,
-    //    onNameChange: itemData.onNameChange,
-    //    onProgressChange: itemData.onProgressChange
-    ////}));
-    //const itemData = createItemData();
-
-
-    function generateItemKey(index: number, data: UpdateWorksListItemData): number {
-        const item = data.updateWorks[index];
-        if (!item) {
-            throw Error("Invalid item for key generation.");
-        }
-        return item.id;
-    }
-
-
-    return (
-        <List
-            itemKey={generateItemKey}
-            height={height}
-            itemCount={updateWorks.length}
-            itemData={{updateWorks, onNameChange, onProgressChange}}
-            itemSize={80}
-            width={width}
-        >{UpdateRow}</List>
     );
 }
 
@@ -175,19 +122,17 @@ export default function UpdateTab() {
                 onInput={(event: ChangeEvent<HTMLInputElement>) => { setFilter(event.target.value); }}
             />
 
-            <div className="grow overflow-hidden">
-                <AutoSizer>
-                    {({ height, width }) => (
-                        <UpdateWorksList
-                            height={height}
-                            width={width}
-                            updateWorks={updateWorks}
-                            onNameChange={handleNameChange}
-                            onProgressChange={handleProgressChange}
-                        />
-                    )}
-                </AutoSizer>
-            </div>
+            <Virtuoso
+                data={updateWorks}
+                computeItemKey={(_, updateWork) => updateWork.id }
+                itemContent={(_, updateWork) => (
+                    <UpdateWorkRow
+                        updateWork={updateWork}
+                        onNameChange={handleNameChange}
+                        onProgressChange={handleProgressChange}
+                    />
+                )}
+            />
         </div>
     );
 }
