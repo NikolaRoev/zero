@@ -2,6 +2,7 @@ import * as api from "../../api";
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import Button from "../../utility/Button";
 import DeleteButton from "../../utility/DeleteButton";
+import Input from "../../utility/Input";
 import type { Status } from "../../api";
 import { emit } from "@tauri-apps/api/event";
 
@@ -89,11 +90,11 @@ export default function StatusesTab() {
     return (
         <>
             <form onSubmit={handleSubmit}>
-                <input
-                    placeholder="Status"
+                <Input
                     value={statusInput}
                     onInput={(event: ChangeEvent<HTMLInputElement>) => { setStatusInput(event.target.value); }}
-                    required
+                    placeholder="Status"
+                    required={true}
                 />
                 <Button>Add</Button>
             </form>

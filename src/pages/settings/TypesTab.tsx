@@ -2,6 +2,7 @@ import * as api from "../../api";
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import Button from "../../utility/Button";
 import DeleteButton from "../../utility/DeleteButton";
+import Input from "../../utility/Input";
 import type { Type } from "../../api";
 import { emit } from "@tauri-apps/api/event";
 
@@ -73,11 +74,11 @@ export default function TypesTab() {
     return (
         <>
             <form onSubmit={handleSubmit}>
-                <input
-                    placeholder="Type"
+                <Input
                     value={typeInput}
                     onInput={(event: ChangeEvent<HTMLInputElement>) => { setTypeInput(event.target.value); }}
-                    required
+                    placeholder="Type"
+                    required={true}
                 />
                 <Button>Add</Button>
             </form>

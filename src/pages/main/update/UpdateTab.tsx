@@ -1,5 +1,6 @@
 import * as api from "../../../api";
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import Input from "../../../utility/Input";
 import type { UpdateWork } from "../../../api";
 import { Virtuoso } from "react-virtuoso";
 import { listen } from "@tauri-apps/api/event";
@@ -15,17 +16,13 @@ type UpdateWorkRowProps = {
 function UpdateWorkRow({ updateWork, onNameChange, onProgressChange }: UpdateWorkRowProps) {
     return (
         <div className="p-[10px] flex flex-col">
-            <input
-                className="grow"
+            <Input
                 value={updateWork.name}
                 onInput={(event: ChangeEvent<HTMLInputElement>) => { onNameChange(updateWork.id, event.target.value); }}
-                spellCheck={false}
             />
-            <input
-                className="grow"
+            <Input
                 value={updateWork.progress}
                 onInput={(event: ChangeEvent<HTMLInputElement>) => { onProgressChange(updateWork.id, event.target.value); }}
-                spellCheck={false}
             />
         </div>
     );
@@ -114,7 +111,7 @@ export default function UpdateTab() {
 
     return (
         <div className="p-[10px] grow flex flex-col">
-            <input
+            <Input
                 ref={filterInput}
                 value={filter}
                 placeholder="Find"

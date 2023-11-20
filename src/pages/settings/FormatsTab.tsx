@@ -3,6 +3,7 @@ import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import Button from "../../utility/Button";
 import DeleteButton from "../../utility/DeleteButton";
 import type { Format } from "../../api";
+import Input from "../../utility/Input";
 import { emit } from "@tauri-apps/api/event";
 
 
@@ -73,11 +74,11 @@ export default function TypesTab() {
     return (
         <>
             <form onSubmit={handleSubmit}>
-                <input
-                    placeholder="Format"
+                <Input
                     value={formatInput}
                     onInput={(event: ChangeEvent<HTMLInputElement>) => { setFormatInput(event.target.value); }}
-                    required
+                    placeholder="Format"
+                    required={true}
                 />
                 <Button>Add</Button>
             </form>
