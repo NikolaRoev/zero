@@ -1,9 +1,9 @@
 import * as api from "../../../api";
-import { type ChangeEvent, useCallback, useEffect, useRef, useState, memo } from "react";
+import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type UnlistenFn, listen } from "@tauri-apps/api/event";
 import Input from "../../../utility/Input";
 import type { UpdateWork } from "../../../api";
 import { Virtuoso } from "react-virtuoso";
-import { listen } from "@tauri-apps/api/event";
 
 
 
@@ -13,7 +13,7 @@ type UpdateWorkRowProps = {
     onProgressChange: (id: number, value: string) => void
 }
 
-const UpdateWorkRow = memo(function ({ updateWork, onNameChange, onProgressChange }: UpdateWorkRowProps) {
+function UpdateWorkRow({ updateWork, onNameChange, onProgressChange }: UpdateWorkRowProps) {
     return (
         <div className="p-[10px] flex flex-col">
             <Input
@@ -26,7 +26,7 @@ const UpdateWorkRow = memo(function ({ updateWork, onNameChange, onProgressChang
             />
         </div>
     );
-});
+}
 
 
 function useUpdateWorks() {
@@ -68,11 +68,17 @@ export default function UpdateTab() {
     }, []);
 
     useEffect(() => {
-        listen(api.CHANGED_STATUS_ISUPDATE_EVENT, () => {
+        const unlisten = listen(api.CHANGED_STATUS_ISUPDATE_EVENT, () => {
             getUpdateWorks(filterInput.current?.value ?? "");
         }).catch(async (reason) => {
             await api.error(`Failed to listen for changed status update event in Update tab: ${reason}`);
         });
+
+        return () => {
+            unlisten.then((f: UnlistenFn) => { f(); }).catch(async (reason) => {
+                await api.error(`Failed to unlisten for changed status update event in Update tab: ${reason}`);
+            });
+        };
     }, [getUpdateWorks]);
 
 
