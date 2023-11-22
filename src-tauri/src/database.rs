@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::{HashMap, HashSet}, path::PathBuf};
 use rusqlite::named_params;
 
 
@@ -120,12 +120,14 @@ pub struct Format {
     format: String
 }
 
+#[derive(serde::Serialize, Debug)]
 pub struct Filter {
     pub by: String,
     pub value: String,
-    pub restrictions: HashMap<String, Vec<String>>
+    pub restrictions: HashMap<String, HashSet<String>>
 }
 
+#[derive(serde::Serialize, Debug)]
 pub struct Order {
     by: String,
     descending: bool
@@ -258,8 +260,9 @@ impl Database {
 
         let mut params = vec![format!("%{}%", filter.value)];
         for (column, values) in filter.restrictions.iter() {
-            query.push_str(&helper(column, values));
-            params.extend(values.to_vec());
+            let values = values.clone().into_iter().collect();
+            query.push_str(&helper(column, &values));
+            params.extend(values);
         }
 
         if let Some(Order {by, descending}) = order {
