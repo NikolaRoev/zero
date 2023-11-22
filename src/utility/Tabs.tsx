@@ -30,16 +30,15 @@ export const TabBar = ({}: TabBarProps) => <></>;
 
 type TabsProps = {
     children: [ReactElement<TabBarProps>, ReactElement<TabsContentsProps>],
-    className?: string
+    className?: string,
+    defaultIndex?: number
 }
 
-export function Tabs({ children, className }: TabsProps) {
-    const [index, setIndex] = useState(0);
-
+export function Tabs({ children, className, defaultIndex = 0 }: TabsProps) {
+    const [index, setIndex] = useState(defaultIndex);
 
     const tabBar = children.find((child) => child.type === TabBar) as ReactElement<TabBarProps>;
     const tabsContents = children.find((child) => child.type === TabsContents) as ReactElement<TabsContentsProps>;
-
 
     return (
         <div className={className}>
