@@ -40,11 +40,11 @@ function StartScreen() {
 function MainScreen() {
     return (
         <Tabs className="flex grow flex-col">
-            <TabBar>
-                <TabButton>Update</TabButton>
-                <TabButton>Library</TabButton>
+            <TabBar className="">
+                <TabButton className="">Update</TabButton>
+                <TabButton className="">Library</TabButton>
             </TabBar>
-            <TabsContents className="flex grow flex-col">
+            <TabsContents>
                 <Tab><UpdateTab /></Tab>
                 <Tab><LibraryTab /></Tab>
             </TabsContents>

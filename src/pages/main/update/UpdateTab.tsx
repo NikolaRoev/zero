@@ -1,5 +1,5 @@
 import * as api from "../../../api";
-import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, useCallback, useEffect, useRef, useState, memo } from "react";
 import Input from "../../../utility/Input";
 import type { UpdateWork } from "../../../api";
 import { Virtuoso } from "react-virtuoso";
@@ -13,7 +13,7 @@ type UpdateWorkRowProps = {
     onProgressChange: (id: number, value: string) => void
 }
 
-function UpdateWorkRow({ updateWork, onNameChange, onProgressChange }: UpdateWorkRowProps) {
+const UpdateWorkRow = memo(function ({ updateWork, onNameChange, onProgressChange }: UpdateWorkRowProps) {
     return (
         <div className="p-[10px] flex flex-col">
             <Input
@@ -26,7 +26,7 @@ function UpdateWorkRow({ updateWork, onNameChange, onProgressChange }: UpdateWor
             />
         </div>
     );
-}
+});
 
 
 function useUpdateWorks() {
@@ -110,7 +110,7 @@ export default function UpdateTab() {
 
 
     return (
-        <div className="p-[10px] grow flex flex-col">
+        <div className="grow flex flex-col gap-y-[10px]">
             <Input
                 ref={filterInput}
                 value={filter}

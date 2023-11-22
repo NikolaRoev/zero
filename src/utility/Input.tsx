@@ -13,7 +13,7 @@ type InputProps = {
 const Input = forwardRef<HTMLInputElement, InputProps>(function Input(props, ref) {
     return (
         <input
-            className="grow"
+            className="grow overflow-ellipsis"
             ref={ref}
             value={props.value}
             onInput={props.onInput}

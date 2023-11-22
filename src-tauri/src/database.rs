@@ -5,7 +5,7 @@ use rusqlite::named_params;
 
 const CREATE_QUERY: &str = "
 CREATE TABLE IF NOT EXISTS works (
-    id       INTEGER PRIMARY KEY,
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
     name     TEXT NOT NULL,
     progress TEXT NOT NULL,
     status   TEXT NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS works (
 );
 
 CREATE TABLE IF NOT EXISTS creators (
-    id    INTEGER PRIMARY KEY,
+    id    INTEGER PRIMARY KEY AUTOINCREMENT,
     name  TEXT NOT NULL,
     works INTEGER NOT NULL DEFAULT 0
 );
@@ -33,18 +33,18 @@ CREATE TABLE IF NOT EXISTS work_creator (
 );
 
 CREATE TABLE IF NOT EXISTS statuses (
-    id        INTEGER PRIMARY KEY,
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
     status    TEXT NOT NULL UNIQUE,
     is_update INTEGER NOT NULL CHECK (is_update IN (0, 1)) DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS types (
-    id   INTEGER PRIMARY KEY,
+    id   INTEGER PRIMARY KEY AUTOINCREMENT,
     type TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS formats (
-    id     INTEGER PRIMARY KEY,
+    id     INTEGER PRIMARY KEY AUTOINCREMENT,
     format TEXT NOT NULL UNIQUE
 );
 

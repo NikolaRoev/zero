@@ -10,7 +10,6 @@ export const Tab = ({ children }: TabProps) => <>{children}</>;
 
 type TabsContentsProps = {
     children: ReactElement<TabProps>[],
-    className?: string
 };
 export const TabsContents = ({}: TabsContentsProps) => <></>;
 
@@ -38,11 +37,8 @@ export function Tabs({ children, className }: TabsProps) {
     const [index, setIndex] = useState(0);
 
 
-    const tabBar = children.find((child) => child.type === TabBar);
-    const tabsContents = children.find((child) => child.type === TabsContents);
-
-    if (!tabBar) { throw Error("Missing Tab Bar."); }
-    if (!tabsContents) { throw Error("Missing Tabs Contents."); }
+    const tabBar = children.find((child) => child.type === TabBar) as ReactElement<TabBarProps>;
+    const tabsContents = children.find((child) => child.type === TabsContents) as ReactElement<TabsContentsProps>;
 
 
     return (
@@ -58,9 +54,7 @@ export function Tabs({ children, className }: TabsProps) {
                     ))
                 }
             </div>
-            <div className={tabsContents.props.className}>
-                {tabsContents.props.children[index]}
-            </div>
+            {tabsContents.props.children[index]}
         </div>
     );
 }
