@@ -15,14 +15,18 @@ type UpdateWorkRowProps = {
 
 function UpdateWorkRow({ updateWork, onNameChange, onProgressChange }: UpdateWorkRowProps) {
     return (
-        <div className="p-[10px] flex flex-col">
-            <Input
+        <div className="px-[20px] py-[10px] flex flex-col">
+            <input
+                className="text-[14px] grow focus:outline-none overflow-ellipsis"
                 value={updateWork.name}
                 onInput={(event: ChangeEvent<HTMLInputElement>) => { onNameChange(updateWork.id, event.target.value); }}
+                spellCheck={false}
             />
-            <Input
+            <input
+                className="text-[14px] grow focus:outline-none overflow-ellipsis"
                 value={updateWork.progress}
                 onInput={(event: ChangeEvent<HTMLInputElement>) => { onProgressChange(updateWork.id, event.target.value); }}
+                spellCheck={false}
             />
         </div>
     );

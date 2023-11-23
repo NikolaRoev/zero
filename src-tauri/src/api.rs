@@ -426,3 +426,36 @@ pub fn remove_format(database: tauri::State<Mutex<Database>>, id: i64) -> Result
         }
     }
 }
+
+#[tauri::command]
+pub fn get_recent_databases(config: tauri::State<Mutex<Config>>) -> Vec<PathBuf> {
+    log::info!("Getting recent databases.");
+
+    let guard = config.lock().unwrap();
+    guard.get_recent_databases().to_vec()
+}
+
+#[tauri::command]
+pub fn remove_recent_database(window: tauri::Window, config: tauri::State<Mutex<Config>>, path: PathBuf) -> Result<(), String> {
+    log::info!("Removing recent database: PATH - {path:?}.");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let mut guard = config.lock().unwrap();
+        guard.remove_recent_database(path)?;
+
+        let menu_handle = window.menu_handle();
+        set_recent_menu(&menu_handle, guard.get_recent_databases())
+    };
+
+    match inner() {
+        Ok(()) => {
+            log::info!("Removed recent database.");
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to remove recent database: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}

@@ -2,6 +2,7 @@ import * as api from "../../api";
 import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../utility/Tabs";
 import { type UnlistenFn, listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
+import DeleteButton from "../../utility/DeleteButton";
 import LibraryTab from "./library/LibraryTab";
 import UpdateTab from "./update/UpdateTab";
 
@@ -43,7 +44,43 @@ function useDatabaseState() {
 
 
 function StartScreen() {
-    return <div>test</div>;
+    const [recentDatabases, setRecentDatabases] = useState<string[]>([]);
+
+    useEffect(() => {
+        api.getRecentDatabases().then((value) => {
+            setRecentDatabases(value);
+        }).catch(async (reason) => {
+            await api.error(`Failed to get recent databases in Start: ${reason}`);
+        });
+    }, []);
+
+    function openDatabase(path: string) {
+        api.openDatabase(path).catch((reason) => { alert(reason); });
+    }
+
+    const recentDatabasesItems = recentDatabases.map((value, index) => (
+        <div key={value} className="flex">
+            <div
+                className="hover:bg-gray-400 active:bg-gray-600 select-none"
+                onClick={() => { openDatabase(value); }}
+            >{index + 1}. {value}</div>
+            <DeleteButton
+                onClick={() => {
+                    api.removeRecentDatabase(value).then(() => {
+                        setRecentDatabases(recentDatabases.filter((path) => path !== value));
+                    }).catch((reason) => { alert(reason); });
+                }}
+                title={`Remove recent database "${value}".`}
+            />
+        </div>
+        
+    ));
+
+    return (
+        <div className="flex flex-col grow">
+            {recentDatabasesItems}
+        </div>
+    );
 }
 
 

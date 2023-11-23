@@ -34,6 +34,8 @@ fn main() {
             api::add_format,
             api::get_formats,
             api::remove_format,
+            api::get_recent_databases,
+            api::remove_recent_database
         ])
         .on_menu_event(menu::event_handler)
         .on_window_event(window::event_handler)

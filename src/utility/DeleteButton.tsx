@@ -27,7 +27,7 @@ export default function DeleteButton({ onClick, title }: DeleteButtonProps) {
 
     return (
         <button
-            className="min-w-[32px] min-h-[32px] flex items-center justify-center hover:bg-gray active:bg-dark-gray"
+            className="min-w-[32px] min-h-[32px] flex items-center justify-center hover:bg-gray-400 active:bg-gray-600"
             onClick={handleClick}
             title={title}
         ><img src={triggered ? "/icons/x-circle.svg" : "/icons/trash.svg"} /></button>

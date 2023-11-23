@@ -57,6 +57,10 @@ export function error(message: string): Promise<void> {
     return invoke("error", { message: message });
 }
 
+export function openDatabase(path: string): Promise<void> {
+    return invoke("open_database", { path: path });
+}
+
 export function databaseIsOpen(): Promise<boolean> {
     return invoke("database_is_open");
 }
@@ -115,4 +119,12 @@ export function getFormats(): Promise<Format[]> {
 
 export function removeFormat(id: number): Promise<void> {
     return invoke("remove_format", { id: id });
+}
+
+export function getRecentDatabases(): Promise<string[]> {
+    return invoke("get_recent_databases");
+}
+
+export function removeRecentDatabase(path: string): Promise<void> {
+    return invoke("remove_recent_database", { path: path });
 }
