@@ -2,7 +2,7 @@
   "type": "module",
   "scripts": {
     "update-dependencies": "ncu -u && cd src-tauri && cargo upgrade",
-    "lint": "eslint .",
+    "lint": "tsc && eslint .",
     "dev": "vite dev",
     "build": "vite build",
     "tauri:dev": "tauri dev",

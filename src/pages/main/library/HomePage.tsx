@@ -1,5 +1,5 @@
 import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../../components/Tabs";
-import WorksTab from "./WorksTab"
+import WorksTab from "./WorksTab";
 
 
 
