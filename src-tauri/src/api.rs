@@ -2,7 +2,7 @@ use std::{sync::Mutex, path::PathBuf, collections::HashMap};
 
 use tauri::Manager;
 
-use crate::{database::{Database, Status, Type, Format, Work, Filter, UpdateWork}, menu::{set_recent_menu, set_menu_state}, config::Config};
+use crate::{database::{Database, Status, Type, Format, Work, UpdateWork}, menu::{set_recent_menu, set_menu_state}, config::Config};
 
 
 const OPENED_DATABASE_EVENT: &str = "opened-database";
@@ -98,12 +98,7 @@ pub fn get_works(database: tauri::State<Mutex<Database>>) -> Result<Vec<Work>, S
 
     let inner = || -> Result<Vec<Work>, Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        let filter: Filter = Filter{
-            by: "name".to_string(),
-            value: "".to_string(),
-            restrictions: HashMap::new()
-        };
-        guard.get_works(filter, None)
+        guard.get_works()
     };
 
     match inner() {
@@ -120,12 +115,12 @@ pub fn get_works(database: tauri::State<Mutex<Database>>) -> Result<Vec<Work>, S
 }
 
 #[tauri::command]
-pub fn get_update_works(database: tauri::State<Mutex<Database>>, name: String) -> Result<Vec<UpdateWork>, String> {
-    log::info!("Getting update works: name - {name}.");
+pub fn get_update_works(database: tauri::State<Mutex<Database>>) -> Result<Vec<UpdateWork>, String> {
+    log::info!("Getting update works.");
 
     let inner = || -> Result<Vec<UpdateWork>, Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        guard.get_update_works(name)
+        guard.get_update_works()
     };
 
     match inner() {

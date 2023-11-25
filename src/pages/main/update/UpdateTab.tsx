@@ -1,9 +1,10 @@
-import * as api from "../../../api";
-import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
-import { type UnlistenFn, listen } from "@tauri-apps/api/event";
-import Input from "../../../utility/Input";
-import type { UpdateWork } from "../../../api";
+import * as api from "../../../data/api";
+import { type ChangeEvent, useEffect, useRef } from "react";
+import Input from "../../../components/Input";
+import type { UpdateWork } from "../../../data/api";
 import { Virtuoso } from "react-virtuoso";
+import useSessionState from "../../../hooks/session-state";
+import { useUpdateWorks } from "../../../hooks/hooks";
 
 
 
@@ -33,27 +34,11 @@ function UpdateWorkRow({ updateWork, onNameChange, onProgressChange }: UpdateWor
 }
 
 
-function useUpdateWorks() {
-    const [filter, setFilter] = useState("");
-    const [updateWorks, setUpdateWorks] = useState<UpdateWork[]>([]);
-  
-    const getUpdateWorks = useCallback((name: string) => {
-        api.getUpdateWorks(name).then((value) => {
-            setUpdateWorks(value);
-        }).catch((reason) => { alert(reason); });
-    }, []);
-
-    useEffect(() => {
-        getUpdateWorks(filter);
-    }, [filter, getUpdateWorks]);
-
-    return { filter, setFilter, updateWorks, setUpdateWorks, getUpdateWorks };
-}
-
 
 export default function UpdateTab() {
     const filterInput = useRef<HTMLInputElement>(null);
-    const { filter, setFilter, updateWorks, setUpdateWorks, getUpdateWorks } = useUpdateWorks();
+    const [filter, setFilter] = useSessionState("UPDATE-FILTER", "");
+    const { updateWorks, setUpdateWorks, getUpdateWorks } = useUpdateWorks();
 
 
     useEffect(() => {
@@ -71,20 +56,6 @@ export default function UpdateTab() {
         };
     }, []);
 
-    useEffect(() => {
-        const unlisten = listen(api.CHANGED_STATUS_ISUPDATE_EVENT, () => {
-            getUpdateWorks(filterInput.current?.value ?? "");
-        }).catch(async (reason) => {
-            await api.error(`Failed to listen for changed status update event in Update tab: ${reason}`);
-        });
-
-        return () => {
-            unlisten.then((f: UnlistenFn) => { f(); }).catch(async (reason) => {
-                await api.error(`Failed to unlisten for changed status update event in Update tab: ${reason}`);
-            });
-        };
-    }, [getUpdateWorks]);
-
 
     function handleNameChange(id: number, value: string) {
         setUpdateWorks(updateWorks.map((updateWork) => {
@@ -97,7 +68,7 @@ export default function UpdateTab() {
         }));
 
         api.updateWorkName(id, value).catch((reason) => {
-            getUpdateWorks(filter);
+            getUpdateWorks();
             alert(reason);
         });
     }
@@ -113,11 +84,13 @@ export default function UpdateTab() {
         }));
 
         api.updateWorkProgress(id, value).catch((reason) => {
-            getUpdateWorks(filter);
+            getUpdateWorks();
             alert(reason);
         });
     }
 
+
+    const updateWorksItems = updateWorks.filter((work) => work.name.includes(filter));
 
     return (
         <div className="grow flex flex-col gap-y-[10px]">
@@ -126,11 +99,13 @@ export default function UpdateTab() {
                 value={filter}
                 placeholder="Find"
                 type="search"
-                onInput={(event: ChangeEvent<HTMLInputElement>) => { setFilter(event.target.value); }}
+                onInput={(event: ChangeEvent<HTMLInputElement>) => {
+                    setFilter(event.target.value);
+                }}
             />
 
             <Virtuoso
-                data={updateWorks}
+                data={updateWorksItems}
                 computeItemKey={(_, updateWork) => updateWork.id }
                 itemContent={(_, updateWork) => (
                     <UpdateWorkRow

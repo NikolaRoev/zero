@@ -1,5 +1,5 @@
-import * as api from "../../api";
-import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../utility/Tabs";
+import * as api from "../../data/api";
+import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../components/Tabs";
 import { type UnlistenFn, listen } from "@tauri-apps/api/event";
 import FormatsTab from "./FormatsTab";
 import StatusesTab from "./StatusesTab";

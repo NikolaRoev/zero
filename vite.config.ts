@@ -15,7 +15,7 @@ export default defineConfig(() => ({
     },
     envPrefix: ["VITE_", "TAURI_"],
     envDir: __dirname,
-    root: resolve(__dirname, "src", "pages"),
+    root: resolve(__dirname, "src"),
     publicDir: resolve(__dirname, "public"),
     build: {
         target: "ESNext",
@@ -23,8 +23,8 @@ export default defineConfig(() => ({
         sourcemap: true,
         rollupOptions: {
             input: {
-                "index": resolve(__dirname, "src", "pages", "index.html"),
-                "settings": resolve(__dirname, "src", "pages", "settings.html")
+                "index": resolve(__dirname, "src", "index.html"),
+                "settings": resolve(__dirname, "src", "settings.html")
             },
             output: {
                 dir: resolve(__dirname, "dist")

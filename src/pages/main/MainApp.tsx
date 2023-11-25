@@ -1,8 +1,8 @@
-import * as api from "../../api";
-import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../utility/Tabs";
+import * as api from "../../data/api";
+import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../components/Tabs";
 import { type UnlistenFn, listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
-import DeleteButton from "../../utility/DeleteButton";
+import DeleteButton from "../../components/DeleteButton";
 import LibraryTab from "./library/LibraryTab";
 import UpdateTab from "./update/UpdateTab";
 

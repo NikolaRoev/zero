@@ -1,4 +1,4 @@
-use std::{collections::{HashMap, HashSet}, path::PathBuf};
+use std::path::PathBuf;
 use rusqlite::named_params;
 
 
@@ -120,19 +120,6 @@ pub struct Format {
     format: String
 }
 
-#[derive(serde::Serialize, Debug)]
-pub struct Filter {
-    pub by: String,
-    pub value: String,
-    pub restrictions: HashMap<String, HashSet<String>>
-}
-
-#[derive(serde::Serialize, Debug)]
-pub struct Order {
-    by: String,
-    descending: bool
-}
-
 
 pub type DatabaseResult<T> = Result<T, Box<dyn std::error::Error>>;
 
@@ -244,36 +231,9 @@ impl Database {
         Ok(work)
     }
 
-    pub fn get_works(
-        &self,
-        filter: Filter,
-        order: Option<Order>
-    ) -> DatabaseResult<Vec<Work>>{
-        let helper = |column: &str, values: &Vec<String>| {
-            let placeholders = vec!["?"; values.len()].join(",");
-            format!(" AND {column} IN ({placeholders})")
-        };
-
-        let mut query = format!("SELECT * FROM works WHERE {by} LIKE ?",
-            by = filter.by
-        );
-
-        let mut params = vec![format!("%{}%", filter.value)];
-        for (column, values) in filter.restrictions.iter() {
-            let values = values.clone().into_iter().collect();
-            query.push_str(&helper(column, &values));
-            params.extend(values);
-        }
-
-        if let Some(Order {by, descending}) = order {
-            query.push_str(&format!(" ORDER BY {by}"));
-            if descending {
-                query.push_str(" DESC")
-            }
-        }
-
-        let mut stmt = self.conn()?.prepare_cached(&query)?;
-        let rows = stmt.query_map(rusqlite::params_from_iter(params), |row| {
+    pub fn get_works(&self) -> DatabaseResult<Vec<Work>>{
+        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM works")?;
+        let rows = stmt.query_map([], |row| {
             Ok(Work {
                 id: row.get(0)?,
                 name: row.get(1)?,
@@ -289,14 +249,14 @@ impl Database {
         rows.map(|row| Ok(row?)).collect()
     }
 
-    pub fn get_update_works(&self, name: String) -> DatabaseResult<Vec<UpdateWork>> {
+    pub fn get_update_works(&self) -> DatabaseResult<Vec<UpdateWork>> {
         let mut stmt = self.conn()?.prepare_cached("
             SELECT works.id, works.name, works.progress
             FROM works
             JOIN statuses ON works.status = statuses.status
-            WHERE works.name LIKE :name AND statuses.is_update = 1
+            WHERE statuses.is_update = 1
         ")?;
-        let rows = stmt.query_map(named_params! {":name": format!("%{name}%")}, |row| {
+        let rows = stmt.query_map([], |row| {
             Ok(UpdateWork {
                 id: row.get(0)?,
                 name: row.get(1)?,
@@ -339,17 +299,9 @@ impl Database {
         Ok(creator)
     }
 
-    pub fn get_creators(&self, name: &str, order: Option<Order>) -> DatabaseResult<Vec<Creator>> {
-        let mut query = String::from("SELECT * FROM creators WHERE name LIKE :name");
-        if let Some(Order {by, descending}) = order {
-            query.push_str(&format!(" ORDER BY {by}"));
-            if descending {
-                query.push_str(" DESC")
-            }
-        }
-        
-        let mut stmt = self.conn()?.prepare_cached(&query)?;
-        let rows = stmt.query_map(named_params! {":name": format!("%{name}%")}, |row| {
+    pub fn get_creators(&self) -> DatabaseResult<Vec<Creator>> {
+        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM creators")?;
+        let rows = stmt.query_map([], |row| {
             Ok(Creator {
                 id: row.get(0)?,
                 name: row.get(1)?,

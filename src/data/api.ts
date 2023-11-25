@@ -8,7 +8,7 @@ export const CHANGED_STATUS_ISUPDATE_EVENT = "changed-status-isupdate";
 export const ADDED_STATUS_EVENT = "added-status";
 export const ADDED_TYPE_EVENT = "added-type";
 export const ADDED_FORMAT_EVENT = "added-format";
-
+export const REFRESH_WORKS_EVENT = "refresh-works";
 
 
 export type Work = {
@@ -69,8 +69,8 @@ export function getWorks(): Promise<Work[]> {
     return invoke("get_works");
 }
 
-export function getUpdateWorks(name: string): Promise<UpdateWork[]> {
-    return invoke("get_update_works", { name: name });
+export function getUpdateWorks(): Promise<UpdateWork[]> {
+    return invoke("get_update_works");
 }
 
 export function updateWorkName(id: number, name: string): Promise<void> {

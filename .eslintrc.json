@@ -65,6 +65,8 @@
       "extends": [
         "plugin:@typescript-eslint/strict-type-checked",
         "plugin:@typescript-eslint/stylistic-type-checked",
+        "plugin:react/recommended",
+        "plugin:react/jsx-runtime",
         "plugin:react-hooks/recommended"
       ],
       "parser": "@typescript-eslint/parser",
@@ -75,7 +77,7 @@
           "jsx": true
         }
       },
-      "plugins": ["react-refresh", "react-hooks"],
+      "plugins": ["react", "react-refresh", "react-hooks"],
       "rules": {
         // Overrides.
         "@typescript-eslint/consistent-type-definitions": "off",
@@ -83,6 +85,9 @@
         "react-refresh/only-export-components": ["warn", { "allowConstantExport": true }]
       },
       "settings": {
+        "react": {
+          "version": "detect"
+        },
         "import/resolver": {
           "typescript": {}
         }

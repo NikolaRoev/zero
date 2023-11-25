@@ -1,9 +1,9 @@
-import * as api from "../../api";
+import * as api from "../../data/api";
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
-import Button from "../../utility/Button";
-import DeleteButton from "../../utility/DeleteButton";
-import Input from "../../utility/Input";
-import type { Status } from "../../api";
+import Button from "../../components/Button";
+import DeleteButton from "../../components/DeleteButton";
+import Input from "../../components/Input";
+import type { Status } from "../../data/api";
 import { emit } from "@tauri-apps/api/event";
 
 
@@ -79,7 +79,7 @@ export default function StatusesTab() {
     function toggleStatus(id: number, isUpdate: boolean) {
         api.updateStatus(id, isUpdate).then(async () => {
             getStatuses();
-            await emit(api.CHANGED_STATUS_ISUPDATE_EVENT);
+            await emit(api.REFRESH_WORKS_EVENT);
         }).catch((reason) => {
             getStatuses();
             alert(reason);

@@ -1,9 +1,10 @@
-import * as api from "../../../api";
+import * as api from "../../../data/api";
 import { useCallback, useEffect, useState } from "react";
-import Input from "../../../utility/Input";
-import { TableVirtuoso } from "react-virtuoso";
-import type { Work } from "../../../api";
+import Input from "../../../components/Input";
+import { type TableProps, TableVirtuoso } from "react-virtuoso";
+import type { Work } from "../../../data/api";
 import { formatDistanceToNowStrict } from "date-fns";
+import { useWorks } from "../../../hooks/hooks";
 
 
 
@@ -12,7 +13,7 @@ function WorksTable({works}: {works: Work[]}) {
         <div className="pl-[10px] grow">
             <TableVirtuoso
                 components={{
-                    Table: ({ style, ...props }) => (
+                    Table: ({ style, ...props } : TableProps) => (
                         <table
                             {...props}
                             style={{ ...style }}
@@ -46,28 +47,9 @@ function WorksTable({works}: {works: Work[]}) {
 }
 
 
-
-
-function useWorks() {
-    //const [filter, setFilter] = useState("");
-    const [works, setWorks] = useState<Work[]>([]);
-  
-    const getWorks = useCallback(() => {
-        api.getWorks().then((value) => {
-            setWorks(value);
-        }).catch((reason) => { alert(reason); });
-    }, []);
-
-    useEffect(() => {
-        getWorks();
-    }, [/*filter, */getWorks]);
-
-    return { /*filter, setFilter, */works, setWorks, getWorks };
-}
-
 export default function WorksTab() {
-    const  {works, setWorks, getWorks} = useWorks();
-
+    const { works, setWorks, getWorks } = useWorks();
+    
     return (
         <div className="grow flex flex-col gap-y-[10px]">
             <div className="flex flex-col">

@@ -1,4 +1,4 @@
-import "../styles.css";
+import "../../assets/styles.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import SettingsApp from "./SettingsApp";

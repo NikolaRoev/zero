@@ -1,9 +1,9 @@
-import * as api from "../../api";
+import * as api from "../../data/api";
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
-import Button from "../../utility/Button";
-import DeleteButton from "../../utility/DeleteButton";
-import type { Format } from "../../api";
-import Input from "../../utility/Input";
+import Button from "../../components/Button";
+import DeleteButton from "../../components/DeleteButton";
+import type { Format } from "../../data/api";
+import Input from "../../components/Input";
 import { emit } from "@tauri-apps/api/event";
 
 
