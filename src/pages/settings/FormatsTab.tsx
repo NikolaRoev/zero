@@ -1,10 +1,11 @@
 import * as api from "../../data/api";
-import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
+import { type ChangeEvent, type FormEvent, useState } from "react";
 import Button from "../../components/Button";
 import DeleteButton from "../../components/DeleteButton";
 import type { Format } from "../../data/api";
 import Input from "../../components/Input";
 import { emit } from "@tauri-apps/api/event";
+import useFormats from "../../hooks/formats";
 
 
 
@@ -27,21 +28,7 @@ function FormatsList({ formats, removeFormat }: FormatsListProps) {
 }
 
 
-function useFormats() {
-    const [formats, setFormats] = useState<Format[]>([]);
-  
-    const getFormats = () => {
-        api.getFormats().then((value) => {
-            setFormats(value);
-        }).catch((reason) => { alert(reason); });
-    };
 
-    useEffect(() => {
-        getFormats();
-    }, []);
-  
-    return { formats, getFormats };
-}
 
 export default function TypesTab() {
     const { formats, getFormats } = useFormats();
@@ -76,7 +63,7 @@ export default function TypesTab() {
             <form onSubmit={handleSubmit}>
                 <Input
                     value={formatInput}
-                    onInput={(event: ChangeEvent<HTMLInputElement>) => { setFormatInput(event.target.value); }}
+                    onChange={(event) => { setFormatInput(event.target.value); }}
                     placeholder="Format"
                     required={true}
                 />

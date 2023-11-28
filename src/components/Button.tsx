@@ -1,9 +1,7 @@
-import type { ReactElement } from "react";
-
-
+import type React from "react";
 
 type ButtonProps = {
-    children: ReactElement | ReactElement[] | string,
+    children: React.ReactNode,
     onClick?: React.MouseEventHandler<HTMLButtonElement>,
     title?: string
 }

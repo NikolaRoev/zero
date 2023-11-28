@@ -1,6 +1,6 @@
 import * as api from "../data/api";
-import type { Status, UpdateWork, Work } from "../data/api";
 import { type UnlistenFn, listen } from "@tauri-apps/api/event";
+import type { UpdateWork, Work } from "../data/api";
 import { useEffect, useState } from "react";
 
 
@@ -19,15 +19,15 @@ export function useUpdateWorks() {
     }, []);
 
     useEffect(() => {
-        const unlisten = listen(api.REFRESH_WORKS_EVENT, () => {
+        const unlisten = listen(api.REFRESH_UPDATE_WORKS_EVENT, () => {
             getUpdateWorks();
         }).catch(async (reason) => {
-            await api.error(`Failed to listen for '${api.REFRESH_WORKS_EVENT}': ${reason}`);
+            await api.error(`Failed to listen for '${api.REFRESH_UPDATE_WORKS_EVENT}': ${reason}`);
         });
     
         return () => {
             unlisten.then((f: UnlistenFn) => { f(); }).catch(async (reason) => {
-                await api.error(`Failed to unlisten for '${api.REFRESH_WORKS_EVENT}': ${reason}`);
+                await api.error(`Failed to unlisten for '${api.REFRESH_UPDATE_WORKS_EVENT}': ${reason}`);
             });
         };
     }, []);
@@ -63,21 +63,4 @@ export function useWorks() {
     }, []);
 
     return { works, setWorks, getWorks };
-}
-
-
-export function useStatuses() {
-    const [statuses, setStatuses] = useState<Status[]>([]);
-
-    function getStatuses() {
-        api.getStatuses().then((value) => {
-            setStatuses(value);
-        }).catch((reason) => { alert(reason); });
-    }
-
-    useEffect(() => {
-        getStatuses();
-    }, []);
-
-    return { statuses, setStatuses };
 }

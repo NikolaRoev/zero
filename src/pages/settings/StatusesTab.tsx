@@ -1,10 +1,11 @@
 import * as api from "../../data/api";
-import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
+import { type ChangeEvent, type FormEvent, useState } from "react";
 import Button from "../../components/Button";
 import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
 import type { Status } from "../../data/api";
 import { emit } from "@tauri-apps/api/event";
+import { useStatuses } from "../../hooks/statuses";
 
 
 
@@ -33,22 +34,6 @@ function StatusesList({ statuses, removeStatus, toggleStatus }: StatusesListProp
 }
 
 
-function useStatuses() {
-    const [statuses, setStatuses] = useState<Status[]>([]);
-  
-    const getStatuses = () => {
-        api.getStatuses().then((value) => {
-            setStatuses(value);
-        }).catch((reason) => { alert(reason); });
-    };
-
-    useEffect(() => {
-        getStatuses();
-    }, []);
-  
-    return { statuses, getStatuses };
-}
-
 export default function StatusesTab() {
     const { statuses, getStatuses } = useStatuses();
     const [statusInput, setStatusInput] = useState("");
@@ -59,31 +44,27 @@ export default function StatusesTab() {
 
         api.addStatus(statusInput).then(async () => {
             setStatusInput("");
-            getStatuses();
-            await emit(api.ADDED_STATUS_EVENT);
+            await emit(api.MODIFIED_STATUSES_EVENT);
         }).catch((reason) => {
-            getStatuses();
             alert(reason);
-        });
+        }).finally(() => { getStatuses(); });
     }
 
     function removeStatus(id: number) {
-        api.removeStatus(id).then(() => {
-            getStatuses();
+        api.removeStatus(id).then(async () => {
+            await emit(api.MODIFIED_STATUSES_EVENT);
         }).catch((reason) => {
-            getStatuses();
             alert(reason);
-        });
+        }).finally(() => { getStatuses(); });
     }
 
     function toggleStatus(id: number, isUpdate: boolean) {
         api.updateStatus(id, isUpdate).then(async () => {
-            getStatuses();
-            await emit(api.REFRESH_WORKS_EVENT);
+            await emit(api.MODIFIED_STATUSES_EVENT);
+            await emit(api.REFRESH_UPDATE_WORKS_EVENT);
         }).catch((reason) => {
-            getStatuses();
             alert(reason);
-        });
+        }).finally(() => { getStatuses(); });
     }
 
 
@@ -92,7 +73,7 @@ export default function StatusesTab() {
             <form onSubmit={handleSubmit}>
                 <Input
                     value={statusInput}
-                    onInput={(event: ChangeEvent<HTMLInputElement>) => { setStatusInput(event.target.value); }}
+                    onChange={(event) => { setStatusInput(event.target.value); }}
                     placeholder="Status"
                     required={true}
                 />

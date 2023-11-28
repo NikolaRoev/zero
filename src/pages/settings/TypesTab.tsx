@@ -1,10 +1,11 @@
 import * as api from "../../data/api";
-import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
+import { type ChangeEvent, type FormEvent, useState } from "react";
 import Button from "../../components/Button";
 import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
 import type { Type } from "../../data/api";
 import { emit } from "@tauri-apps/api/event";
+import useTypes from "../../hooks/types";
 
 
 
@@ -26,22 +27,6 @@ function TypesList({ types, removeType }: TypesListProps) {
     return <div>{typesItems}</div>;
 }
 
-
-function useTypes() {
-    const [types, setTypes] = useState<Type[]>([]);
-  
-    const getTypes = () => {
-        api.getTypes().then((value) => {
-            setTypes(value);
-        }).catch((reason) => { alert(reason); });
-    };
-
-    useEffect(() => {
-        getTypes();
-    }, []);
-  
-    return { types, getTypes };
-}
 
 export default function TypesTab() {
     const { types, getTypes } = useTypes();
@@ -76,7 +61,7 @@ export default function TypesTab() {
             <form onSubmit={handleSubmit}>
                 <Input
                     value={typeInput}
-                    onInput={(event: ChangeEvent<HTMLInputElement>) => { setTypeInput(event.target.value); }}
+                    onChange={(event) => { setTypeInput(event.target.value); }}
                     placeholder="Type"
                     required={true}
                 />

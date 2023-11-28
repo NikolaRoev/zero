@@ -4,7 +4,7 @@ import Input from "../../../components/Input";
 import type { UpdateWork } from "../../../data/api";
 import { Virtuoso } from "react-virtuoso";
 import useSessionState from "../../../hooks/session-state";
-import { useUpdateWorks } from "../../../hooks/hooks";
+import { useUpdateWorks } from "../../../hooks/works";
 
 
 
@@ -90,7 +90,7 @@ export default function UpdateTab() {
     }
 
 
-    const updateWorksItems = updateWorks.filter((work) => work.name.includes(filter));
+    const updateWorksItems = updateWorks.filter((work) => work.name.toLowerCase().includes(filter.toLowerCase()));
 
     return (
         <div className="grow flex flex-col gap-y-[10px]">
@@ -99,9 +99,7 @@ export default function UpdateTab() {
                 value={filter}
                 placeholder="Find"
                 type="search"
-                onInput={(event: ChangeEvent<HTMLInputElement>) => {
-                    setFilter(event.target.value);
-                }}
+                onChange={(event) => { setFilter(event.target.value); }}
             />
 
             <Virtuoso

@@ -5,7 +5,7 @@ import { forwardRef } from "react";
 type InputProps = {
     name?: string,
     value?: string | number | readonly string[],
-    onInput?: React.FormEventHandler<HTMLInputElement>,
+    onChange?: React.ChangeEventHandler<HTMLInputElement>,
     placeholder?: string,
     type?: string
     required?: boolean
@@ -18,7 +18,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(props, ref
             ref={ref}
             name={props.name}
             value={props.value}
-            onInput={props.onInput}
+            onChange={props.onChange}
             placeholder={props.placeholder}
             type={props.type}
             required={props.required}

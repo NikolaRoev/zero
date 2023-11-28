@@ -4,10 +4,12 @@ import { invoke } from "@tauri-apps/api/tauri";
 
 export const OPENED_DATABASE_EVENT = "opened-database";
 export const CLOSED_DATABASE_EVENT = "closed-database";
-export const CHANGED_STATUS_ISUPDATE_EVENT = "changed-status-isupdate";
-export const ADDED_STATUS_EVENT = "added-status";
+
+export const MODIFIED_STATUSES_EVENT = "modified-statuses";
 export const ADDED_TYPE_EVENT = "added-type";
 export const ADDED_FORMAT_EVENT = "added-format";
+
+export const REFRESH_UPDATE_WORKS_EVENT = "refresh-update-works";
 export const REFRESH_WORKS_EVENT = "refresh-works";
 
 
@@ -54,15 +56,19 @@ export type Format = {
 
 export function error(message: string): Promise<void> {
     console.error(message);
-    return invoke("error", { message: message });
+    return invoke("error", { message });
 }
 
 export function openDatabase(path: string): Promise<void> {
-    return invoke("open_database", { path: path });
+    return invoke("open_database", { path });
 }
 
 export function databaseIsOpen(): Promise<boolean> {
     return invoke("database_is_open");
+}
+
+export function getWork(id: number): Promise<Work> {
+    return invoke("get_work", { id });
 }
 
 export function getWorks(): Promise<Work[]> {
@@ -73,16 +79,40 @@ export function getUpdateWorks(): Promise<UpdateWork[]> {
     return invoke("get_update_works");
 }
 
+export function getWorkCreators(workId: number): Promise<Creator[]> {
+    return invoke("get_work_creators", { workId });
+}
+
+export function getCreator(id: number): Promise<Creator> {
+    return invoke("get_creator", { id });
+}
+
+export function getCreators(): Promise<Creator[]> {
+    return invoke("get_creators");
+}
+
+export function getCreatorWorks(creatorId: number): Promise<Work[]> {
+    return invoke("get_creator_works", { creatorId });
+}
+
 export function updateWorkName(id: number, name: string): Promise<void> {
-    return invoke("update_work_name", { id: id, name: name });
+    return invoke("update_work_name", { id, name });
 }
 
 export function updateWorkProgress(id: number, progress: string): Promise<void> {
-    return invoke("update_work_progress", { id: id, progress: progress });
+    return invoke("update_work_progress", { id, progress });
+}
+
+export function addWork(name: string, progress: string, status: string, type: string, format: string, creators: number[]): Promise<void> {
+    return invoke("add_work", { name, progress, status, type, format, creators });
+}
+
+export function addCreator(name: string, works: number[]): Promise<void> {
+    return invoke("add_creator", { name, works });
 }
 
 export function addStatus(status: string): Promise<void> {
-    return invoke("add_status", { status: status });
+    return invoke("add_status", { status });
 }
 
 export function getStatuses(): Promise<Status[]> {
@@ -90,15 +120,15 @@ export function getStatuses(): Promise<Status[]> {
 }
 
 export function updateStatus(id: number, isUpdate: boolean): Promise<void> {
-    return invoke("update_status", { id: id, isUpdate: isUpdate });
+    return invoke("update_status", { id, isUpdate });
 }
 
 export function removeStatus(id: number): Promise<void> {
-    return invoke("remove_status", { id: id });
+    return invoke("remove_status", { id });
 }
 
 export function addType(type: string): Promise<void> {
-    return invoke("add_type", { type: type });
+    return invoke("add_type", { type });
 }
 
 export function getTypes(): Promise<Type[]> {
@@ -106,11 +136,11 @@ export function getTypes(): Promise<Type[]> {
 }
 
 export function removeType(id: number): Promise<void> {
-    return invoke("remove_type", { id: id });
+    return invoke("remove_type", { id });
 }
 
 export function addFormat(format: string): Promise<void> {
-    return invoke("add_format", { format: format });
+    return invoke("add_format", { format });
 }
 
 export function getFormats(): Promise<Format[]> {
@@ -118,7 +148,15 @@ export function getFormats(): Promise<Format[]> {
 }
 
 export function removeFormat(id: number): Promise<void> {
-    return invoke("remove_format", { id: id });
+    return invoke("remove_format", { id });
+}
+
+export function attach(workId: number, creatorId: number): Promise<void> {
+    return invoke("attach", { workId, creatorId });
+}
+
+export function detach(workId: number, creatorId: number): Promise<void> {
+    return invoke("detach", { workId, creatorId });
 }
 
 export function getRecentDatabases(): Promise<string[]> {
@@ -126,5 +164,5 @@ export function getRecentDatabases(): Promise<string[]> {
 }
 
 export function removeRecentDatabase(path: string): Promise<void> {
-    return invoke("remove_recent_database", { path: path });
+    return invoke("remove_recent_database", { path });
 }
