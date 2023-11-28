@@ -6,8 +6,6 @@ export const OPENED_DATABASE_EVENT = "opened-database";
 export const CLOSED_DATABASE_EVENT = "closed-database";
 
 export const MODIFIED_STATUSES_EVENT = "modified-statuses";
-export const ADDED_TYPE_EVENT = "added-type";
-export const ADDED_FORMAT_EVENT = "added-format";
 
 export const REFRESH_UPDATE_WORKS_EVENT = "refresh-update-works";
 export const REFRESH_WORKS_EVENT = "refresh-works";

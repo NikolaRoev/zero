@@ -6,7 +6,6 @@ mod config;
 mod database;
 mod log;
 mod menu;
-mod window;
 
 fn main() {
     log::init().unwrap_or_else(|err| panic!("Failed to initialize log: {err}."));
@@ -48,7 +47,7 @@ fn main() {
             api::remove_recent_database
         ])
         .on_menu_event(menu::event_handler)
-        .on_window_event(window::event_handler)
+        .on_window_event(application::window_event_handler)
         .build(tauri::generate_context!()).unwrap_or_else(|err| panic!("Failed to build application: {err}."))
         .run(application::callback);
 }

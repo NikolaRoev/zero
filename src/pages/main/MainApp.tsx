@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import DeleteButton from "../../components/DeleteButton";
 import LibraryTab from "./library/LibraryTab";
 import UpdateTab from "./update/UpdateTab";
+import SettingsApp from "../settings/SettingsApp";
 
 
 
@@ -90,10 +91,12 @@ function MainScreen() {
             <TabBar className="">
                 <TabButton className="">Update</TabButton>
                 <TabButton className="">Library</TabButton>
+                <TabButton className="">Configuration</TabButton>
             </TabBar>
             <TabsContents>
                 <Tab><UpdateTab /></Tab>
                 <Tab><LibraryTab /></Tab>
+                <Tab><SettingsApp /></Tab>
             </TabsContents>
         </Tabs>
     );

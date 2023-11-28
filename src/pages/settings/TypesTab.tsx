@@ -1,10 +1,9 @@
 import * as api from "../../data/api";
-import { type ChangeEvent, type FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 import Button from "../../components/Button";
 import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
 import type { Type } from "../../data/api";
-import { emit } from "@tauri-apps/api/event";
 import useTypes from "../../hooks/types";
 
 
@@ -36,23 +35,17 @@ export default function TypesTab() {
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        api.addType(typeInput).then(async () => {
-            setTypeInput("");
-            getTypes();
-            await emit(api.ADDED_TYPE_EVENT);
-        }).catch((reason) => {
-            getTypes();
-            alert(reason);
-        });
+        api.addType(typeInput)
+            .then(() => { setTypeInput(""); })
+            .catch((reason) => { alert(reason); })
+            .finally(() => { getTypes(); });
     }
 
     function removeType(id: number) {
-        api.removeType(id).then(() => {
-            getTypes();
-        }).catch((reason) => {
-            getTypes();
-            alert(reason);
-        });
+        api.removeType(id)
+            .then(() => { /*TODO: Clear stuff.*/ })
+            .catch((reason) => { alert(reason); })
+            .finally(() => { getTypes(); });
     }
 
 

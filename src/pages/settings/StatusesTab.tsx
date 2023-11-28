@@ -42,29 +42,23 @@ export default function StatusesTab() {
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        api.addStatus(statusInput).then(async () => {
-            setStatusInput("");
-            await emit(api.MODIFIED_STATUSES_EVENT);
-        }).catch((reason) => {
-            alert(reason);
-        }).finally(() => { getStatuses(); });
+        api.addStatus(statusInput)
+            .then(() => { setStatusInput(""); })
+            .catch((reason) => { alert(reason); })
+            .finally(() => { getStatuses(); });
     }
 
     function removeStatus(id: number) {
-        api.removeStatus(id).then(async () => {
-            await emit(api.MODIFIED_STATUSES_EVENT);
-        }).catch((reason) => {
-            alert(reason);
-        }).finally(() => { getStatuses(); });
+        api.removeStatus(id)
+            .then(() => { /*TODO: Clear stuff.*/ })
+            .catch((reason) => { alert(reason); })
+            .finally(() => { getStatuses(); });
     }
 
     function toggleStatus(id: number, isUpdate: boolean) {
-        api.updateStatus(id, isUpdate).then(async () => {
-            await emit(api.MODIFIED_STATUSES_EVENT);
-            await emit(api.REFRESH_UPDATE_WORKS_EVENT);
-        }).catch((reason) => {
-            alert(reason);
-        }).finally(() => { getStatuses(); });
+        api.updateStatus(id, isUpdate)
+            .catch((reason) => { alert(reason); })
+            .finally(() => { getStatuses(); });
     }
 
 

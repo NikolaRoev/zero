@@ -1,10 +1,9 @@
 import * as api from "../../data/api";
-import { type ChangeEvent, type FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 import Button from "../../components/Button";
 import DeleteButton from "../../components/DeleteButton";
 import type { Format } from "../../data/api";
 import Input from "../../components/Input";
-import { emit } from "@tauri-apps/api/event";
 import useFormats from "../../hooks/formats";
 
 
@@ -38,23 +37,17 @@ export default function TypesTab() {
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        api.addFormat(formatInput).then(async () => {
-            setFormatInput("");
-            getFormats();
-            await emit(api.ADDED_FORMAT_EVENT);
-        }).catch((reason) => {
-            getFormats();
-            alert(reason);
-        });
+        api.addFormat(formatInput)
+            .then(() => { setFormatInput(""); })
+            .catch((reason) => { alert(reason); })
+            .finally(() => { getFormats(); });
     }
 
     function removeFormat(id: number) {
-        api.removeFormat(id).then(() => {
-            getFormats();
-        }).catch((reason) => {
-            getFormats();
-            alert(reason);
-        });
+        api.removeFormat(id)
+            .then(() => { /*TODO: Clear stuff.*/ })
+            .catch((reason) => { alert(reason); })
+            .finally(() => { getFormats(); });
     }
 
 

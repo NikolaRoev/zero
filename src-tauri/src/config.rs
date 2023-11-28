@@ -1,16 +1,24 @@
-use std::{collections::HashMap, path::{Path, PathBuf}, ffi::OsString};
+use std::path::{Path, PathBuf};
 use serde::{Serialize, Deserialize};
-use crate::window::WindowConfig;
 
 
 
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+pub struct WindowConfig {
+    pub width: f64,
+    pub height: f64,
+    pub x: f64,
+    pub y: f64,
+    pub maximized: bool
+}
 
 #[derive(Serialize, Deserialize, Default, Debug)]
 pub struct Config {
-    windows: HashMap<String, WindowConfig>,
+    window_config: Option<WindowConfig>,
     database_last: Option<PathBuf>,
     database_recent: Vec<PathBuf>
 }
+
 
 pub const CONFIG_PATH: &str = "config.json";
 
@@ -30,12 +38,12 @@ impl Config {
         Ok(std::fs::write(path, serde_json::to_string_pretty(self)?)?)
     }
     
-    pub fn get_window(&self, label: &str) -> Option<&WindowConfig> {
-        self.windows.get(label)
+    pub fn get_window_config(&self) -> Option<WindowConfig> {
+        self.window_config
     }
 
-    pub fn set_window(&mut self, label: &str, window: WindowConfig) {
-        self.windows.insert(label.to_string(), window);
+    pub fn set_window_config(&mut self, window_config: WindowConfig) {
+        self.window_config = Some(window_config);
     }
 
     pub fn get_last_database(&self) -> Option<&PathBuf> {

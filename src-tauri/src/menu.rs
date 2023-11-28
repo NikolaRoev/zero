@@ -3,18 +3,18 @@ use std::sync::Mutex;
 
 use tauri::api::dialog::{FileDialogBuilder, MessageDialogBuilder, MessageDialogButtons, MessageDialogKind};
 use tauri::api::shell;
-use tauri::{webview_version, VERSION, ClipboardManager, Window};
+use tauri::{webview_version, VERSION, ClipboardManager};
 use tauri::{CustomMenuItem, Menu, Submenu, Manager, window::MenuHandle};
 
 use crate::api;
-use crate::{config::Config, api::add_creator, database::Database};
+use crate::{config::Config, database::Database};
 
 
 pub const RECENT_MENU_ITEMS: [&str; 5] = ["1", "2", "3", "4", "5"];
 
 
 pub fn create_main_menu() -> Menu {
-    // File.
+    // Database.
     let new = CustomMenuItem::new("new", "New...");
     let open = CustomMenuItem::new("open", "Open...");
 
@@ -35,7 +35,7 @@ pub fn create_main_menu() -> Menu {
     let close = CustomMenuItem::new("close", "Close").disabled();
     let exit = CustomMenuItem::new("exit", "Exit").accelerator("Alt+F4");
 
-    let file_menu = Menu::new()
+    let database_menu = Menu::new()
         .add_item(new)
         .add_item(open)
         .add_submenu(recent)
@@ -43,15 +43,7 @@ pub fn create_main_menu() -> Menu {
         .add_item(close)
         .add_native_item(tauri::MenuItem::Separator)
         .add_item(exit);
-    let file_submenu = Submenu::new("File", file_menu);
-
-
-    // Tools
-    let settings = CustomMenuItem::new("settings", "Settings").disabled();
-
-    let tools_menu = Menu::new()
-        .add_item(settings);
-    let tools_submenu = Submenu::new("Tools", tools_menu);
+    let database_submenu = Submenu::new("Database", database_menu);
 
 
     // Help.
@@ -73,8 +65,7 @@ pub fn create_main_menu() -> Menu {
 
     // Menu.
     Menu::new()
-        .add_submenu(file_submenu)
-        .add_submenu(tools_submenu)
+        .add_submenu(database_submenu)
         .add_submenu(help_submenu)
 }
 
@@ -95,7 +86,6 @@ pub fn set_recent_menu(handle: &MenuHandle, recent_databases: &[PathBuf]) -> Res
 }
 
 pub fn set_menu_state(handle: &MenuHandle, enabled: bool) -> Result<(), Box<dyn std::error::Error>> {
-    handle.get_item("settings").set_enabled(enabled)?;
     handle.get_item("close").set_enabled(enabled)?;
 
     Ok(())
@@ -172,22 +162,6 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
                 window.state::<Mutex<Config>>(),
                 window.state::<Mutex<Database>>()
             );
-        },
-        "settings" => {
-            if let Some(settings_window) = event.window().app_handle().get_window("settings") {
-                settings_window.set_focus().unwrap();
-            }
-            else {
-                crate::window::create_window(
-                    &event.window().app_handle(),
-                    String::from("settings"),
-                    String::from("settings.html"),
-                    String::from("Settings"),
-                    event.window().state::<Mutex<Config>>().lock().unwrap().get_window("settings"),
-                    (600.0, 400.0),
-                    None
-                ).unwrap();
-            }
         },
         "exit" => {
             //FIXME: Does not trigger closerequested, will be fixed in 2.0.
