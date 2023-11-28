@@ -6,13 +6,13 @@ export default function useEvent(eventName: string, handler: EventCallback<unkno
     useEffect(() => {
         const unlisten = listen(eventName, (event) => {
             handler(event);
-        }).catch(async (reason) => {
-            await api.error(`Failed to listen for '${eventName}': ${reason}`);
+        }).catch((reason) => {
+            api.error(`Failed to listen for '${eventName}': ${reason}`);
         });
     
         return () => {
-            unlisten.then((f: UnlistenFn) => { f(); }).catch(async (reason) => {
-                await api.error(`Failed to unlisten for '${eventName}': ${reason}`);
+            unlisten.then((f: UnlistenFn) => { f(); }).catch((reason) => {
+                api.error(`Failed to unlisten for '${eventName}': ${reason}`);
             });
         };
     }, []);

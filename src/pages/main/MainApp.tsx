@@ -19,23 +19,23 @@ function useDatabaseState() {
 
         const closedUnlisten = listen(api.CLOSED_DATABASE_EVENT, () => {
             setIsOpen(false);
-        }).catch(async (reason) => {
-            await api.error(`Failed to listen for database closed event in Main: ${reason}`);
+        }).catch((reason) => {
+            api.error(`Failed to listen for database closed event in Main: ${reason}`);
         });
         
         const openUnlisten = listen(api.OPENED_DATABASE_EVENT, () => {
             setIsOpen(true);
-        }).catch(async (reason) => {
-            await api.error(`Failed to listen for database opened event in Main: ${reason}`);
+        }).catch((reason) => {
+            api.error(`Failed to listen for database opened event in Main: ${reason}`);
         });
 
         return () => {
-            closedUnlisten.then((f: UnlistenFn) => { f(); }).catch(async (reason) => {
-                await api.error(`Failed to unlisten for database closed event in Main: ${reason}`);
+            closedUnlisten.then((f: UnlistenFn) => { f(); }).catch((reason) => {
+                api.error(`Failed to unlisten for database closed event in Main: ${reason}`);
             });
 
-            openUnlisten.then((f: UnlistenFn) => { f(); }).catch(async (reason) => {
-                await api.error(`Failed to unlisten for database opened event in Main: ${reason}`);
+            openUnlisten.then((f: UnlistenFn) => { f(); }).catch((reason) => {
+                api.error(`Failed to unlisten for database opened event in Main: ${reason}`);
             });
         };
     }, []);
@@ -50,8 +50,8 @@ function StartScreen() {
     useEffect(() => {
         api.getRecentDatabases().then((value) => {
             setRecentDatabases(value);
-        }).catch(async (reason) => {
-            await api.error(`Failed to get recent databases in Start: ${reason}`);
+        }).catch((reason) => {
+            api.error(`Failed to get recent databases in Start: ${reason}`);
         });
     }, []);
 

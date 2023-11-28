@@ -1,7 +1,6 @@
 import * as api from "../data/api";
 import { useCallback, useEffect, useState } from "react";
 import type { Status } from "../data/api";
-import useEvent from "./event";
 
 export function useStatuses() {
     const [statuses, setStatuses] = useState<Status[]>([]);
@@ -15,8 +14,6 @@ export function useStatuses() {
     useEffect(() => {
         getStatuses();
     }, [getStatuses]);
-
-    useEvent(api.MODIFIED_STATUSES_EVENT, getStatuses);
 
     return { statuses, setStatuses, getStatuses };
 }

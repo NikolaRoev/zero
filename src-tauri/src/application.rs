@@ -43,6 +43,7 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     let mut database = crate::database::Database::default();
     if let Some(last) = config.get_last_database() {
+        log::info!("Opening last database: {last:?}");
         database.open(last)?;
         set_menu_state(&menu_handle, true)?;
     }

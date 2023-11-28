@@ -5,11 +5,6 @@ import { invoke } from "@tauri-apps/api/tauri";
 export const OPENED_DATABASE_EVENT = "opened-database";
 export const CLOSED_DATABASE_EVENT = "closed-database";
 
-export const MODIFIED_STATUSES_EVENT = "modified-statuses";
-
-export const REFRESH_UPDATE_WORKS_EVENT = "refresh-update-works";
-export const REFRESH_WORKS_EVENT = "refresh-works";
-
 
 export type Work = {
     id: number,
@@ -51,10 +46,14 @@ export type Format = {
 }
 
 
+export function info(message: string) {
+    console.log(message);
+    invoke("info", { message }).catch((reason) => { console.error(reason); });
+}
 
-export function error(message: string): Promise<void> {
+export function error(message: string) {
     console.error(message);
-    return invoke("error", { message });
+    invoke("error", { message }).catch((reason) => { console.error(reason); });
 }
 
 export function openDatabase(path: string): Promise<void> {

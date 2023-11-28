@@ -8,6 +8,11 @@ const CLOSED_DATABASE_EVENT: &str = "closed-database";
 
 
 #[tauri::command]
+pub fn info(message: String) {
+    log::info!("[UI] {}", message);
+}
+
+#[tauri::command]
 pub fn error(message: String) {
     log::error!("[UI] {}", message);
 }

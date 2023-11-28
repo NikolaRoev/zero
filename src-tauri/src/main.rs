@@ -16,6 +16,7 @@ fn main() {
         }))
         .setup(application::setup)
         .invoke_handler(tauri::generate_handler![
+            api::info,
             api::error,
             api::open_database,
             api::database_is_open,

@@ -1,18 +1,15 @@
-import * as api from "../../../data/api";
 import { type TableProps, TableVirtuoso } from "react-virtuoso";
-import { type ChangeEvent, Fragment, useId, useReducer, useEffect, useCallback } from "react";
+import { Fragment } from "react";
 import Input from "../../../components/Input";
 import type { Work } from "../../../data/api";
 import clsx from "clsx";
 import { formatDistanceToNowStrict } from "date-fns";
 import useFormats from "../../../hooks/formats";
-import useSessionState from "../../../hooks/session-state";
 import { useStatuses } from "../../../hooks/statuses";
 import useTypes from "../../../hooks/types";
 import { useWorks } from "../../../hooks/works";
 import Select from "../../../components/Select";
 import useSessionReducer from "../../../hooks/session-reducer";
-import useEvent from "../../../hooks/event";
 
 
 
@@ -117,12 +114,7 @@ export default function WorksTab() {
     const { formats } = useFormats();
     const [filter, filterDispatch] = useSessionReducer("LIBRARY-FILTER", filterReducer, emptyFilter);
 
-    //TODO: move settings to a tab.
-    useEvent(api.MODIFIED_STATUSES_EVENT, useCallback(() => {
-        filterDispatch({action:"Clear"});
-    }, [filterDispatch]));
-
-
+    
     const statusesItems = statuses.map((status) => (
         <Fragment key={status.id}>
             <input
