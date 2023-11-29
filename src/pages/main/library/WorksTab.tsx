@@ -1,15 +1,16 @@
 import { type TableProps, TableVirtuoso } from "react-virtuoso";
 import { Fragment } from "react";
 import Input from "../../../components/Input";
+import Select from "../../../components/Select";
+import { StorageKey } from "../../../data/storage-key";
 import type { Work } from "../../../data/api";
 import clsx from "clsx";
 import { formatDistanceToNowStrict } from "date-fns";
 import useFormats from "../../../hooks/formats";
+import useSessionReducer from "../../../hooks/session-reducer";
 import { useStatuses } from "../../../hooks/statuses";
 import useTypes from "../../../hooks/types";
 import { useWorks } from "../../../hooks/works";
-import Select from "../../../components/Select";
-import useSessionReducer from "../../../hooks/session-reducer";
 
 
 
@@ -59,6 +60,7 @@ type Filter = {
     types: string[],
     formats: string[]
 }
+
 const emptyFilter: Filter = {
     value: "",
     by: "name",
@@ -112,7 +114,7 @@ export default function WorksTab() {
     const { statuses } = useStatuses();
     const { types } = useTypes();
     const { formats } = useFormats();
-    const [filter, filterDispatch] = useSessionReducer("LIBRARY-FILTER", filterReducer, emptyFilter);
+    const [filter, filterDispatch] = useSessionReducer(StorageKey.LibraryWorksFilter, filterReducer, emptyFilter);
 
     
     const statusesItems = statuses.map((status) => (

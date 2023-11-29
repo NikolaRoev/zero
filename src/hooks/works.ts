@@ -33,5 +33,5 @@ export function useWorks() {
         getWorks();
     }, []);
 
-    return { works, setWorks, getWorks };
+    return { works };
 }

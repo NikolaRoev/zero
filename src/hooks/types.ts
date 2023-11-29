@@ -5,11 +5,11 @@ import type { Type } from "../data/api";
 export default function useTypes() {
     const [types, setTypes] = useState<Type[]>([]);
   
-    const getTypes = () => {
+    function getTypes() {
         api.getTypes().then((value) => {
             setTypes(value);
         }).catch((reason) => { alert(reason); });
-    };
+    }
 
     useEffect(() => {
         getTypes();

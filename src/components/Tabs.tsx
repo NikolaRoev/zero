@@ -1,4 +1,6 @@
-import { type ReactElement, useState } from "react";
+import { type ReactElement } from "react";
+import type { StorageKey } from "../data/storage-key";
+import useSessionState from "../hooks/session-state";
 
 
 
@@ -30,12 +32,13 @@ export const TabBar = ({}: TabBarProps) => <></>;
 
 type TabsProps = {
     children: [ReactElement<TabBarProps>, ReactElement<TabsContentsProps>],
+    storageKey: StorageKey,
     className?: string,
     defaultIndex?: number
 }
 
-export function Tabs({ children, className, defaultIndex = 0 }: TabsProps) {
-    const [index, setIndex] = useState(defaultIndex);
+export function Tabs({ children, storageKey, className, defaultIndex = 0 }: TabsProps) {
+    const [index, setIndex] = useSessionState(storageKey, defaultIndex);
 
     const tabBar = children.find((child) => child.type === TabBar) as ReactElement<TabBarProps>;
     const tabsContents = children.find((child) => child.type === TabsContents) as ReactElement<TabsContentsProps>;

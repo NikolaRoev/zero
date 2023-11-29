@@ -2,14 +2,14 @@
 import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../components/Tabs";
 import FormatsTab from "./FormatsTab";
 import StatusesTab from "./StatusesTab";
+import { StorageKey } from "../../data/storage-key";
 import TypesTab from "./TypesTab";
-
 
 
 
 export default function SettingsApp() {
     return (
-        <Tabs className="flex grow flex-col">
+        <Tabs storageKey={StorageKey.SettingsTabs} className="flex grow flex-col">
             <TabBar>
                 <TabButton>Statuses</TabButton>
                 <TabButton>Types</TabButton>

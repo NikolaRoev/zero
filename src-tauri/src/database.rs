@@ -145,10 +145,6 @@ impl Database {
         Ok(())
     }
 
-    pub fn is_open(&self) -> bool {
-        self.conn.is_some()
-    }
-
     pub fn close(&mut self) -> DatabaseResult<()> {
         let conn = self.conn.take();
         if let Some(conn) = conn {
@@ -165,8 +161,8 @@ impl Database {
         }
     }
 
-    pub fn path(&self) -> DatabaseResult<std::path::PathBuf> {
-        Ok(self.conn()?.path().ok_or("Invalid path to database.")?.into())
+    pub fn path(&self) -> Option<std::path::PathBuf> {
+        self.conn().map(|conn| conn.path()).unwrap_or(None).map(Into::into)
     }
 
     pub fn add(&self, table: &str, params: Vec<(&str, &dyn rusqlite::ToSql)>) -> DatabaseResult<i64> {

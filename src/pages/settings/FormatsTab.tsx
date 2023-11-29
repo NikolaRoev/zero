@@ -4,6 +4,7 @@ import Button from "../../components/Button";
 import DeleteButton from "../../components/DeleteButton";
 import type { Format } from "../../data/api";
 import Input from "../../components/Input";
+import { StorageKey } from "../../data/storage-key";
 import useFormats from "../../hooks/formats";
 
 
@@ -45,7 +46,10 @@ export default function TypesTab() {
 
     function removeFormat(id: number) {
         api.removeFormat(id)
-            .then(() => { /*TODO: Clear stuff.*/ })
+            .then(() => {
+                sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
+                sessionStorage.removeItem(StorageKey.AddWorkFormData);
+            })
             .catch((reason) => { alert(reason); })
             .finally(() => { getFormats(); });
     }

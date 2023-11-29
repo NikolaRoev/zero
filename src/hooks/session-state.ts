@@ -1,13 +1,14 @@
+import type { StorageKey } from "../data/storage-key";
 import { useState } from "react";
 
-export default function useSessionState<T>(key: string, defaultValue: T): [T, (value: T) => void] {
-    const storedValue = sessionStorage.getItem(key);
-    const initialValue: T = storedValue ? JSON.parse(storedValue) as T : defaultValue;
-    const [state, innerSetState] = useState(initialValue);
+export default function useSessionState<T>(key: StorageKey, initialState: T): [T, (state: T) => void] {
+    const storedState = sessionStorage.getItem(key);
+    const initialStateInner: T = storedState ? JSON.parse(storedState) as T : initialState;
+    const [state, innerSetState] = useState(initialStateInner);
 
-    function setState(value: T) {
-        innerSetState(value);
-        sessionStorage.setItem(key, JSON.stringify(value));
+    function setState(state: T) {
+        innerSetState(state);
+        sessionStorage.setItem(key, JSON.stringify(state));
     }
 
     return [state, setState];

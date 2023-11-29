@@ -1,19 +1,19 @@
 import * as api from "../data/api";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Status } from "../data/api";
 
 export function useStatuses() {
     const [statuses, setStatuses] = useState<Status[]>([]);
 
-    const getStatuses = useCallback(() => {
+    function getStatuses (){
         api.getStatuses().then((value) => {
             setStatuses(value);
         }).catch((reason) => { alert(reason); });
-    }, []);
+    }
 
     useEffect(() => {
         getStatuses();
-    }, [getStatuses]);
+    }, []);
 
-    return { statuses, setStatuses, getStatuses };
+    return { statuses, getStatuses };
 }

@@ -32,13 +32,13 @@ pub fn open_database(
 
         let mut config_guard = config.lock().unwrap();
         config_guard.set_last_database(Some(path.clone()));
-        config_guard.add_recent_database(path);
+        config_guard.add_recent_database(path.clone());
 
         let menu_handle = window.menu_handle();
         set_recent_menu(&menu_handle, config_guard.get_recent_databases())?;
         set_menu_state(&menu_handle, true)?;
 
-        Ok(window.emit(OPENED_DATABASE_EVENT, ())?)
+        Ok(window.emit(OPENED_DATABASE_EVENT, path)?)
     };
 
     match inner() {
@@ -51,13 +51,6 @@ pub fn open_database(
             Err(message)
         }
     }
-}
-
-#[tauri::command]
-pub fn database_is_open(database: tauri::State<Mutex<Database>>) -> bool {
-    log::info!("Checking if database is open.");
-    let db_guard = database.lock().unwrap();
-    db_guard.is_open()
 }
 
 #[tauri::command]
@@ -91,6 +84,13 @@ pub fn close_database(
             Err(message)
         }
     }
+}
+
+#[tauri::command]
+pub fn database_path(database: tauri::State<Mutex<Database>>) -> Option<std::path::PathBuf> {
+    log::info!("Getting current database path.");
+    let guard = database.lock().unwrap();
+    guard.path()
 }
 
 #[tauri::command]

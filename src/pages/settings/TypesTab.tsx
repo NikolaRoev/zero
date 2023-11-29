@@ -3,6 +3,7 @@ import { type FormEvent, useState } from "react";
 import Button from "../../components/Button";
 import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
+import { StorageKey } from "../../data/storage-key";
 import type { Type } from "../../data/api";
 import useTypes from "../../hooks/types";
 
@@ -43,7 +44,10 @@ export default function TypesTab() {
 
     function removeType(id: number) {
         api.removeType(id)
-            .then(() => { /*TODO: Clear stuff.*/ })
+            .then(() => {
+                sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
+                sessionStorage.removeItem(StorageKey.AddWorkFormData);
+            })
             .catch((reason) => { alert(reason); })
             .finally(() => { getTypes(); });
     }

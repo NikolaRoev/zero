@@ -2,10 +2,6 @@ import { invoke } from "@tauri-apps/api/tauri";
 
 
 
-export const OPENED_DATABASE_EVENT = "opened-database";
-export const CLOSED_DATABASE_EVENT = "closed-database";
-
-
 export type Work = {
     id: number,
     name: string,
@@ -60,8 +56,8 @@ export function openDatabase(path: string): Promise<void> {
     return invoke("open_database", { path });
 }
 
-export function databaseIsOpen(): Promise<boolean> {
-    return invoke("database_is_open");
+export function databasePath(): Promise<string | null> {
+    return invoke("database_path");
 }
 
 export function getWork(id: number): Promise<Work> {

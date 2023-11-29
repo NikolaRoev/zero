@@ -4,7 +4,7 @@ import Button from "../../components/Button";
 import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
 import type { Status } from "../../data/api";
-import { emit } from "@tauri-apps/api/event";
+import { StorageKey } from "../../data/storage-key";
 import { useStatuses } from "../../hooks/statuses";
 
 
@@ -50,7 +50,10 @@ export default function StatusesTab() {
 
     function removeStatus(id: number) {
         api.removeStatus(id)
-            .then(() => { /*TODO: Clear stuff.*/ })
+            .then(() => {
+                sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
+                sessionStorage.removeItem(StorageKey.AddWorkFormData);
+            })
             .catch((reason) => { alert(reason); })
             .finally(() => { getStatuses(); });
     }

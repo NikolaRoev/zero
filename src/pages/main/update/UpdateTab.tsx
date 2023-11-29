@@ -1,6 +1,7 @@
 import * as api from "../../../data/api";
 import { type ChangeEvent, useEffect, useRef } from "react";
 import Input from "../../../components/Input";
+import { StorageKey } from "../../../data/storage-key";
 import type { UpdateWork } from "../../../data/api";
 import { Virtuoso } from "react-virtuoso";
 import useSessionState from "../../../hooks/session-state";
@@ -37,7 +38,7 @@ function UpdateWorkRow({ updateWork, onNameChange, onProgressChange }: UpdateWor
 
 export default function UpdateTab() {
     const filterInput = useRef<HTMLInputElement>(null);
-    const [filter, setFilter] = useSessionState("UPDATE-FILTER", "");
+    const [filter, setFilter] = useSessionState(StorageKey.UpdateFilter, "");
     const { updateWorks, setUpdateWorks, getUpdateWorks } = useUpdateWorks();
 
 

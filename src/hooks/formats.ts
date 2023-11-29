@@ -5,11 +5,11 @@ import type { Format } from "../data/api";
 export default function useFormats() {
     const [formats, setFormats] = useState<Format[]>([]);
   
-    const getFormats = () => {
+    function getFormats() {
         api.getFormats().then((value) => {
             setFormats(value);
         }).catch((reason) => { alert(reason); });
-    };
+    }
 
     useEffect(() => {
         getFormats();

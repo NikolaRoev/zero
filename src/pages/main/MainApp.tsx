@@ -1,30 +1,33 @@
 import * as api from "../../data/api";
+import * as e from "../../data/events";
+import { type Event, type UnlistenFn, listen } from "@tauri-apps/api/event";
 import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../components/Tabs";
-import { type UnlistenFn, listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
 import DeleteButton from "../../components/DeleteButton";
 import LibraryTab from "./library/LibraryTab";
-import UpdateTab from "./update/UpdateTab";
 import SettingsApp from "../settings/SettingsApp";
+import { StorageKey } from "../../data/storage-key";
+import UpdateTab from "./update/UpdateTab";
 
 
 
-function useDatabaseState() {
-    const [isOpen, setIsOpen] = useState(false);
+function useDatabase() {
+    const [path, setPath] = useState<string | null>(null);
 
     useEffect(() => {
-        api.databaseIsOpen().then((value) => {
-            setIsOpen(value);
+        api.databasePath().then((value) => {
+            setPath(value);
         }).catch((reason) => { alert(reason); });
 
-        const closedUnlisten = listen(api.CLOSED_DATABASE_EVENT, () => {
-            setIsOpen(false);
+        const closedUnlisten = listen(e.CLOSED_DATABASE_EVENT, () => {
+            setPath(null);
         }).catch((reason) => {
             api.error(`Failed to listen for database closed event in Main: ${reason}`);
         });
         
-        const openUnlisten = listen(api.OPENED_DATABASE_EVENT, () => {
-            setIsOpen(true);
+        const openUnlisten = listen(e.OPENED_DATABASE_EVENT, (event: Event<string>) => {
+            sessionStorage.clear();
+            setPath(event.payload);
         }).catch((reason) => {
             api.error(`Failed to listen for database opened event in Main: ${reason}`);
         });
@@ -40,7 +43,7 @@ function useDatabaseState() {
         };
     }, []);
 
-    return { isOpen };
+    return { path };
 }
 
 
@@ -87,7 +90,7 @@ function StartScreen() {
 
 function MainScreen() {
     return (
-        <Tabs className="flex grow flex-col">
+        <Tabs storageKey={StorageKey.MainScreenTabs} className="flex grow flex-col">
             <TabBar className="">
                 <TabButton className="">Update</TabButton>
                 <TabButton className="">Library</TabButton>
@@ -104,7 +107,7 @@ function MainScreen() {
 
 
 export default function MainApp() {
-    const { isOpen } = useDatabaseState();
+    const { path } = useDatabase();
 
-    return isOpen ? <MainScreen /> : <StartScreen />;
+    return path === null ? <StartScreen /> : <MainScreen key={path} />;
 }
