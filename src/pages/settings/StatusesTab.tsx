@@ -4,7 +4,7 @@ import Button from "../../components/Button";
 import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
 import type { Status } from "../../data/api";
-import { StorageKey } from "../../data/storage-key";
+import { StorageKey } from "../../data/storage";
 import { useStatuses } from "../../hooks/statuses";
 
 

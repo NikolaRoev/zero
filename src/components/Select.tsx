@@ -21,7 +21,7 @@ export default function Select<T extends string | number | readonly string[]>(pr
             onChange={(event) => { props.onChange(event.target.value as T); }}
             required
         >
-            <option disabled selected value="">{optionItems.length === 0 ? props.errorMsg : props.selectMsg}</option>
+            <option disabled value="">{optionItems.length === 0 ? props.errorMsg : props.selectMsg}</option>
             {optionItems}
         </select>
     );

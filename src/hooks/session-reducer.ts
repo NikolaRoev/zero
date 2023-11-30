@@ -1,4 +1,4 @@
-import type { StorageKey } from "../data/storage-key";
+import type { StorageKey } from "../data/storage";
 import { useReducer } from "react";
 
 export default function useSessionReducer<S, A>(key: StorageKey, reducer: (state: S, action: A) => S, initialState: S) {

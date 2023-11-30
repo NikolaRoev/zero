@@ -2,7 +2,7 @@
 import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../components/Tabs";
 import FormatsTab from "./FormatsTab";
 import StatusesTab from "./StatusesTab";
-import { StorageKey } from "../../data/storage-key";
+import { StorageKey } from "../../data/storage";
 import TypesTab from "./TypesTab";
 
 

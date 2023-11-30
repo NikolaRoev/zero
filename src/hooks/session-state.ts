@@ -1,4 +1,4 @@
-import type { StorageKey } from "../data/storage-key";
+import type { StorageKey } from "../data/storage";
 import { useState } from "react";
 
 export default function useSessionState<T>(key: StorageKey, initialState: T): [T, (state: T) => void] {

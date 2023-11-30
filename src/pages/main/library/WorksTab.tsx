@@ -2,7 +2,7 @@ import { type TableProps, TableVirtuoso } from "react-virtuoso";
 import { Fragment } from "react";
 import Input from "../../../components/Input";
 import Select from "../../../components/Select";
-import { StorageKey } from "../../../data/storage-key";
+import { StorageKey } from "../../../data/storage";
 import type { Work } from "../../../data/api";
 import clsx from "clsx";
 import { formatDistanceToNowStrict } from "date-fns";

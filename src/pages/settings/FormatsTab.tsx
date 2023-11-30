@@ -4,7 +4,7 @@ import Button from "../../components/Button";
 import DeleteButton from "../../components/DeleteButton";
 import type { Format } from "../../data/api";
 import Input from "../../components/Input";
-import { StorageKey } from "../../data/storage-key";
+import { StorageKey } from "../../data/storage";
 import useFormats from "../../hooks/formats";
 
 

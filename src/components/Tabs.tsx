@@ -1,5 +1,5 @@
 import { type ReactElement } from "react";
-import type { StorageKey } from "../data/storage-key";
+import type { StorageKey } from "../data/storage";
 import useSessionState from "../hooks/session-state";
 
 

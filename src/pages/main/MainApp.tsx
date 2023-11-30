@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import DeleteButton from "../../components/DeleteButton";
 import LibraryTab from "./library/LibraryTab";
 import SettingsApp from "../settings/SettingsApp";
-import { StorageKey } from "../../data/storage-key";
+import { StorageKey } from "../../data/storage";
 import UpdateTab from "./update/UpdateTab";
 
 

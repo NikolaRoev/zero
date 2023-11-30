@@ -1,7 +1,7 @@
 import { type TableProps, TableVirtuoso } from "react-virtuoso";
 import type { Creator } from "../../../data/api";
 import Input from "../../../components/Input";
-import { StorageKey } from "../../../data/storage-key";
+import { StorageKey } from "../../../data/storage";
 import { useCreators } from "../../../hooks/creators";
 import useSessionState from "../../../hooks/session-state";
 
