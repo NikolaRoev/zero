@@ -15,5 +15,5 @@ export default function useTypes() {
         getTypes();
     }, []);
   
-    return { types, getTypes };
+    return { types, setTypes, getTypes };
 }

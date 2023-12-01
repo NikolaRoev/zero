@@ -102,6 +102,7 @@ pub struct Creator {
 }
 
 #[derive(serde::Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct Status {
     pub id: i64,
     pub status: String,

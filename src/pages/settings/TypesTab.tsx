@@ -29,27 +29,31 @@ function TypesList({ types, removeType }: TypesListProps) {
 
 
 export default function TypesTab() {
-    const { types, getTypes } = useTypes();
+    const { types, setTypes, getTypes } = useTypes();
     const [typeInput, setTypeInput] = useState("");
 
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        api.addType(typeInput)
-            .then(() => { setTypeInput(""); })
-            .catch((reason) => { alert(reason); })
-            .finally(() => { getTypes(); });
+        api.addType(typeInput).then((id) => {
+            setTypes([...types, { id: id, type: typeInput }]);
+            setTypeInput("");
+        }).catch((reason) => {
+            getTypes();
+            alert(reason);
+        });
     }
 
     function removeType(id: number) {
-        api.removeType(id)
-            .then(() => {
-                sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
-                sessionStorage.removeItem(StorageKey.AddWorkFormData);
-            })
-            .catch((reason) => { alert(reason); })
-            .finally(() => { getTypes(); });
+        api.removeType(id).then(() => {
+            setTypes(types.filter((type) => type.id !== id));
+            sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
+            sessionStorage.removeItem(StorageKey.AddWorkFormData);
+        }).catch((reason) => {
+            getTypes();
+            alert(reason);
+        });
     }
 
 

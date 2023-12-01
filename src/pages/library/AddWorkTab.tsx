@@ -1,21 +1,21 @@
-import * as api from "../../../data/api";
-import { DndContext, type DragEndEvent, DragOverlay, type DragStartEvent } from "@dnd-kit/core";
-import Button from "../../../components/Button";
-import type { Creator } from "../../../data/api";
-import DeleteButton from "../../../components/DeleteButton";
-import Draggable from "../../../components/Draggable";
-import Droppable from "../../../components/Droppable";
-import Input from "../../../components/Input";
-import Select from "../../../components/Select";
-import { StorageKey } from "../../../data/storage";
+import * as api from "../../data/api";
+import { DndContext, type DragEndEvent, DragOverlay, type DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import Button from "../../components/Button";
+import type { Creator } from "../../data/api";
+import DeleteButton from "../../components/DeleteButton";
+import Draggable from "../../components/Draggable";
+import Droppable from "../../components/Droppable";
+import Input from "../../components/Input";
+import Select from "../../components/Select";
+import { StorageKey } from "../../data/storage";
 import { Virtuoso } from "react-virtuoso";
-import { useCreators } from "../../../hooks/creators";
-import useFormats from "../../../hooks/formats";
-import useSessionReducer from "../../../hooks/session-reducer";
-import useSessionState from "../../../hooks/session-state";
+import { useCreators } from "../../hooks/creators";
+import useFormats from "../../hooks/formats";
+import useSessionReducer from "../../hooks/session-reducer";
+import useSessionState from "../../hooks/session-state";
 import { useState } from "react";
-import { useStatuses } from "../../../hooks/statuses";
-import useTypes from "../../../hooks/types";
+import { useStatuses } from "../../hooks/statuses";
+import useTypes from "../../hooks/types";
 
 
 
@@ -127,6 +127,15 @@ export default function AddWorkTab() {
         setActiveItemData(null);
     }
 
+    
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 10
+            }
+        })
+    );
+
 
     const creatorsItems = creators.filter((creator) => creator.name.toLowerCase().includes(creatorsFilter.toLowerCase()));
 
@@ -169,7 +178,7 @@ export default function AddWorkTab() {
                     />
                 </div>
                 <div className="grow flex border">
-                    <DndContext onDragStart={start} onDragEnd={test}>
+                    <DndContext onDragStart={start} onDragEnd={test} sensors={sensors}>
                         <div className="flex flex-col grow bg-slate-400">
                             <Input
                                 value={creatorsFilter}
@@ -181,7 +190,18 @@ export default function AddWorkTab() {
                                 data={creatorsItems}
                                 computeItemKey={(_, creator) => creator.id }
                                 itemContent={(_, creator) => (
-                                    <Draggable key={creator.id} id={creator.id} value={creator}>{creator.name}</Draggable>
+                                    <div className="flex">
+                                        <Draggable
+                                            key={creator.id}
+                                            id={creator.id}
+                                            value={creator}
+                                            onClick={() => { console.log(creator.id); }}
+                                        >{creator.name}</Draggable>
+                                        <button
+                                            type="button"
+                                            onClick={() => { dispatch({ action: "AddCreator", creator: creator }); }}
+                                        >{">"}</button>
+                                    </div>
                                 )}
                             />
                         </div>

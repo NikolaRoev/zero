@@ -1,7 +1,7 @@
-import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../../components/Tabs";
+import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../components/Tabs";
 import AddWorkTab from "./AddWorkTab";
 import CreatorsTab from "./CreatorsTab";
-import { StorageKey } from "../../../data/storage";
+import { StorageKey } from "../../data/storage";
 import WorksTab from "./WorksTab";
 
 

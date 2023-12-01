@@ -15,5 +15,5 @@ export default function useFormats() {
         getFormats();
     }, []);
   
-    return { formats, getFormats };
+    return { formats, setFormats, getFormats };
 }

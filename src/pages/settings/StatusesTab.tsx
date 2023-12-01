@@ -20,7 +20,7 @@ function StatusesList({ statuses, removeStatus, toggleStatus }: StatusesListProp
             <p>{status.status}</p>
             <input
                 type="checkbox"
-                checked={status.is_update}
+                checked={status.isUpdate}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => { toggleStatus(status.id, event.target.checked); }}
             />
             <DeleteButton
@@ -35,33 +35,47 @@ function StatusesList({ statuses, removeStatus, toggleStatus }: StatusesListProp
 
 
 export default function StatusesTab() {
-    const { statuses, getStatuses } = useStatuses();
+    const { statuses, setStatuses, getStatuses } = useStatuses();
     const [statusInput, setStatusInput] = useState("");
 
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        api.addStatus(statusInput)
-            .then(() => { setStatusInput(""); })
-            .catch((reason) => { alert(reason); })
-            .finally(() => { getStatuses(); });
+        api.addStatus(statusInput).then((id) => {
+            setStatuses([...statuses, { id: id, status: statusInput, isUpdate: false }]);
+            setStatusInput("");
+        }).catch((reason) => {
+            getStatuses();
+            alert(reason);
+        });
     }
 
     function removeStatus(id: number) {
-        api.removeStatus(id)
-            .then(() => {
-                sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
-                sessionStorage.removeItem(StorageKey.AddWorkFormData);
-            })
-            .catch((reason) => { alert(reason); })
-            .finally(() => { getStatuses(); });
+        api.removeStatus(id).then(() => {
+            setStatuses(statuses.filter((status) => status.id !== id));
+            sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
+            sessionStorage.removeItem(StorageKey.AddWorkFormData);
+        }).catch((reason) => {
+            getStatuses();
+            alert(reason);
+        });
     }
 
     function toggleStatus(id: number, isUpdate: boolean) {
-        api.updateStatus(id, isUpdate)
-            .catch((reason) => { alert(reason); })
-            .finally(() => { getStatuses(); });
+        api.updateStatus(id, isUpdate).then(() => {
+            setStatuses(statuses.map((status) => {
+                if (status.id === id) {
+                    return { ...status, isUpdate: isUpdate };
+                }
+                else {
+                    return status;
+                }
+            }));
+        }).catch((reason) => {
+            getStatuses();
+            alert(reason);
+        });
     }
 
 

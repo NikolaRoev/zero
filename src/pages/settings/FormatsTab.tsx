@@ -31,27 +31,31 @@ function FormatsList({ formats, removeFormat }: FormatsListProps) {
 
 
 export default function TypesTab() {
-    const { formats, getFormats } = useFormats();
+    const { formats, setFormats, getFormats } = useFormats();
     const [formatInput, setFormatInput] = useState("");
 
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        api.addFormat(formatInput)
-            .then(() => { setFormatInput(""); })
-            .catch((reason) => { alert(reason); })
-            .finally(() => { getFormats(); });
+        api.addFormat(formatInput).then((id) => {
+            setFormats([...formats, { id: id, format: formatInput }]);
+            setFormatInput("");
+        }).catch((reason) => {
+            getFormats();
+            alert(reason);
+        });
     }
 
     function removeFormat(id: number) {
-        api.removeFormat(id)
-            .then(() => {
-                sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
-                sessionStorage.removeItem(StorageKey.AddWorkFormData);
-            })
-            .catch((reason) => { alert(reason); })
-            .finally(() => { getFormats(); });
+        api.removeFormat(id).then(() => {
+            setFormats(formats.filter((format) => format.id !== id));
+            sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
+            sessionStorage.removeItem(StorageKey.AddWorkFormData);
+        }).catch((reason) => {
+            getFormats();
+            alert(reason);
+        });
     }
 
 

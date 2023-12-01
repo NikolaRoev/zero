@@ -1,6 +1,6 @@
 import * as api from "../data/api";
-import { useEffect, useState } from "react";
-import type { Creator } from "../data/api";
+import type { Creator, Work } from "../data/api";
+import { useCallback, useEffect, useState } from "react";
 
 
 
@@ -18,4 +18,30 @@ export function useCreators() {
     }, []);
 
     return { creators };
+}
+
+export function useCreator(id: number) {
+    const [creator, setCreator] = useState<Creator>({
+        id: 0, name: "", works: 0
+    });
+    const [creatorWorks, setCreatorWorks] = useState<Work[]>([]);
+
+    const getCreator = useCallback(() => {
+        api.getCreator(id).then((value) => {
+            setCreator(value);
+        }).catch((reason) => { alert(reason); });
+    }, [id]);
+
+    const getCreatorWorks = useCallback(() => {
+        api.getCreatorWorks(id).then((value) => {
+            setCreatorWorks(value);
+        }).catch((reason) => { alert(reason); });
+    }, [id]);
+
+    useEffect(() => {
+        getCreator();
+        getCreatorWorks();
+    }, [getCreator, getCreatorWorks]);
+
+    return { creator, setCreator, getCreator, creatorWorks, getCreatorWorks };
 }

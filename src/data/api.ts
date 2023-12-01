@@ -28,7 +28,7 @@ export type Creator = {
 export type Status = {
     id: number,
     status: string,
-    is_update: boolean
+    isUpdate: boolean
 }
 
 export type Type = {
@@ -96,6 +96,22 @@ export function updateWorkProgress(id: number, progress: string): Promise<void> 
     return invoke("update_work_progress", { id, progress });
 }
 
+export function updateWorkStatus(id: number, status: string): Promise<void> {
+    return invoke("update_work_status", { id, status });
+}
+
+export function updateWorkType(id: number, type: string): Promise<void> {
+    return invoke("update_work_type", { id, type });
+}
+
+export function updateWorkFormat(id: number, format: string): Promise<void> {
+    return invoke("update_work_format", { id, format });
+}
+
+export function updateCreatorName(id: number, name: string): Promise<void> {
+    return invoke("update_creator_name", { id, name });
+}
+
 export function addWork(name: string, progress: string, status: string, type: string, format: string, creators: number[]): Promise<void> {
     return invoke("add_work", { name, progress, status, type, format, creators });
 }
@@ -104,7 +120,7 @@ export function addCreator(name: string, works: number[]): Promise<void> {
     return invoke("add_creator", { name, works });
 }
 
-export function addStatus(status: string): Promise<void> {
+export function addStatus(status: string): Promise<number> {
     return invoke("add_status", { status });
 }
 
@@ -120,7 +136,7 @@ export function removeStatus(id: number): Promise<void> {
     return invoke("remove_status", { id });
 }
 
-export function addType(type: string): Promise<void> {
+export function addType(type: string): Promise<number> {
     return invoke("add_type", { type });
 }
 
@@ -132,7 +148,7 @@ export function removeType(id: number): Promise<void> {
     return invoke("remove_type", { id });
 }
 
-export function addFormat(format: string): Promise<void> {
+export function addFormat(format: string): Promise<number> {
     return invoke("add_format", { format });
 }
 

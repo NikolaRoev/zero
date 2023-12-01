@@ -1,20 +1,24 @@
 import { type TableProps, TableVirtuoso } from "react-virtuoso";
 import { Fragment } from "react";
-import Input from "../../../components/Input";
-import Select from "../../../components/Select";
-import { StorageKey } from "../../../data/storage";
-import type { Work } from "../../../data/api";
+import Input from "../../components/Input";
+import Select from "../../components/Select";
+import { StorageKey } from "../../data/storage";
+import type { Work } from "../../data/api";
 import clsx from "clsx";
 import { formatDistanceToNowStrict } from "date-fns";
-import useFormats from "../../../hooks/formats";
-import useSessionReducer from "../../../hooks/session-reducer";
-import { useStatuses } from "../../../hooks/statuses";
-import useTypes from "../../../hooks/types";
-import { useWorks } from "../../../hooks/works";
+import useFormats from "../../hooks/formats";
+import useSessionReducer from "../../hooks/session-reducer";
+import { useStatuses } from "../../hooks/statuses";
+import useTypes from "../../hooks/types";
+import { useWorks } from "../../hooks/works";
+import useSafeContext from "../../hooks/safe-context-hook";
+import { NavigationContext } from "../../contexts/navigation-context";
 
 
 
 function WorksTable({works}: {works: Work[]}) {
+    const { dispatch } = useSafeContext(NavigationContext);
+
     return(
         <div className="pl-[10px] grow">
             <TableVirtuoso
@@ -41,7 +45,7 @@ function WorksTable({works}: {works: Work[]}) {
                 itemContent={(index, work) => (
                     <>
                         <td className="w-[1%] p-[5px] border-[1px] border-black">{index + 1}.</td>
-                        <td title={work.name} className="max-w-0 p-[5px] border-[1px] border-black overflow-hidden whitespace-nowrap overflow-ellipsis">{work.name}</td>
+                        <td onClick={() => { dispatch({action: "New", page: {id: work.id, type: "Work"}}); }} title={work.name} className="max-w-0 p-[5px] border-[1px] border-black overflow-hidden whitespace-nowrap overflow-ellipsis">{work.name}</td>
                         <td className="w-[1%] p-[5px] border-[1px] border-black whitespace-nowrap">{work.progress}</td>
                         <td title={formatDistanceToNowStrict(Date.parse(work.updated), { addSuffix: true })} className="w-[1%] p-[5px] border-[1px] border-black whitespace-nowrap">{work.updated}</td>
                         <td title={formatDistanceToNowStrict(Date.parse(work.added), { addSuffix: true })} className="w-[1%] p-[5px] border-[1px] border-black whitespace-nowrap">{work.added}</td>
@@ -130,8 +134,8 @@ export default function WorksTab() {
             />
             <label
                 htmlFor={`status-${status.status}`}
-                title={status.is_update ? "Update status." : undefined}
-                className={clsx({ "underline": status.is_update })}
+                title={status.isUpdate ? "Update status." : undefined}
+                className={clsx({ "underline": status.isUpdate })}
             >{status.status}</label>
         </Fragment>
     ));

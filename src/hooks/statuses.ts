@@ -15,5 +15,5 @@ export function useStatuses() {
         getStatuses();
     }, []);
 
-    return { statuses, getStatuses };
+    return { statuses, setStatuses, getStatuses };
 }

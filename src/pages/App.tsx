@@ -1,12 +1,12 @@
-import * as api from "../../data/api";
-import * as e from "../../data/events";
+import * as api from "../data/api";
+import * as e from "../data/events";
 import { type Event, type UnlistenFn, listen } from "@tauri-apps/api/event";
-import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../components/Tabs";
+import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../components/Tabs";
 import { useEffect, useState } from "react";
-import DeleteButton from "../../components/DeleteButton";
+import DeleteButton from "../components/DeleteButton";
 import LibraryTab from "./library/LibraryTab";
-import SettingsApp from "../settings/SettingsApp";
-import { StorageKey } from "../../data/storage";
+import SettingsApp from "./settings/SettingsApp";
+import { StorageKey } from "../data/storage";
 import UpdateTab from "./update/UpdateTab";
 
 
@@ -106,7 +106,7 @@ function MainScreen() {
 }
 
 
-export default function MainApp() {
+export default function App() {
     const { path } = useDatabase();
 
     return path === null ? <StartScreen /> : <MainScreen key={path} />;

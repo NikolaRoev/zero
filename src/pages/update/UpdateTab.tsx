@@ -1,11 +1,11 @@
-import * as api from "../../../data/api";
+import * as api from "../../data/api";
 import { type ChangeEvent, useEffect, useRef } from "react";
-import Input from "../../../components/Input";
-import { StorageKey } from "../../../data/storage";
-import type { UpdateWork } from "../../../data/api";
+import Input from "../../components/Input";
+import { StorageKey } from "../../data/storage";
+import type { UpdateWork } from "../../data/api";
 import { Virtuoso } from "react-virtuoso";
-import useSessionState from "../../../hooks/session-state";
-import { useUpdateWorks } from "../../../hooks/works";
+import useSessionState from "../../hooks/session-state";
+import { useUpdateWorks } from "../../hooks/works";
 
 
 
