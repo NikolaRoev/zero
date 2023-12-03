@@ -6,11 +6,13 @@ import DeleteButton from "../../components/DeleteButton";
 import Draggable from "../../components/Draggable";
 import Droppable from "../../components/Droppable";
 import Input from "../../components/Input";
+import { NavigationContext } from "../../contexts/navigation-context";
 import Select from "../../components/Select";
 import { StorageKey } from "../../data/storage";
 import { Virtuoso } from "react-virtuoso";
 import { useCreators } from "../../hooks/creators";
 import useFormats from "../../hooks/formats";
+import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer";
 import useSessionState from "../../hooks/session-state";
 import { useState } from "react";
@@ -90,6 +92,7 @@ function addWorkFormReducer(addWorkFormData: AddWorkFormData, action: AddWorkFor
 
 
 export default function AddWorkTab() {
+    const { navigationDispatch } = useSafeContext(NavigationContext);
     const { statuses } = useStatuses();
     const { types } = useTypes();
     const { formats } = useFormats();
@@ -195,7 +198,7 @@ export default function AddWorkTab() {
                                             key={creator.id}
                                             id={creator.id}
                                             value={creator}
-                                            onClick={() => { console.log(creator.id); }}
+                                            onClick={() => { navigationDispatch({ action: "New", page: { id: creator.id, type: "Creator" } }); }}
                                         >{creator.name}</Draggable>
                                         <button
                                             type="button"

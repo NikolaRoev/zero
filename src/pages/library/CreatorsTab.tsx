@@ -1,13 +1,17 @@
 import { type TableProps, TableVirtuoso } from "react-virtuoso";
 import type { Creator } from "../../data/api";
 import Input from "../../components/Input";
+import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
 import { useCreators } from "../../hooks/creators";
+import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionState from "../../hooks/session-state";
 
 
 
 function CreatorsTable({ creators }: { creators: Creator[]}) {
+    const { navigationDispatch } = useSafeContext(NavigationContext);
+    
     return(
         <div className="pl-[10px] grow">
             <TableVirtuoso
@@ -32,7 +36,7 @@ function CreatorsTable({ creators }: { creators: Creator[]}) {
                 itemContent={(index, creator) => (
                     <>
                         <td className="w-[1%] p-[5px] border-[1px] border-black">{index + 1}.</td>
-                        <td title={creator.name} className="max-w-0 p-[5px] border-[1px] border-black overflow-hidden whitespace-nowrap overflow-ellipsis">{creator.name}</td>
+                        <td onClick={() => { navigationDispatch({ action: "New", page: { id: creator.id, type: "Creator" }}); }} title={creator.name} className="max-w-0 p-[5px] border-[1px] border-black overflow-hidden whitespace-nowrap overflow-ellipsis">{creator.name}</td>
                         <td className="w-[1%] p-[5px] border-[1px] border-black whitespace-nowrap">{creator.works}</td>
                     </>
                 )}

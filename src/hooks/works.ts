@@ -40,7 +40,6 @@ export function useWork(id: number) {
     const [work, setWork] = useState<Work>({
         id: 0, name: "", progress: "", status: "", type: "", format: "", updated: "", added: ""
     });
-    const [workCreators, setWorkCreators] = useState<Creator[]>([]);
 
     const getWork = useCallback(() => {
         api.getWork(id).then((value) => {
@@ -48,16 +47,25 @@ export function useWork(id: number) {
         }).catch((reason) => { alert(reason); });
     }, [id]);
 
-    const getWorkCreators = useCallback(() => {
-        api.getWorkCreators(id).then((value) => {
-            setWorkCreators(value);
-        }).catch((reason) => { alert(reason); });
-    }, [id]);
-
     useEffect(() => {
         getWork();
-        getWorkCreators();
-    }, [getWork, getWorkCreators]);
+    }, [getWork]);
 
-    return { work, setWork, getWork, workCreators, getWorkCreators };
+    return { work, setWork, getWork };
+}
+
+export function useWorkCreators(workId: number) {
+    const [workCreators, setWorkCreators] = useState<Creator[]>([]);
+
+    const getWorkCreators = useCallback(() => {
+        api.getWorkCreators(workId).then((value) => {
+            setWorkCreators(value);
+        }).catch((reason) => { alert(reason); });
+    }, [workId]);
+
+    useEffect(() => {
+        getWorkCreators();
+    }, [getWorkCreators]);
+
+    return { workCreators, setWorkCreators, getWorkCreators };
 }

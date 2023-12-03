@@ -68,15 +68,22 @@ function navigationReducer(navigationData: NavigationData, action: NavigationAct
 
 export const NavigationContext = createContext<{
     navigationData: NavigationData,
-    dispatch: React.Dispatch<NavigationAction>
+    navigationDispatch: React.Dispatch<NavigationAction>
 } | null>(null);
 
-export default function NavigationContextProvider({ children }: { children: React.ReactNode }) {
-    const [navigationData, dispatch] = useSessionReducer(StorageKey.Navigation, navigationReducer, emtpyNavigationData);
+export default function NavigationContextProvider({ children, storageKey }: { children: React.ReactNode, storageKey: StorageKey }) {
+    const [navigationData, navigationDispatch] = useSessionReducer(storageKey, navigationReducer, emtpyNavigationData);
 
     return (
-        <NavigationContext.Provider value={{ navigationData: navigationData, dispatch: dispatch }}>
-            {children}
+        <NavigationContext.Provider value={{ navigationData: navigationData, navigationDispatch: navigationDispatch }}>
+            <div className="grow flex flex-col">
+                <div className="flex">
+                    <button onClick={() => { navigationDispatch({action: "Home" }); }}>HOME</button>
+                    <button onClick={() => { navigationDispatch({action: "Back" }); }}>BACK</button>
+                    <button onClick={() => { navigationDispatch({action: "Forward" }); }}>FORWARD</button>
+                </div>
+                {children}
+            </div>
         </NavigationContext.Provider>
     );
 }

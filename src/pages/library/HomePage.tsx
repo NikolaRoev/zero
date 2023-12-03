@@ -1,4 +1,5 @@
 import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../../components/Tabs";
+import AddCreatorTab from "./AddCreatorTab";
 import AddWorkTab from "./AddWorkTab";
 import CreatorsTab from "./CreatorsTab";
 import { StorageKey } from "../../data/storage";
@@ -19,7 +20,7 @@ export default function HomePage() {
                 <Tab><WorksTab /></Tab>
                 <Tab><CreatorsTab /></Tab>
                 <Tab><AddWorkTab /></Tab>
-                <Tab><div>add creator</div></Tab>
+                <Tab><AddCreatorTab /></Tab>
             </TabsContents>
         </Tabs>
     );

@@ -24,13 +24,22 @@ export function useCreator(id: number) {
     const [creator, setCreator] = useState<Creator>({
         id: 0, name: "", works: 0
     });
-    const [creatorWorks, setCreatorWorks] = useState<Work[]>([]);
 
     const getCreator = useCallback(() => {
         api.getCreator(id).then((value) => {
             setCreator(value);
         }).catch((reason) => { alert(reason); });
     }, [id]);
+
+    useEffect(() => {
+        getCreator();
+    }, [getCreator]);
+
+    return { creator, setCreator, getCreator };
+}
+
+export function useCreatorWorks(id: number) {
+    const [creatorWorks, setCreatorWorks] = useState<Work[]>([]);
 
     const getCreatorWorks = useCallback(() => {
         api.getCreatorWorks(id).then((value) => {
@@ -39,9 +48,8 @@ export function useCreator(id: number) {
     }, [id]);
 
     useEffect(() => {
-        getCreator();
         getCreatorWorks();
-    }, [getCreator, getCreatorWorks]);
+    }, [getCreatorWorks]);
 
-    return { creator, setCreator, getCreator, creatorWorks, getCreatorWorks };
+    return { creatorWorks, setCreatorWorks, getCreatorWorks };
 }
