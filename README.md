@@ -1,4 +1,3 @@
-- toast when adding stuff for confirmation
 - navigation dropdown
 - clean-up
 - testing

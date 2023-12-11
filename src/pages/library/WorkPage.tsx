@@ -9,6 +9,7 @@ import { NavigationContext } from "../../contexts/navigation-context";
 import Select from "../../components/Select";
 import { confirm } from "@tauri-apps/api/dialog";
 import { formatDistanceToNowStrict } from "date-fns";
+import { toast } from "react-toastify";
 import useFormats from "../../hooks/formats";
 import useSafeContext from "../../hooks/safe-context-hook";
 import { useStatuses } from "../../hooks/statuses";
@@ -93,6 +94,7 @@ export default function WorkPage({ id }: { id: number }) {
                         confirm(`Delete work "${work.name}"?`, { title: "Delete Work", okLabel: "Yes", cancelLabel: "No", type: "warning" }).then(async (result) => {
                             if (result) {
                                 await api.removeWork(work.id);
+                                toast(`Deleted work "${work.name}".`);
                                 navigationDispatch({ action: "Clear" });
                             }
                         }).catch((reason) => { alert(reason); });

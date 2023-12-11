@@ -2,9 +2,12 @@ import * as api from "../../data/api";
 import AddWorksList from "../../components/AddWorksList";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
 import type { Work } from "../../data/api";
 import WorksTable from "../../components/WorksTable";
+import { toast } from "react-toastify";
+import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer";
 
 
@@ -56,6 +59,7 @@ function addCreatorFormReducer(addCreatorFormData: AddCreatorFormData, action: A
 
 
 export default function AddCreatorTab() {
+    const { navigationDispatch } = useSafeContext(NavigationContext);
     const [addCreatorFormData, dispatch] = useSessionReducer(StorageKey.AddCreatorFormData, addCreatorFormReducer, emptyAddCreatorFormData);
 
 
@@ -63,7 +67,12 @@ export default function AddCreatorTab() {
         event.preventDefault();
 
         api.addCreator(addCreatorFormData.name, addCreatorFormData.works.map((work) => work.id))
-            .then(() => { dispatch({ action: "Clear" }); })
+            .then((id) => {
+                toast(<div
+                    onClick={() => { navigationDispatch({ action: "New", page: { type: "Creator", id: id}}); }}
+                >{`Added creator "${addCreatorFormData.name}".`}</div>);
+                dispatch({ action: "Clear" });
+            })
             .catch((reason) => { alert(reason); });
     }
 
@@ -81,6 +90,7 @@ export default function AddCreatorTab() {
                     </div>
                     <label>Name:</label>
                     <Input
+                        className="col-span-8"
                         value={addCreatorFormData.name}
                         onChange={(event) => { dispatch({ action: "ChangeName", name: event.target.value }); }}
                         placeholder="Name"

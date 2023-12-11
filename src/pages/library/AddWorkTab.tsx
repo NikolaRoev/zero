@@ -4,9 +4,12 @@ import Button from "../../components/Button";
 import type { Creator } from "../../data/api";
 import CreatorsTable from "../../components/CreatorsTable";
 import Input from "../../components/Input";
+import { NavigationContext } from "../../contexts/navigation-context";
 import Select from "../../components/Select";
 import { StorageKey } from "../../data/storage";
+import { toast } from "react-toastify";
 import useFormats from "../../hooks/formats";
+import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer";
 import { useStatuses } from "../../hooks/statuses";
 import useTypes from "../../hooks/types";
@@ -84,6 +87,7 @@ function addWorkFormReducer(addWorkFormData: AddWorkFormData, action: AddWorkFor
 
 
 export default function AddWorkTab() {
+    const { navigationDispatch } = useSafeContext(NavigationContext);
     const { statuses } = useStatuses();
     const { types } = useTypes();
     const { formats } = useFormats();
@@ -99,7 +103,12 @@ export default function AddWorkTab() {
 
         if (status && type && format) {
             api.addWork(addWorkFormData.name, addWorkFormData.progress, status, type, format, addWorkFormData.creators.map((creator) => creator.id))
-                .then(() => { dispatch({ action: "Clear" }); })
+                .then((id) => {
+                    toast(<div
+                        onClick={() => { navigationDispatch({ action: "New", page: { type: "Work", id: id}}); }}
+                    >{`Added work "${addWorkFormData.name}".`}</div>);
+                    dispatch({ action: "Clear" });
+                })
                 .catch((reason) => { alert(reason); });
         }
     }

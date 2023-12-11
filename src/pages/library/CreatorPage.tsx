@@ -9,6 +9,7 @@ import type { Work } from "../../data/api";
 import WorksTable from "../../components/WorksTable";
 import clsx from "clsx";
 import { confirm } from "@tauri-apps/api/dialog";
+import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionState from "../../hooks/session-state";
 import { useWorks } from "../../hooks/works";
@@ -98,9 +99,10 @@ export default function CreatorPage({ id }: { id: number }) {
                 <label className="col-span-7">{creator.id}</label>
                 <Button
                     onClick={() => {
-                        confirm(`Delete work "${creator.name}"?`, { title: "Delete Creator", okLabel: "Yes", cancelLabel: "No", type: "warning" }).then(async (result) => {
+                        confirm(`Delete creator "${creator.name}"?`, { title: "Delete Creator", okLabel: "Yes", cancelLabel: "No", type: "warning" }).then(async (result) => {
                             if (result) {
                                 await api.removeCreator(creator.id);
+                                toast(`Deleted creator "${creator.name}".`);
                                 navigationDispatch({ action: "Clear" });
                             }
                         }).catch((reason) => { alert(reason); });

@@ -377,7 +377,7 @@ pub fn add_work(
     r#type: String,
     format: String,
     creators: Vec<i64>
-) -> Result<(), String> {
+) -> Result<i64, String> {
     log::info!(
         "Adding work: NAME - {}, PROGRESS - {}, STATUS - {}, TYPE - {}, FORMAT - {} CREATORS - {:?}.",
         name, progress, status, r#type, format, creators
@@ -402,7 +402,7 @@ pub fn add_work(
     match inner() {
         Ok(id) => {
             log::info!("Added work: ID - {id}.");
-            Ok(())
+            Ok(id)
         },
         Err(err) => {
             let message = format!("Failed to add work: {err}.");
@@ -413,7 +413,7 @@ pub fn add_work(
 }
 
 #[tauri::command]
-pub fn add_creator(database: tauri::State<Mutex<Database>>, name: String, works: Vec<i64>) -> Result<(), String> {
+pub fn add_creator(database: tauri::State<Mutex<Database>>, name: String, works: Vec<i64>) -> Result<i64, String> {
     log::info!("Adding creator: NAME - {name}, WORKS - {works:?}.");
 
     let inner = || -> Result<i64, Box<dyn std::error::Error>>  {
@@ -426,7 +426,7 @@ pub fn add_creator(database: tauri::State<Mutex<Database>>, name: String, works:
     match inner() {
         Ok(id) => {
             log::info!("Added creator: ID - {id}.");
-            Ok(())
+            Ok(id)
         },
         Err(err) => {
             let message = format!("Failed to add creator: {err}.");

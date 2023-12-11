@@ -112,11 +112,11 @@ export function updateCreatorName(id: number, name: string): Promise<void> {
     return invoke("update_creator_name", { id, name });
 }
 
-export function addWork(name: string, progress: string, status: string, type: string, format: string, creators: number[]): Promise<void> {
+export function addWork(name: string, progress: string, status: string, type: string, format: string, creators: number[]): Promise<number> {
     return invoke("add_work", { name, progress, status, type, format, creators });
 }
 
-export function addCreator(name: string, works: number[]): Promise<void> {
+export function addCreator(name: string, works: number[]): Promise<number> {
     return invoke("add_creator", { name, works });
 }
 
