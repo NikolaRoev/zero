@@ -1,6 +1,5 @@
+- toast when adding stuff for confirmation
 - navigation dropdown
-- deleting work/creator
-- auto-update
-- styling
 - clean-up
 - testing
+- auto-update

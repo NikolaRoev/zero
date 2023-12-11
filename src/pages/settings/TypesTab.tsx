@@ -15,7 +15,7 @@ type TypesListProps = {
 }
 function TypesList({ types, removeType }: TypesListProps) {
     const typesItems = types.map((type) => (
-        <div key={type.id} className="flex even:bg-neutral-200">
+        <div key={type.id} className="flex even:bg-neutral-100">
             <p className="grow p-[5px]">{type.type}</p>
             <DeleteButton
                 onClick={() => { removeType(type.id); } }

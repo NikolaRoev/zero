@@ -15,7 +15,7 @@ type FormatsListProps = {
 }
 function FormatsList({ formats, removeFormat }: FormatsListProps) {
     const formatsItems = formats.map((format) => (
-        <div key={format.id} className="flex even:bg-neutral-200">
+        <div key={format.id} className="flex even:bg-neutral-100">
             <p className="grow p-[5px]">{format.format}</p>
             <DeleteButton
                 onClick={() => { removeFormat(format.id); } }

@@ -179,7 +179,12 @@ export default function WorksTable(props: WorksTableProps) {
                         title={work.name}
                     >{work.name}</td>}
                     {props.progress && <td
-                        className={clsx("w-[1%] p-[5px] border border-neutral-700 whitespace-nowrap", props.dataClassName)}
+                        className={clsx(
+                            "max-w-0 w-[1%] p-[5px] border border-neutral-700",
+                            "overflow-hidden whitespace-nowrap overflow-ellipsis",
+                            props.dataClassName
+                        )}
+                        title={work.progress}
                     >{work.progress}</td>}
                     {props.status && <td
                         className={clsx("w-[1%] p-[5px] border border-neutral-700 whitespace-nowrap", props.dataClassName)}

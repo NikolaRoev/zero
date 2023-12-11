@@ -17,7 +17,7 @@ type StatusesListProps = {
 }
 function StatusesList({ statuses, removeStatus, toggleStatus }: StatusesListProps) {
     const statusesItems = statuses.map((status) => (
-        <div key={status.id} className="flex even:bg-neutral-200">
+        <div key={status.id} className="flex even:bg-neutral-100">
             <p className={clsx("grow p-[5px]", { "underline": status.isUpdate })}>{status.status}</p>
             <input
                 className="mx-[10px]"

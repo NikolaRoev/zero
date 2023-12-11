@@ -3,11 +3,12 @@ import clsx from "clsx";
 type ButtonProps = {
     children: React.ReactNode,
     className?: string,
+    type?: "submit" | "reset" | "button";
     onClick?: React.MouseEventHandler<HTMLButtonElement>,
     title?: string
 }
 
-export default function Button({ children, className, onClick, title }: ButtonProps) {
+export default function Button({ children, className, onClick, title, type }: ButtonProps) {
     return (
         <button
             className={clsx(
@@ -17,6 +18,7 @@ export default function Button({ children, className, onClick, title }: ButtonPr
                 "select-none",
                 className
             )}
+            type={type}
             onClick={onClick}
             title={title}
         >{children}</button>

@@ -1,21 +1,13 @@
 import * as api from "../../data/api";
-import { DndContext, type DragEndEvent, DragOverlay, type DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import AddCreatorsList from "../../components/AddCreatorsList";
 import Button from "../../components/Button";
 import type { Creator } from "../../data/api";
-import DeleteButton from "../../components/DeleteButton";
-import Draggable from "../../components/Draggable";
-import Droppable from "../../components/Droppable";
+import CreatorsTable from "../../components/CreatorsTable";
 import Input from "../../components/Input";
-import { NavigationContext } from "../../contexts/navigation-context";
 import Select from "../../components/Select";
 import { StorageKey } from "../../data/storage";
-import { Virtuoso } from "react-virtuoso";
-import { useCreators } from "../../hooks/creators";
 import useFormats from "../../hooks/formats";
-import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer";
-import useSessionState from "../../hooks/session-state";
-import { useState } from "react";
 import { useStatuses } from "../../hooks/statuses";
 import useTypes from "../../hooks/types";
 
@@ -92,15 +84,10 @@ function addWorkFormReducer(addWorkFormData: AddWorkFormData, action: AddWorkFor
 
 
 export default function AddWorkTab() {
-    const { navigationDispatch } = useSafeContext(NavigationContext);
     const { statuses } = useStatuses();
     const { types } = useTypes();
     const { formats } = useFormats();
-    const { creators } = useCreators();
-    const [creatorsFilter, setCreatorsFilter] = useSessionState(StorageKey.AddWorkCreatorsFilter, "");
     const [addWorkFormData, dispatch] = useSessionReducer(StorageKey.AddWorkFormData, addWorkFormReducer, emptyAddWorkFormData);
-
-    const [activeItemData, setActiveItemData] = useState<Creator | null>(null);
 
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -117,62 +104,55 @@ export default function AddWorkTab() {
         }
     }
 
-    function start(event: DragStartEvent) {
-        const creator = event.active.data.current?.value as Creator;
-        setActiveItemData(creator);
-    }
-
-    function test(event: DragEndEvent) {
-        if (event.over) {
-            const creator = event.active.data.current?.value as Creator;
-            dispatch({ action: "AddCreator", creator: creator });
-        }
-        setActiveItemData(null);
-    }
-
-    
-    const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 10
-            }
-        })
-    );
-
-
-    const creatorsItems = creators.filter((creator) => creator.name.toLowerCase().includes(creatorsFilter.toLowerCase()));
 
     return (
-        <>
-            <form onSubmit={handleSubmit} className="flex flex-col grow">
-                <div>
+        <div className="p-[5px] grow flex flex-col">
+            <form onSubmit={handleSubmit} className="flex flex-col grow gap-y-[10px]">
+                <div className="p-[5px] grid grid-cols-9 gap-x-[40px] gap-y-[5px] border border-neutral-700 rounded">
+                    <div className="col-span-9 flex rounded">
+                        <Button
+                            className="ml-auto"
+                            type="button"
+                            onClick={() => { dispatch({ action: "Clear" }); }}
+                        >Clear</Button>
+                    </div>
+                    <label>Name:</label>
                     <Input
+                        className="col-span-8"
                         value={addWorkFormData.name}
                         onChange={(event) => { dispatch({ action: "ChangeName", name: event.target.value }); }}
                         placeholder="Name"
                         required={true}
                     />
+                    <label>Progress:</label>
                     <Input
+                        className="col-span-8"
                         value={addWorkFormData.progress}
                         onChange={(event) => { dispatch({ action: "ChangeProgress", progress: event.target.value }); }}
                         placeholder="Progress"
                         required={true}
                     />
+                    <label>Status:</label>
                     <Select
+                        className="col-span-2"
                         value={addWorkFormData.statusIndex}
                         items={statuses.map((status, index) => ({ label: status.status, value: index }))}
                         onChange={(value) => { dispatch({ action: "ChangeStatus", statusIndex: value}); }}
                         selectMsg="Select Status"
                         errorMsg="No Statuses"
                     />
+                    <label>Type:</label>
                     <Select
+                        className="col-span-2"
                         value={addWorkFormData.typeIndex}
                         items={types.map((type, index) => ({ label: type.type, value: index }))}
                         onChange={(value) => { dispatch({ action: "ChangeType", typeIndex: value}); }}
                         selectMsg="Select Type"
                         errorMsg="No Types"
                     />
+                    <label>Format:</label>
                     <Select
+                        className="col-span-2"
                         value={addWorkFormData.formatIndex}
                         items={formats.map((format, index) => ({ label: format.format, value: index }))}
                         onChange={(value) => { dispatch({ action: "ChangeFormat", formatIndex: value}); }}
@@ -180,57 +160,29 @@ export default function AddWorkTab() {
                         errorMsg="No Formats"
                     />
                 </div>
-                <div className="grow flex border">
-                    <DndContext onDragStart={start} onDragEnd={test} sensors={sensors}>
-                        <div className="flex flex-col grow bg-slate-400">
-                            <Input
-                                value={creatorsFilter}
-                                placeholder="Find"
-                                type="search"
-                                onChange={(event) => { setCreatorsFilter(event.target.value); }}
-                            />
-                            <Virtuoso
-                                data={creatorsItems}
-                                computeItemKey={(_, creator) => creator.id }
-                                itemContent={(_, creator) => (
-                                    <div className="flex">
-                                        <Draggable
-                                            key={creator.id}
-                                            id={creator.id}
-                                            value={creator}
-                                            onClick={() => { navigationDispatch({ action: "New", page: { id: creator.id, type: "Creator" } }); }}
-                                        >{creator.name}</Draggable>
-                                        <button
-                                            type="button"
-                                            onClick={() => { dispatch({ action: "AddCreator", creator: creator }); }}
-                                        >{">"}</button>
-                                    </div>
-                                )}
-                            />
-                        </div>
-
-                        <DragOverlay dropAnimation={null}>
-                            {activeItemData ? (
-                                <div>{activeItemData.name}</div>
-                            ): null}
-                        </DragOverlay>
-
-                        <Droppable id={"CREATORS-DROPPABLE"}>
-                            {addWorkFormData.creators.map((creator) => (
-                                <div key={creator.id}>
-                                    <div>{creator.name}</div>
-                                    <DeleteButton
-                                        onClick={() => { dispatch({ action: "RemoveCreator", id: creator.id }); } }
-                                        title={`Remove creator "${creator.name}".`}
-                                    />
-                                </div>
-                            ))}
-                        </Droppable>
-                    </DndContext>
+                <div className="grow grid grid-cols-2 gap-x-[10px]">
+                    <div className="flex flex-col border border-neutral-700 rounded overflow-y-auto">
+                        <label className="p-[5px] border-b border-neutral-700 ">Creators:</label>
+                        <CreatorsTable
+                            creators={addWorkFormData.creators}
+                            storageKey={StorageKey.AddWorkCreatorsSort}
+                            name
+                            works
+                            onDetachCreator={(id) => { dispatch({ action: "RemoveCreator", id: id }); } }
+                        />
+                    </div>
+                    <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
+                        <AddCreatorsList
+                            workCreators={addWorkFormData.creators}
+                            storageKey={StorageKey.AddWorkCreatorsFilter}
+                            onButtonClick={(creator) => { dispatch({ action: "AddCreator", creator: creator }); }}
+                        />
+                    </div>
                 </div>
-                <Button>Add</Button>
+                <div className="pb-[5px] col-span-9">
+                    <Button className="w-[100px]">Add</Button>
+                </div>
             </form>
-            <Button onClick={() => { dispatch({ action: "Clear" }); }}>Clear</Button>
-        </>
+        </div>
     );
 }
