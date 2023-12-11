@@ -1,3 +1,7 @@
+import clsx from "clsx";
+
+
+
 type Item<T> = {
     label: string,
     value: T
@@ -7,6 +11,7 @@ type SelectProps<T> = {
     value: string | number | readonly string[],
     items: Item<T>[],
     onChange: (value: T) => void,
+    className?: string,
     selectMsg?: string
     errorMsg?: string
 }
@@ -17,6 +22,10 @@ export default function Select<T extends string | number | readonly string[]>(pr
     ));
     return (
         <select
+            className={clsx(
+                "px-[5px] py-[2px] border border-neutral-700 rounded-[5px] focus:outline-none",
+                props.className
+            )}
             value={props.value}
             onChange={(event) => { props.onChange(event.target.value as T); }}
             required

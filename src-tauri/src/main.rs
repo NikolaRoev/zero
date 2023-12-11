@@ -39,6 +39,8 @@ fn main() {
             api::add_status,
             api::get_statuses,
             api::update_status,
+            api::remove_work,
+            api::remove_creator,
             api::remove_status,
             api::add_type,
             api::get_types,

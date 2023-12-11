@@ -17,15 +17,15 @@ type UpdateWorkRowProps = {
 
 function UpdateWorkRow({ updateWork, onNameChange, onProgressChange }: UpdateWorkRowProps) {
     return (
-        <div className="px-[20px] py-[10px] flex flex-col">
+        <div className="px-[15px] py-[10px] flex flex-col bg-neutral-50">
             <input
-                className="text-[14px] grow focus:outline-none overflow-ellipsis"
+                className="text-[14px] grow focus:outline-none overflow-ellipsis bg-neutral-50"
                 value={updateWork.name}
                 onInput={(event: ChangeEvent<HTMLInputElement>) => { onNameChange(updateWork.id, event.target.value); }}
                 spellCheck={false}
             />
             <input
-                className="text-[14px] grow focus:outline-none overflow-ellipsis"
+                className="text-[14px] grow focus:outline-none overflow-ellipsis bg-neutral-50"
                 value={updateWork.progress}
                 onInput={(event: ChangeEvent<HTMLInputElement>) => { onProgressChange(updateWork.id, event.target.value); }}
                 spellCheck={false}
@@ -94,7 +94,7 @@ export default function UpdateTab() {
     const updateWorksItems = updateWorks.filter((work) => work.name.toLowerCase().includes(filter.toLowerCase()));
 
     return (
-        <div className="grow flex flex-col gap-y-[10px]">
+        <div className="p-[5px] grow flex flex-col gap-y-[10px] bg-neutral-50">
             <Input
                 ref={filterInput}
                 value={filter}

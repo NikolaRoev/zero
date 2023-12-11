@@ -23,8 +23,7 @@ export default defineConfig(() => ({
         sourcemap: true,
         rollupOptions: {
             input: {
-                "index": resolve(__dirname, "src", "index.html"),
-                "settings": resolve(__dirname, "src", "settings.html")
+                "index": resolve(__dirname, "src", "index.html")
             },
             output: {
                 dir: resolve(__dirname, "dist")

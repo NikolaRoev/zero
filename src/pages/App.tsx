@@ -91,10 +91,10 @@ function StartScreen() {
 function MainScreen() {
     return (
         <Tabs storageKey={StorageKey.MainScreenTabs} className="flex grow flex-col">
-            <TabBar className="">
-                <TabButton className="">Update</TabButton>
-                <TabButton className="">Library</TabButton>
-                <TabButton className="">Configuration</TabButton>
+            <TabBar>
+                <TabButton>Update</TabButton>
+                <TabButton>Library</TabButton>
+                <TabButton>Configuration</TabButton>
             </TabBar>
             <TabsContents>
                 <Tab><UpdateTab /></Tab>

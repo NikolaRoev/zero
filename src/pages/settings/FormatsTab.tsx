@@ -15,8 +15,8 @@ type FormatsListProps = {
 }
 function FormatsList({ formats, removeFormat }: FormatsListProps) {
     const formatsItems = formats.map((format) => (
-        <div key={format.id}>
-            <p>{format.format}</p>
+        <div key={format.id} className="flex even:bg-neutral-200">
+            <p className="grow p-[5px]">{format.format}</p>
             <DeleteButton
                 onClick={() => { removeFormat(format.id); } }
                 title={`Remove format "${format.format}".`}
@@ -24,9 +24,8 @@ function FormatsList({ formats, removeFormat }: FormatsListProps) {
         </div>
     ));
 
-    return <div>{formatsItems}</div>;
+    return <div className="grow border border-neutral-700 rounded-[5px] overflow-y-auto">{formatsItems}</div>;
 }
-
 
 
 
@@ -60,9 +59,10 @@ export default function TypesTab() {
 
 
     return (
-        <>
-            <form onSubmit={handleSubmit}>
+        <div className="p-[5px] grow flex flex-col gap-y-[10px]">
+            <form onSubmit={handleSubmit} className="flex gap-x-[3px]">
                 <Input
+                    className="grow"
                     value={formatInput}
                     onChange={(event) => { setFormatInput(event.target.value); }}
                     placeholder="Format"
@@ -71,6 +71,6 @@ export default function TypesTab() {
                 <Button>Add</Button>
             </form>
             <FormatsList formats={formats} removeFormat={removeFormat} />
-        </>
+        </div>
     );
 }

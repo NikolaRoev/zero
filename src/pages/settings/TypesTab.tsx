@@ -15,8 +15,8 @@ type TypesListProps = {
 }
 function TypesList({ types, removeType }: TypesListProps) {
     const typesItems = types.map((type) => (
-        <div key={type.id}>
-            <p>{type.type}</p>
+        <div key={type.id} className="flex even:bg-neutral-200">
+            <p className="grow p-[5px]">{type.type}</p>
             <DeleteButton
                 onClick={() => { removeType(type.id); } }
                 title={`Remove type "${type.type}".`}
@@ -24,7 +24,7 @@ function TypesList({ types, removeType }: TypesListProps) {
         </div>
     ));
 
-    return <div>{typesItems}</div>;
+    return <div className="grow border border-neutral-700 rounded-[5px] overflow-y-auto">{typesItems}</div>;
 }
 
 
@@ -58,9 +58,10 @@ export default function TypesTab() {
 
 
     return (
-        <>
-            <form onSubmit={handleSubmit}>
+        <div className="p-[5px] grow flex flex-col gap-y-[10px]">
+            <form onSubmit={handleSubmit} className="flex gap-x-[3px]">
                 <Input
+                    className="grow"
                     value={typeInput}
                     onChange={(event) => { setTypeInput(event.target.value); }}
                     placeholder="Type"
@@ -69,6 +70,6 @@ export default function TypesTab() {
                 <Button>Add</Button>
             </form>
             <TypesList types={types} removeType={removeType} />
-        </>
+        </div>
     );
 }

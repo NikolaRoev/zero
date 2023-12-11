@@ -503,6 +503,50 @@ pub fn update_status(database: tauri::State<Mutex<Database>>, id: i64, is_update
 }
 
 #[tauri::command]
+pub fn remove_work(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(), String> {
+    log::info!("Removing work {id}.");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let guard = database.lock().unwrap();
+        guard.remove("works", id)
+    };
+
+    match inner() {
+        Ok(()) => {
+            log::info!("Removed work {id}.");
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to remove work: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
+pub fn remove_creator(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(), String> {
+    log::info!("Removing creator {id}.");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let guard = database.lock().unwrap();
+        guard.remove("creators", id)
+    };
+
+    match inner() {
+        Ok(()) => {
+            log::info!("Removed creator {id}.");
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to remove creator: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
 pub fn remove_status(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(), String> {
     log::info!("Removing status {id}.");
 

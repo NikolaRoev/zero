@@ -1,17 +1,21 @@
 import * as api from "../../data/api";
 import { useCreator, useCreatorWorks } from "../../hooks/creators";
+import { BsPlus } from "react-icons/bs";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
-import { Virtuoso } from "react-virtuoso";
+import { Virtuoso} from "react-virtuoso";
 import type { Work } from "../../data/api";
+import WorksTable from "../../components/WorksTable";
+import clsx from "clsx";
+import { confirm } from "@tauri-apps/api/dialog";
 import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionState from "../../hooks/session-state";
 import { useWorks } from "../../hooks/works";
 
 
 
-function AddWorksList({ creatorId, creatorWorks, onAttachWork, onDetachWork }: { creatorId: number, creatorWorks: Work[], onAttachWork: (workId: number) => void, onDetachWork: (workId: number) => void }) {
+function AddWorksList({ creatorId, creatorWorks, onAttachWork }: { creatorId: number, creatorWorks: Work[], onAttachWork: (workId: number) => void }) {
     const { navigationDispatch } = useSafeContext(NavigationContext);
     const { works } = useWorks();
     const [filter, setFilter] = useSessionState(`ADD-WORKS-${creatorId}-KEY`, "");
@@ -19,7 +23,7 @@ function AddWorksList({ creatorId, creatorWorks, onAttachWork, onDetachWork }: {
     const worksItems = works.filter((work) => work.name.toLowerCase().includes(filter.toLowerCase()));
     
     return (
-        <div className="grow flex flex-col">
+        <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
             <Input
                 value={filter}
                 placeholder="Find"
@@ -27,27 +31,25 @@ function AddWorksList({ creatorId, creatorWorks, onAttachWork, onDetachWork }: {
                 onChange={(event) => { setFilter(event.target.value); } }
             />
             <Virtuoso
+                className="border border-neutral-700 rounded"
                 data={worksItems}
                 computeItemKey={(_, work) => work.id}
-                itemContent={(_, work) => {
+                itemContent={(index, work) => {
                     const attached = creatorWorks.find((creatorWork) => creatorWork.id === work.id) !== undefined;
                     return (
-                        <div className="flex">
+                        <div className={clsx("flex", { "bg-neutral-100": index % 2 })}>
                             <div
+                                className={clsx(
+                                    "p-[5px] flex grow overflow-hidden hover:bg-neutral-200 active:bg-neutral-300",
+                                    { "text-neutral-500": attached }
+                                )}
                                 onClick={() => { navigationDispatch({ action: "New", page: { type: "Work", id: work.id } }); }}
-                            >{work.name}</div>
-                            <button
-                                className="disabled:bg-gray-300"
+                            ><span className="overflow-hidden whitespace-nowrap overflow-ellipsis">{work.name}</span></div>
+                            { !attached && <button
+                                className="min-w-[32px] min-h-[32px] flex items-center justify-center hover:bg-neutral-300 active:bg-neutral-400"
                                 type="button"
-                                onClick={() => {
-                                    if (attached) {
-                                        onDetachWork(work.id);
-                                    }
-                                    else {
-                                        onAttachWork(work.id);
-                                    }
-                                }}
-                            >{attached ? "-" : "+"}</button>
+                                onClick={() => { onAttachWork(work.id); }}
+                            ><BsPlus /></button> }
                         </div>
                     );
                 }}
@@ -56,33 +58,9 @@ function AddWorksList({ creatorId, creatorWorks, onAttachWork, onDetachWork }: {
     );
 }
 
-function CreatorWorksList({ creatorWorks, onDetachWork }: { creatorWorks: Work[], onDetachWork: (workId: number) => void }) {
-    const { navigationDispatch } = useSafeContext(NavigationContext);
-
-    return (
-        <div className="grow">
-            <Virtuoso
-                data={creatorWorks}
-                computeItemKey={(_, work) => work.id}
-                itemContent={(index, work) => (
-                    <div key={work.id} >
-                        <p>{index + 1}.</p>
-                        <p onClick={() => { navigationDispatch({ action: "New", page: { id: work.id, type: "Work" }}); }}>{work.name}</p>
-                        <p>Progress: {work.progress}</p>
-                        <p>Status: {work.status}</p>
-                        <p>Type: {work.type}</p>
-                        <p>Format: {work.format}</p>
-                        <p>Updated: {work.updated}</p>
-                        <p>Added: {work.added}</p>
-                        <Button onClick={() => { onDetachWork(work.id); }}>REMOVE</Button>
-                    </div>
-                )}
-            />
-        </div>
-    );
-}
 
 export default function CreatorPage({ id }: { id: number }) {
+    const { navigationDispatch } = useSafeContext(NavigationContext);
     const { creator, setCreator, getCreator } = useCreator(id);
     const { creatorWorks, setCreatorWorks, getCreatorWorks } = useCreatorWorks(id);
 
@@ -114,18 +92,50 @@ export default function CreatorPage({ id }: { id: number }) {
 
 
     return (
-        <div className="flex flex-col grow">
-            <label>ID: {creator.id}</label>
-            <Input
-                value={creator.name}
-                placeholder="Name"
-                onChange={(event) => { handleNameChange(creator.id, event.target.value); }}
-            />
-            <label>Works: {creator.works}</label>
+        <div className="grow p-[5px] flex flex-col gap-y-[10px]">
+            <div className="p-[5px] grid grid-cols-9 gap-x-[40px] gap-y-[5px] border border-neutral-700 rounded">
+                <label className="whitespace-nowrap">Creator ID:</label>
+                <label className="col-span-7">{creator.id}</label>
+                <Button
+                    onClick={() => {
+                        confirm(`Delete work "${creator.name}"?`, { title: "Delete Creator", okLabel: "Yes", cancelLabel: "No", type: "warning" }).then(async (result) => {
+                            if (result) {
+                                await api.removeCreator(creator.id);
+                                navigationDispatch({ action: "Clear" });
+                            }
+                        }).catch((reason) => { alert(reason); });
+                    }}
+                >Delete</Button>
+                <label>Name:</label>
+                <Input
+                    className="col-span-8"
+                    value={creator.name}
+                    placeholder="Name"
+                    onChange={(event) => { handleNameChange(creator.id, event.target.value); }}
+                />
+                <label>Works:</label>
+                <label className="col-span-7">{creator.works}</label>
+            </div>
 
-            <div className="flex grow">
-                <CreatorWorksList creatorWorks={creatorWorks} onDetachWork={handleDetachWork}/>
-                <AddWorksList creatorId={id} creatorWorks={creatorWorks} onAttachWork={handleAttachWork} onDetachWork={handleDetachWork}/>
+            <div className="grow grid grid-cols-2 gap-x-[10px]">
+                <div className="flex flex-col border border-neutral-700 rounded">
+                    <label className="p-[5px] border-b border-neutral-700 ">Works:</label>
+                    <WorksTable
+                        works={creatorWorks}
+                        storageKey={`CREATOR-WORKS-${id}-SORT-KEY`}
+                        headerClassName="text-sm"
+                        dataClassName="text-xs"
+                        name
+                        progress
+                        status
+                        type
+                        format
+                        updated
+                        added
+                        onDetachWork={handleDetachWork}
+                    />
+                </div>
+                <AddWorksList creatorId={id} creatorWorks={creatorWorks} onAttachWork={handleAttachWork} />
             </div>
         </div>
     );

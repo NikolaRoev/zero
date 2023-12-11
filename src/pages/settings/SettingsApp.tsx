@@ -9,7 +9,7 @@ import TypesTab from "./TypesTab";
 
 export default function SettingsApp() {
     return (
-        <Tabs storageKey={StorageKey.SettingsTabs} className="flex grow flex-col">
+        <Tabs storageKey={StorageKey.SettingsTabs} className="pt-[30px] flex grow flex-col">
             <TabBar>
                 <TabButton>Statuses</TabButton>
                 <TabButton>Types</TabButton>

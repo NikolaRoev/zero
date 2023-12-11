@@ -1,60 +1,17 @@
-import { type TableProps, TableVirtuoso } from "react-virtuoso";
+import Button from "../../components/Button";
 import { Fragment } from "react";
 import Input from "../../components/Input";
-import { NavigationContext } from "../../contexts/navigation-context";
 import Select from "../../components/Select";
 import { StorageKey } from "../../data/storage";
-import type { Work } from "../../data/api";
+import WorksTable from "../../components/WorksTable";
 import clsx from "clsx";
-import { formatDistanceToNowStrict } from "date-fns";
 import useFormats from "../../hooks/formats";
-import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer";
 import { useStatuses } from "../../hooks/statuses";
 import useTypes from "../../hooks/types";
 import { useWorks } from "../../hooks/works";
 
 
-
-function WorksTable({works}: {works: Work[]}) {
-    const { navigationDispatch } = useSafeContext(NavigationContext);
-
-    return(
-        <div className="pl-[10px] grow">
-            <TableVirtuoso
-                components={{
-                    Table: ({ style, ...props } : TableProps) => (
-                        <table
-                            {...props}
-                            style={{ ...style }}
-                            className="w-[100%] border-[1px] border-collapse"
-                        />
-                    )
-                }}
-                data={works}
-                computeItemKey={(_, work) => work.id }
-                fixedHeaderContent={() => (
-                    <tr className="border-[1px] bg-gray-300 border-black">
-                        <th className="border-[1px] border-black"></th>
-                        <th className="border-[1px] border-black">Name</th>
-                        <th className="border-[1px] border-black">Progress</th>
-                        <th className="border-[1px] border-black">Updated</th>
-                        <th className="border-[1px] border-black">Added</th>
-                    </tr>
-                )}
-                itemContent={(index, work) => (
-                    <>
-                        <td className="w-[1%] p-[5px] border-[1px] border-black">{index + 1}.</td>
-                        <td onClick={() => { navigationDispatch({action: "New", page: {id: work.id, type: "Work"}}); }} title={work.name} className="max-w-0 p-[5px] border-[1px] border-black overflow-hidden whitespace-nowrap overflow-ellipsis">{work.name}</td>
-                        <td className="w-[1%] p-[5px] border-[1px] border-black whitespace-nowrap">{work.progress}</td>
-                        <td title={formatDistanceToNowStrict(Date.parse(work.updated), { addSuffix: true })} className="w-[1%] p-[5px] border-[1px] border-black whitespace-nowrap">{work.updated}</td>
-                        <td title={formatDistanceToNowStrict(Date.parse(work.added), { addSuffix: true })} className="w-[1%] p-[5px] border-[1px] border-black whitespace-nowrap">{work.added}</td>
-                    </>
-                )}
-            />
-        </div>
-    );
-}
 
 type By = "name" | "progress";
 type Filter = {
@@ -206,31 +163,44 @@ export default function WorksTab() {
     });
     
     return (
-        <div className="grow flex flex-col gap-y-[10px]">
-            <div className="flex flex-col">
-                <Input
-                    value={filter.value}
-                    placeholder="Find"
-                    type="search"
-                    onChange={(event) => { filterDispatch({ action: "ChangeValue", value: event.target.value }); }}
-                />
-                <Select
-                    value={filter.by}
-                    items={[{ label: "Name", value: "name" }, { label: "Progress", value: "progress" }]}
-                    onChange={(value: By) => { filterDispatch({ action: "ChangeBy", by: value }); }}
-                />
-                <fieldset>
-                    <legend>Statuses</legend>{statusesItems}
-                </fieldset>
-                <fieldset>
-                    <legend>Types</legend>{typesItems}
-                </fieldset>
-                <fieldset>
-                    <legend>Formats</legend>{formatsItems}
-                </fieldset>
-                <button onClick={() => { filterDispatch({ action: "Clear"}); }}>Clear</button>
+        <div className="p-[5px] grow flex flex-col gap-y-[10px]">
+            <div className="flex flex-col gap-y-[5px]">
+                <div className="flex gap-x-[3px]">
+                    <Input
+                        className="grow"
+                        value={filter.value}
+                        placeholder="Find"
+                        type="search"
+                        onChange={(event) => { filterDispatch({ action: "ChangeValue", value: event.target.value }); }}
+                    />
+                    <Select
+                        value={filter.by}
+                        items={[{ label: "Name", value: "name" }, { label: "Progress", value: "progress" }]}
+                        onChange={(value: By) => { filterDispatch({ action: "ChangeBy", by: value }); }}
+                        selectMsg="Find By"
+                    />
+                    <Button onClick={() => { filterDispatch({ action: "Clear"}); }}>Clear</Button>
+                </div>
+                <div className="flex gap-x-[5px]">
+                    <fieldset className="grow p-[5px] border border-neutral-700 rounded-[5px] flex gap-x-[5px]">
+                        <legend>Statuses</legend>{statusesItems}
+                    </fieldset>
+                    <fieldset className="grow p-[5px] border border-neutral-700 rounded-[5px] flex gap-x-[5px]">
+                        <legend>Types</legend>{typesItems}
+                    </fieldset>
+                    <fieldset className="grow p-[5px] border border-neutral-700 rounded-[5px] flex gap-x-[5px]">
+                        <legend>Formats</legend>{formatsItems}
+                    </fieldset>
+                </div>
             </div>
-            <WorksTable works={worksItems} />
+            <WorksTable
+                works={worksItems}
+                storageKey={StorageKey.LibraryWorksSort}
+                name
+                progress
+                updated
+                added
+            />
         </div>
     );
 }

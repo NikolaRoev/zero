@@ -10,11 +10,11 @@ import WorksTab from "./WorksTab";
 export default function HomePage() {
     return (
         <Tabs storageKey={StorageKey.HomePageTabs} className="flex grow flex-col">
-            <TabBar className="">
-                <TabButton className="">Works</TabButton>
-                <TabButton className="">Creators</TabButton>
-                <TabButton className="">Add Work</TabButton>
-                <TabButton className="">Add Creator</TabButton>
+            <TabBar>
+                <TabButton>Works</TabButton>
+                <TabButton>Creators</TabButton>
+                <TabButton>Add Work</TabButton>
+                <TabButton>Add Creator</TabButton>
             </TabBar>
             <TabsContents>
                 <Tab><WorksTab /></Tab>

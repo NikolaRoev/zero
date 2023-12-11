@@ -132,6 +132,14 @@ export function updateStatus(id: number, isUpdate: boolean): Promise<void> {
     return invoke("update_status", { id, isUpdate });
 }
 
+export function removeWork(id: number): Promise<void> {
+    return invoke("remove_work", { id });
+}
+
+export function removeCreator(id: number): Promise<void> {
+    return invoke("remove_creator", { id });
+}
+
 export function removeStatus(id: number): Promise<void> {
     return invoke("remove_status", { id });
 }

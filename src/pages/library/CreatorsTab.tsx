@@ -1,49 +1,9 @@
-import { type TableProps, TableVirtuoso } from "react-virtuoso";
-import type { Creator } from "../../data/api";
+import CreatorsTable from "../../components/CreatorsTable";
 import Input from "../../components/Input";
-import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
 import { useCreators } from "../../hooks/creators";
-import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionState from "../../hooks/session-state";
 
-
-
-function CreatorsTable({ creators }: { creators: Creator[]}) {
-    const { navigationDispatch } = useSafeContext(NavigationContext);
-    
-    return(
-        <div className="pl-[10px] grow">
-            <TableVirtuoso
-                components={{
-                    Table: ({ style, ...props } : TableProps) => (
-                        <table
-                            {...props}
-                            style={{ ...style }}
-                            className="w-[100%] border-[1px] border-collapse"
-                        />
-                    )
-                }}
-                data={creators}
-                computeItemKey={(_, creator) => creator.id }
-                fixedHeaderContent={() => (
-                    <tr className="border-[1px] bg-gray-300 border-black">
-                        <th className="border-[1px] border-black"></th>
-                        <th className="border-[1px] border-black">Name</th>
-                        <th className="border-[1px] border-black">Works</th>
-                    </tr>
-                )}
-                itemContent={(index, creator) => (
-                    <>
-                        <td className="w-[1%] p-[5px] border-[1px] border-black">{index + 1}.</td>
-                        <td onClick={() => { navigationDispatch({ action: "New", page: { id: creator.id, type: "Creator" }}); }} title={creator.name} className="max-w-0 p-[5px] border-[1px] border-black overflow-hidden whitespace-nowrap overflow-ellipsis">{creator.name}</td>
-                        <td className="w-[1%] p-[5px] border-[1px] border-black whitespace-nowrap">{creator.works}</td>
-                    </>
-                )}
-            />
-        </div>
-    );
-}
 
 
 export default function CreatorsTab() {
@@ -60,7 +20,7 @@ export default function CreatorsTab() {
     });
     
     return (
-        <div className="grow flex flex-col gap-y-[10px]">
+        <div className="p-[5px] grow flex flex-col gap-y-[10px]">
             <div className="flex flex-col">
                 <Input
                     value={filter}
@@ -69,7 +29,12 @@ export default function CreatorsTab() {
                     onChange={(event) => { setFilter(event.target.value); }}
                 />
             </div>
-            <CreatorsTable creators={creatorsItems} />
+            <CreatorsTable
+                creators={creatorsItems}
+                storageKey={StorageKey.LibraryCreatorsSort}
+                name
+                works
+            />
         </div>
     );
 }

@@ -1,4 +1,3 @@
-- sorting
 - navigation dropdown
 - deleting work/creator
 - auto-update

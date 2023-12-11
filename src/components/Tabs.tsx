@@ -1,5 +1,6 @@
 import { type ReactElement } from "react";
 import type { StorageKey } from "../data/storage";
+import clsx from "clsx";
 import useSessionState from "../hooks/session-state";
 
 
@@ -18,14 +19,12 @@ export const TabsContents = ({}: TabsContentsProps) => <></>;
 
 type TabButtonProps = {
     children: ReactElement | ReactElement[] | string,
-    className?: string
 };
 export const TabButton = ({}: TabButtonProps) => <></>;
 
 
 type TabBarProps = {
     children: ReactElement<TabButtonProps>[],
-    className?: string
 };
 export const TabBar = ({}: TabBarProps) => <></>;
 
@@ -45,12 +44,16 @@ export function Tabs({ children, storageKey, className, defaultIndex = 0 }: Tabs
 
     return (
         <div className={className}>
-            <div className={tabBar.props.className}>
+            <div className="pl-[5px] bg-neutral-300">
                 {
                     tabBar.props.children.map((tabButton: ReactElement<TabButtonProps>, tabButtonIndex) => (
                         <button
                             key={tabButtonIndex}
-                            className={tabButton.props.className}
+                            className={clsx(
+                                "px-[15px] rounded-tr-[8px] rounded-tl-[8px]",
+                                { "hover:bg-neutral-200 active:bg-neutral-50": tabButtonIndex !== index },
+                                tabButtonIndex === index ? "bg-neutral-50" : "bg-neutral-300"
+                            )}
                             onClick={() => { setIndex(tabButtonIndex); }}
                         >{tabButton.props.children}</button>
                     ))

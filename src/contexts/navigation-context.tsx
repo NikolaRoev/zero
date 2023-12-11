@@ -1,7 +1,8 @@
 import { StorageKey } from "../data/storage";
+import clsx from "clsx";
 import { createContext } from "react";
 import useSessionReducer from "../hooks/session-reducer";
-
+import { BsHouse, BsArrowLeft, BsArrowRight } from "react-icons/bs";
 
 
 type Page =
@@ -77,10 +78,31 @@ export default function NavigationContextProvider({ children, storageKey }: { ch
     return (
         <NavigationContext.Provider value={{ navigationData: navigationData, navigationDispatch: navigationDispatch }}>
             <div className="grow flex flex-col">
-                <div className="flex">
-                    <button onClick={() => { navigationDispatch({action: "Home" }); }}>HOME</button>
-                    <button onClick={() => { navigationDispatch({action: "Back" }); }}>BACK</button>
-                    <button onClick={() => { navigationDispatch({action: "Forward" }); }}>FORWARD</button>
+                <div className="p-[5px] flex gap-x-[8px] bg-neutral-50">
+                    <button
+                        className={clsx(
+                            "p-[2px] rounded-[5px] select-none",
+                            "hover:bg-neutral-200 active:bg-neutral-300",
+                            { "pointer-events-none": navigationData.index === 0 }
+                        )}
+                        onClick={() => { navigationDispatch({action: "Home" }); }}
+                    ><BsHouse className={clsx({ "fill-neutral-400": navigationData.index === 0 })}/></button>
+                    <button
+                        className={clsx(
+                            "p-[2px] rounded-[5px] select-none",
+                            "hover:bg-neutral-200 active:bg-neutral-300",
+                            { "pointer-events-none": navigationData.index === 0 }
+                        )}
+                        onClick={() => { navigationDispatch({action: "Back" }); }}
+                    ><BsArrowLeft className={clsx({ "fill-neutral-400": navigationData.index === 0 })} /></button>
+                    <button
+                        className={clsx(
+                            "p-[2px] rounded-[5px] select-none",
+                            "hover:bg-neutral-200 active:bg-neutral-300",
+                            { "pointer-events-none": navigationData.index >= (navigationData.pages.length - 1) }
+                        )}
+                        onClick={() => { navigationDispatch({action: "Forward" }); }}
+                    ><BsArrowRight className={clsx({ "fill-neutral-400": navigationData.index >= (navigationData.pages.length - 1) })} /></button>
                 </div>
                 {children}
             </div>

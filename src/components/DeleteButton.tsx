@@ -1,13 +1,16 @@
+import { BsX, BsXCircle } from "react-icons/bs";
+import clsx from "clsx";
 import { useState } from "react";
 
 
 
 type DeleteButtonProps = {
     onClick: () => void,
-    title: string
+    title: string,
+    className?: string,
 }
 
-export default function DeleteButton({ onClick, title }: DeleteButtonProps) {
+export default function DeleteButton({ onClick, title, className }: DeleteButtonProps) {
     const [triggered, setTriggered] = useState(false);
 
 
@@ -27,10 +30,13 @@ export default function DeleteButton({ onClick, title }: DeleteButtonProps) {
 
     return (
         <button
-            className="min-w-[32px] min-h-[32px] flex items-center justify-center hover:bg-gray-400 active:bg-gray-600"
+            className={clsx(
+                "min-w-[32px] min-h-[32px] flex items-center justify-center hover:bg-neutral-300 active:bg-neutral-400",
+                className
+            )}
             onClick={handleClick}
             title={title}
             type="button"
-        ><img src={triggered ? "/icons/x-circle.svg" : "/icons/trash.svg"} /></button>
+        >{triggered ? <BsXCircle /> : <BsX />}</button>
     );
 }
