@@ -1,7 +1,7 @@
 export enum StorageKey {
     MainScreenTabs = "MAIN-SCREEN-TABS-KEY",
     HomePageTabs = "HOME-PAGE-TABS-KEY",
-    SettingsTabs = "SETTINGS-TABS-KEY",
+    ConfigurationTabs = "CONFIGURATION-TABS-KEY",
 
     UpdateFilter = "UPDATE-FILTER-KEY",
 

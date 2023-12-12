@@ -3,9 +3,9 @@ import * as e from "../data/events";
 import { type Event, type UnlistenFn, listen } from "@tauri-apps/api/event";
 import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../components/Tabs";
 import { useEffect, useState } from "react";
+import ConfigurationTab from "./settings/ConfigurationTab";
 import DeleteButton from "../components/DeleteButton";
 import LibraryTab from "./library/LibraryTab";
-import SettingsApp from "./settings/SettingsApp";
 import { StorageKey } from "../data/storage";
 import UpdateTab from "./update/UpdateTab";
 
@@ -99,7 +99,7 @@ function MainScreen() {
             <TabsContents>
                 <Tab><UpdateTab /></Tab>
                 <Tab><LibraryTab /></Tab>
-                <Tab><SettingsApp /></Tab>
+                <Tab><ConfigurationTab /></Tab>
             </TabsContents>
         </Tabs>
     );
