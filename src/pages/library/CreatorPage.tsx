@@ -1,63 +1,15 @@
 import * as api from "../../data/api";
 import type { Creator, Work } from "../../data/api";
 import { useCreator, useCreatorWorks } from "../../hooks/creators";
-import { BsPlus } from "react-icons/bs";
+import AddWorksList from "../../components/AddWorksList";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
-import { Virtuoso} from "react-virtuoso";
 import WorksTable from "../../components/WorksTable";
-import clsx from "clsx";
 import { confirm } from "@tauri-apps/api/dialog";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
-import useSessionState from "../../hooks/session-state";
-import { useWorks } from "../../hooks/works";
 
-
-
-function AddWorksList({ creatorId, creatorWorks, onAttachWork }: { creatorId: number, creatorWorks: Work[], onAttachWork: (workId: number) => void }) {
-    const { navigationDispatch } = useSafeContext(NavigationContext);
-    const { works } = useWorks();
-    const [filter, setFilter] = useSessionState(`ADD-WORKS-${creatorId}-KEY`, "");
-
-    const worksItems = works.filter((work) => work.name.toLowerCase().includes(filter.toLowerCase()));
-    
-    return (
-        <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
-            <Input
-                value={filter}
-                placeholder="Find"
-                type="search"
-                onChange={(event) => { setFilter(event.target.value); } }
-            />
-            <Virtuoso
-                className="border border-neutral-700 rounded"
-                data={worksItems}
-                computeItemKey={(_, work) => work.id}
-                itemContent={(index, work) => {
-                    const attached = creatorWorks.find((creatorWork) => creatorWork.id === work.id) !== undefined;
-                    return (
-                        <div className={clsx("flex", { "bg-neutral-100": index % 2 })}>
-                            <div
-                                className={clsx(
-                                    "p-[5px] flex grow overflow-hidden hover:bg-neutral-200 active:bg-neutral-300",
-                                    { "text-neutral-500": attached }
-                                )}
-                                onClick={() => { navigationDispatch({ action: "New", page: { type: "Work", id: work.id } }); }}
-                            ><span className="overflow-hidden whitespace-nowrap overflow-ellipsis">{work.name}</span></div>
-                            { !attached && <button
-                                className="min-w-[32px] min-h-[32px] flex items-center justify-center hover:bg-neutral-300 active:bg-neutral-400"
-                                type="button"
-                                onClick={() => { onAttachWork(work.id); }}
-                            ><BsPlus /></button> }
-                        </div>
-                    );
-                }}
-            />
-        </div>
-    );
-}
 
 
 export default function CreatorPage({ id }: { id: number }) {
@@ -74,8 +26,8 @@ export default function CreatorPage({ id }: { id: number }) {
         });
     }
 
-    function handleAttachWork(workId: number) {
-        api.attach(workId, id)
+    function handleAttachWork(work: Work) {
+        api.attach(work.id, id)
             .catch((reason) => { alert(reason); })
             .finally(() => { getCreatorWorks(); });
     }
@@ -137,7 +89,13 @@ export default function CreatorPage({ id }: { id: number }) {
                         onDetachWork={handleDetachWork}
                     />
                 </div>
-                <AddWorksList creatorId={id} creatorWorks={creatorWorks} onAttachWork={handleAttachWork} />
+                <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
+                    <AddWorksList
+                        storageKey={`ADD-WORKS-${id}-KEY`}
+                        creatorWorks={creatorWorks}
+                        onButtonClick={handleAttachWork}
+                    />
+                </div>
             </div>
         </div>
     );

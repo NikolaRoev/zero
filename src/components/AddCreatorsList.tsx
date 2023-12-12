@@ -42,11 +42,13 @@ export default function AddCreatorsList({ storageKey, workCreators, onButtonClic
                         <div className={clsx("flex", { "bg-neutral-100": index % 2 })}>
                             <div
                                 className={clsx(
-                                    "p-[5px] flex grow overflow-hidden hover:bg-neutral-200 active:bg-neutral-300",
+                                    "p-[5px] grow",
+                                    "overflow-hidden whitespace-nowrap overflow-ellipsis",
+                                    "hover:bg-neutral-200 active:bg-neutral-300",
                                     { "text-neutral-500": attached }
                                 )}
                                 onClick={() => { navigationDispatch({ action: "New", page: { type: "Creator", id: creator.id } }); }}
-                            ><span className="overflow-hidden whitespace-nowrap overflow-ellipsis">{creator.name}</span></div>
+                            >{creator.name}</div>
                             { !attached && <button
                                 className="min-w-[32px] min-h-[32px] flex items-center justify-center hover:bg-neutral-300 active:bg-neutral-400"
                                 type="button"

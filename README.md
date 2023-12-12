@@ -1,5 +1,6 @@
-- start screen
 - navigation dropdown
+- better behaviour for nav when deleting stuff
+- more button for dbs
 - clean-up
 - testing
 - auto-update

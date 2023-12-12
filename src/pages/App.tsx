@@ -1,73 +1,32 @@
 import * as api from "../data/api";
-import * as e from "../data/events";
-import { type Event, type UnlistenFn, listen } from "@tauri-apps/api/event";
 import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../components/Tabs";
-import { useEffect, useState } from "react";
+import { useDatabasePath, useRecentDatabases } from "../hooks/database-hook";
 import ConfigurationTab from "./settings/ConfigurationTab";
 import DeleteButton from "../components/DeleteButton";
 import LibraryTab from "./library/LibraryTab";
 import { StorageKey } from "../data/storage";
 import UpdateTab from "./update/UpdateTab";
+import clsx from "clsx";
 
-
-
-function useDatabase() {
-    const [path, setPath] = useState<string | null>(null);
-
-    useEffect(() => {
-        api.databasePath().then((value) => {
-            setPath(value);
-        }).catch((reason) => { alert(reason); });
-
-        const closedUnlisten = listen(e.CLOSED_DATABASE_EVENT, () => {
-            setPath(null);
-        }).catch((reason) => {
-            api.error(`Failed to listen for database closed event in Main: ${reason}`);
-        });
-        
-        const openUnlisten = listen(e.OPENED_DATABASE_EVENT, (event: Event<string>) => {
-            sessionStorage.clear();
-            setPath(event.payload);
-        }).catch((reason) => {
-            api.error(`Failed to listen for database opened event in Main: ${reason}`);
-        });
-
-        return () => {
-            closedUnlisten.then((f: UnlistenFn) => { f(); }).catch((reason) => {
-                api.error(`Failed to unlisten for database closed event in Main: ${reason}`);
-            });
-
-            openUnlisten.then((f: UnlistenFn) => { f(); }).catch((reason) => {
-                api.error(`Failed to unlisten for database opened event in Main: ${reason}`);
-            });
-        };
-    }, []);
-
-    return { path };
-}
 
 
 function StartScreen() {
-    const [recentDatabases, setRecentDatabases] = useState<string[]>([]);
+    const { recentDatabases, setRecentDatabases } = useRecentDatabases();
 
-    useEffect(() => {
-        api.getRecentDatabases().then((value) => {
-            setRecentDatabases(value);
-        }).catch((reason) => {
-            api.error(`Failed to get recent databases in Start: ${reason}`);
-        });
-    }, []);
-
+    
     function openDatabase(path: string) {
         api.openDatabase(path).catch((reason) => { alert(reason); });
     }
 
+
     const recentDatabasesItems = recentDatabases.map((value, index) => (
-        <div key={value} className="flex">
+        <div key={value} className={clsx("flex", { "bg-neutral-100": index % 2 })}>
+            <div className="p-[5px]">{index + 1}.</div>
             <div
-                className="hover:bg-gray-400 active:bg-gray-600 select-none"
+                className="p-[5px] overflow-hidden whitespace-nowrap overflow-ellipsis grow hover:bg-neutral-200 active:bg-neutral-300"
                 onClick={() => { openDatabase(value); }}
-            >{index + 1}. {value}</div>
+                title={value}
+            >{value}</div>
             <DeleteButton
                 onClick={() => {
                     api.removeRecentDatabase(value).then(() => {
@@ -77,12 +36,14 @@ function StartScreen() {
                 title={`Remove recent database "${value}".`}
             />
         </div>
-        
     ));
 
     return (
-        <div className="flex flex-col grow">
-            {recentDatabasesItems}
+        <div className="translate-x-1/2 translate-y-1/2 w-1/2 h-1/2 flex flex-col border border-neutral-700 rounded">
+            <label className="p-[5px] border-b border-neutral-700"> Open Recent Databases:</label>
+            <div className="flex flex-col rounded overflow-y-auto select-none">
+                {recentDatabasesItems}
+            </div>
         </div>
     );
 }
@@ -107,7 +68,7 @@ function MainScreen() {
 
 
 export default function App() {
-    const { path } = useDatabase();
+    const { path } = useDatabasePath();
 
     return path === null ? <StartScreen /> : <MainScreen key={path} />;
 }
