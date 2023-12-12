@@ -37,9 +37,7 @@ export function useWorks() {
 }
 
 export function useWork(id: number) {
-    const [work, setWork] = useState<Work>({
-        id: 0, name: "", progress: "", status: "", type: "", format: "", updated: "0", added: "0"
-    });
+    const [work, setWork] = useState<Work>();
 
     const getWork = useCallback(() => {
         api.getWork(id).then((value) => {

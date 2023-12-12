@@ -21,9 +21,7 @@ export function useCreators() {
 }
 
 export function useCreator(id: number) {
-    const [creator, setCreator] = useState<Creator>({
-        id: 0, name: "", works: 0
-    });
+    const [creator, setCreator] = useState<Creator>();
 
     const getCreator = useCallback(() => {
         api.getCreator(id).then((value) => {

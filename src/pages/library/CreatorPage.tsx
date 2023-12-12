@@ -1,11 +1,11 @@
 import * as api from "../../data/api";
+import type { Creator, Work } from "../../data/api";
 import { useCreator, useCreatorWorks } from "../../hooks/creators";
 import { BsPlus } from "react-icons/bs";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import { Virtuoso} from "react-virtuoso";
-import type { Work } from "../../data/api";
 import WorksTable from "../../components/WorksTable";
 import clsx from "clsx";
 import { confirm } from "@tauri-apps/api/dialog";
@@ -66,7 +66,7 @@ export default function CreatorPage({ id }: { id: number }) {
     const { creatorWorks, setCreatorWorks, getCreatorWorks } = useCreatorWorks(id);
 
     
-    function handleNameChange(id: number, value: string) {
+    function handleNameChange(creator: Creator, value: string) {
         setCreator({...creator, name: value });
         api.updateCreatorName(id, value).catch((reason) => {
             getCreator();
@@ -93,7 +93,7 @@ export default function CreatorPage({ id }: { id: number }) {
 
 
     return (
-        <div className="grow p-[5px] flex flex-col gap-y-[10px]">
+        creator && <div className="grow p-[5px] flex flex-col gap-y-[10px]">
             <div className="p-[5px] grid grid-cols-9 gap-x-[40px] gap-y-[5px] border border-neutral-700 rounded">
                 <label className="whitespace-nowrap">Creator ID:</label>
                 <label className="col-span-7">{creator.id}</label>
@@ -113,7 +113,7 @@ export default function CreatorPage({ id }: { id: number }) {
                     className="col-span-8"
                     value={creator.name}
                     placeholder="Name"
-                    onChange={(event) => { handleNameChange(creator.id, event.target.value); }}
+                    onChange={(event) => { handleNameChange(creator, event.target.value); }}
                 />
                 <label>Works:</label>
                 <label className="col-span-7">{creator.works}</label>
