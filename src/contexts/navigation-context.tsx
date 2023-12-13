@@ -1,8 +1,8 @@
+import { BsArrowLeft, BsArrowRight, BsHouse } from "react-icons/bs";
 import { StorageKey } from "../data/storage";
 import clsx from "clsx";
 import { createContext } from "react";
 import useSessionReducer from "../hooks/session-reducer";
-import { BsHouse, BsArrowLeft, BsArrowRight } from "react-icons/bs";
 
 
 type Page =
