@@ -1,4 +1,4 @@
-- update the select component to take children of option so we can make the update statuses underlined
+- sort indicators in the tables
 - more button for dbs
 - clean-up
 - testing

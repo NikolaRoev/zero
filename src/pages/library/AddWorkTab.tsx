@@ -1,11 +1,11 @@
 import type { Creator, Work } from "../../data/api";
+import { Option, Select } from "../../components/Select";
 import AddCreatorsList from "../../components/AddCreatorsList";
 import Button from "../../components/Button";
 import CreatorsTable from "../../components/CreatorsTable";
 import { DataContext } from "../../contexts/data-context";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
-import Select from "../../components/Select";
 import { StorageKey } from "../../data/storage";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
@@ -154,29 +154,41 @@ export default function AddWorkTab() {
                     <Select
                         className="col-span-2"
                         value={addWorkFormData.statusIndex}
-                        items={statuses.map((status, index) => ({ label: status.status, value: index }))}
                         onChange={(value) => { addWorkFormDispatch({ action: "ChangeStatus", statusIndex: value}); }}
                         selectMsg="Select Status"
                         errorMsg="No Statuses"
-                    />
+                    >
+                        {statuses.map((status, index) => (
+                            <Option
+                                key={status.status}
+                                value={index}
+                            >{status.status}</Option>
+                        ))}
+                    </Select>
                     <label>Type:</label>
                     <Select
                         className="col-span-2"
                         value={addWorkFormData.typeIndex}
-                        items={types.map((type, index) => ({ label: type.type, value: index }))}
                         onChange={(value) => { addWorkFormDispatch({ action: "ChangeType", typeIndex: value}); }}
                         selectMsg="Select Type"
                         errorMsg="No Types"
-                    />
+                    >
+                        {types.map((type, index) => (
+                            <Option key={type.type} value={index}>{type.type}</Option>
+                        ))}
+                    </Select>
                     <label>Format:</label>
                     <Select
                         className="col-span-2"
                         value={addWorkFormData.formatIndex}
-                        items={formats.map((format, index) => ({ label: format.format, value: index }))}
                         onChange={(value) => { addWorkFormDispatch({ action: "ChangeFormat", formatIndex: value}); }}
                         selectMsg="Select Format"
                         errorMsg="No Formats"
-                    />
+                    >
+                        {formats.map((format, index) => (
+                            <Option key={format.format} value={index}>{format.format}</Option>
+                        ))}
+                    </Select>
                 </div>
                 <div className="grow grid grid-cols-2 gap-x-[10px]">
                     <div className="flex flex-col border border-neutral-700 rounded overflow-y-auto">

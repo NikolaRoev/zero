@@ -2,24 +2,25 @@ import clsx from "clsx";
 
 
 
-type Item<T> = {
-    label: string,
+type OptionProps<T> = {
+    children: React.ReactNode,
     value: T
 }
 
+export function Option<T extends string | number | readonly string[]>(props: OptionProps<T>) {
+    return <option value={props.value}>{props.children}</option>;
+}
+
 type SelectProps<T> = {
-    value: string | number | readonly string[],
-    items: Item<T>[],
+    children: React.ReactElement<OptionProps<T>>[],
+    value: T,
     onChange: (value: T) => void,
     className?: string,
     selectMsg?: string
     errorMsg?: string
 }
 
-export default function Select<T extends string | number | readonly string[]>(props: SelectProps<T>) {
-    const optionItems = props.items.map((item) => (
-        <option key={item.label} value={item.value}>{item.label}</option>
-    ));
+export function Select<T extends string | number | readonly string[]>(props: SelectProps<T>) {
     return (
         <select
             className={clsx(
@@ -30,8 +31,8 @@ export default function Select<T extends string | number | readonly string[]>(pr
             onChange={(event) => { props.onChange(event.target.value as T); }}
             required
         >
-            <option disabled value="">{optionItems.length === 0 ? props.errorMsg : props.selectMsg}</option>
-            {optionItems}
+            <option disabled value="">{props.children.length ? props.selectMsg: props.errorMsg }</option>
+            {props.children}
         </select>
     );
 }

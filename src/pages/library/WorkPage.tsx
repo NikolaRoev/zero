@@ -1,4 +1,5 @@
 import * as api from "../../data/api";
+import { Option, Select } from "../../components/Select";
 import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
 import AddCreatorsList from "../../components/AddCreatorsList";
 import Button from "../../components/Button";
@@ -7,7 +8,6 @@ import CreatorsTable from "../../components/CreatorsTable";
 import { DataContext } from "../../contexts/data-context";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
-import Select from "../../components/Select";
 import { confirm } from "@tauri-apps/api/dialog";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
@@ -65,26 +65,38 @@ export default function WorkPage({ id }: { id: number }) {
                 <Select
                     className="col-span-2"
                     value={work.status}
-                    items={dataContext.statuses.map((status) => ({ label: status.status, value: status.status }))}
                     onChange={(value) => { dataContext.updateWorkStatus(work.id, value); }}
                     selectMsg="Change Status"
-                />
+                >
+                    {dataContext.statuses.map((status) => (
+                        <Option
+                            key={status.status}
+                            value={status.status}
+                        >{status.status}</Option>
+                    ))}
+                </Select>
                 <label>Type:</label>
                 <Select
                     className="col-span-2"
                     value={work.type}
-                    items={dataContext.types.map((type) => ({ label: type.type, value: type.type }))}
                     onChange={(value) => { dataContext.updateWorkType(work.id, value); }}
                     selectMsg="Change Type"
-                />
+                >
+                    {dataContext.types.map((type) => (
+                        <Option key={type.type} value={type.type}>{type.type}</Option>
+                    ))}
+                </Select>
                 <label>Format:</label>
                 <Select
                     className="col-span-2"
                     value={work.format}
-                    items={dataContext.formats.map((format) => ({ label: format.format, value: format.format }))}
                     onChange={(value) => { dataContext.updateWorkFormat(work.id, value); }}
                     selectMsg="Change Format"
-                />
+                >
+                    {dataContext.formats.map((format) => (
+                        <Option key={format.format} value={format.format}>{format.format}</Option>
+                    ))}
+                </Select>
 
                 <label>Updated:</label>
                 <label className="col-span-8">

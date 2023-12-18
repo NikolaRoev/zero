@@ -1,8 +1,8 @@
+import {Option, Select} from "../../components/Select";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
 import { Fragment } from "react";
 import Input from "../../components/Input";
-import Select from "../../components/Select";
 import { StorageKey } from "../../data/storage";
 import WorksTable from "../../components/WorksTable";
 import clsx from "clsx";
@@ -169,10 +169,12 @@ export default function WorksTab() {
                     />
                     <Select
                         value={filter.by}
-                        items={[{ label: "Name", value: "name" }, { label: "Progress", value: "progress" }]}
                         onChange={(value: By) => { filterDispatch({ action: "ChangeBy", by: value }); }}
                         selectMsg="Find By"
-                    />
+                    >
+                        <Option value={"name"}>Name</Option>
+                        <Option value={"progress"}>Progress</Option>
+                    </Select>
                     <Button onClick={() => { filterDispatch({ action: "Clear"}); }}>Clear</Button>
                 </div>
                 <div className="flex gap-x-[5px]">
