@@ -1,10 +1,10 @@
-import * as api from "../../data/api";
+import type { Creator, Work } from "../../data/api";
 import AddWorksList from "../../components/AddWorksList";
 import Button from "../../components/Button";
+import { DataContext } from "../../contexts/data-context";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
-import type { Work } from "../../data/api";
 import WorksTable from "../../components/WorksTable";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
@@ -14,7 +14,7 @@ import useSessionReducer from "../../hooks/session-reducer";
 
 type AddCreatorFormData = {
     name: string,
-    works: Work[]
+    works: number[]
 }
 
 const emptyAddCreatorFormData: AddCreatorFormData = {
@@ -25,10 +25,8 @@ const emptyAddCreatorFormData: AddCreatorFormData = {
 type AddCreatorFormAction =
     { action: "Clear" } |
     { action: "ChangeName", name: string } |
-    { action: "AddWork", work: Work } |
+    { action: "AddWork", id: number } |
     { action: "RemoveWork", id: number }
-
-
 
 function addCreatorFormReducer(addCreatorFormData: AddCreatorFormData, action: AddCreatorFormAction): AddCreatorFormData {
     switch (action.action) {
@@ -39,15 +37,15 @@ function addCreatorFormReducer(addCreatorFormData: AddCreatorFormData, action: A
             return { ...addCreatorFormData, name: action.name };
         }
         case "AddWork": {
-            if (!addCreatorFormData.works.find((work) => work.id === action.work.id)) {
-                return { ...addCreatorFormData, works: [...addCreatorFormData.works, action.work] };
+            if (!addCreatorFormData.works.find((id) => id === action.id)) {
+                return { ...addCreatorFormData, works: [...addCreatorFormData.works, action.id] };
             }
             else {
                 return addCreatorFormData;
             }
         }
         case "RemoveWork": {
-            return { ...addCreatorFormData, works: addCreatorFormData.works.filter((work) => work.id !== action.id) };
+            return { ...addCreatorFormData, works: addCreatorFormData.works.filter((id) => id !== action.id) };
         }
         default: {
             const unreachable: never = action;
@@ -59,6 +57,7 @@ function addCreatorFormReducer(addCreatorFormData: AddCreatorFormData, action: A
 
 
 export default function AddCreatorTab() {
+    const { works, addCreator } = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
     const [addCreatorFormData, dispatch] = useSessionReducer(StorageKey.AddCreatorFormData, addCreatorFormReducer, emptyAddCreatorFormData);
 
@@ -66,16 +65,28 @@ export default function AddCreatorTab() {
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        api.addCreator(addCreatorFormData.name, addCreatorFormData.works.map((work) => work.id))
-            .then((id) => {
-                toast(<div
-                    onClick={() => { navigationDispatch({ action: "New", page: { type: "Creator", id: id}}); }}
-                >{`Added creator "${addCreatorFormData.name}".`}</div>);
-                dispatch({ action: "Clear" });
-            })
-            .catch((reason) => { alert(reason); });
+        const creator: Creator = {
+            id: 0,
+            name: addCreatorFormData.name,
+            works: addCreatorFormData.works
+        };
+
+        addCreator(creator, (id) => {
+            toast(<div
+                onClick={() => { navigationDispatch({ action: "New", page: { type: "Creator", id: id}}); }}
+            >{`Added creator "${addCreatorFormData.name}".`}</div>);
+            dispatch({ action: "Clear" });
+        });
     }
 
+
+    const creatorWorks: Work[] = [];
+    for (const workId of addCreatorFormData.works) {
+        const work = works.get(workId);
+        if (work) {
+            creatorWorks.push(work);
+        }
+    }
 
     return (
         <div className="p-[5px] grow flex flex-col">
@@ -101,7 +112,7 @@ export default function AddCreatorTab() {
                     <div className="flex flex-col border border-neutral-700 rounded overflow-y-auto">
                         <label className="p-[5px] border-b border-neutral-700 ">Works:</label>
                         <WorksTable
-                            works={addCreatorFormData.works}
+                            works={creatorWorks}
                             storageKey={StorageKey.AddCreatorWorksSort}
                             headerClassName="text-sm"
                             dataClassName="text-xs"
@@ -117,9 +128,9 @@ export default function AddCreatorTab() {
                     </div>
                     <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
                         <AddWorksList
-                            creatorWorks={addCreatorFormData.works}
+                            creatorWorks={creatorWorks}
                             storageKey={StorageKey.AddCreatorWorksFilter}
-                            onButtonClick={(work) => { dispatch({ action: "AddWork", work: work }); }}
+                            onButtonClick={(workId) => { dispatch({ action: "AddWork", id: workId }); }}
                         />
                     </div>
                 </div>

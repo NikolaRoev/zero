@@ -1,10 +1,10 @@
 import * as api from "../../data/api";
-import type { Creator, Work } from "../../data/api";
-import { useCreator, useCreatorWorks } from "../../hooks/creators";
 import AddWorksList from "../../components/AddWorksList";
 import Button from "../../components/Button";
+import { DataContext } from "../../contexts/data-context";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
+import type { Work } from "../../data/api";
 import WorksTable from "../../components/WorksTable";
 import { confirm } from "@tauri-apps/api/dialog";
 import { toast } from "react-toastify";
@@ -13,62 +13,47 @@ import useSafeContext from "../../hooks/safe-context-hook";
 
 
 export default function CreatorPage({ id }: { id: number }) {
+    const dataContext = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
-    const { creator, setCreator, getCreator } = useCreator(id);
-    const { creatorWorks, setCreatorWorks, getCreatorWorks } = useCreatorWorks(id);
+    const creator = dataContext.creators.get(id);
 
-    
-    function handleNameChange(creator: Creator, value: string) {
-        setCreator({...creator, name: value });
-        api.updateCreatorName(id, value).catch((reason) => {
-            getCreator();
-            alert(reason);
-        });
+    const creatorWorks: Work[] = [];
+    if (creator) {
+        for (const workId of creator.works) {
+            const work = dataContext.works.get(workId);
+            if (work) {
+                creatorWorks.push(work);
+            }
+        }
     }
-
-    function handleAttachWork(work: Work) {
-        api.attach(work.id, id)
-            .catch((reason) => { alert(reason); })
-            .finally(() => { getCreatorWorks(); });
-    }
-
-    function handleDetachWork(workId: number) {
-        api.detach(workId, id)
-            .then(() => {
-                setCreatorWorks(creatorWorks.filter((work) => work.id !== workId));
-            })
-            .catch((reason) => {
-                getCreatorWorks();
-                alert(reason);
-            });
-    }
-
 
     return (
         creator && <div className="grow p-[5px] flex flex-col gap-y-[10px]">
             <div className="p-[5px] grid grid-cols-9 gap-x-[40px] gap-y-[5px] border border-neutral-700 rounded">
                 <label className="whitespace-nowrap">Creator ID:</label>
                 <label className="col-span-7">{creator.id}</label>
-                <Button
-                    onClick={() => {
-                        confirm(`Delete creator "${creator.name}"?`, { title: "Delete Creator", okLabel: "Yes", cancelLabel: "No", type: "warning" }).then(async (result) => {
-                            if (result) {
-                                await api.removeCreator(creator.id);
+                <Button onClick={() => {
+                    confirm(
+                        `Delete creator "${creator.name}"?`,
+                        { title: "Delete Creator", okLabel: "Yes", cancelLabel: "No", type: "warning" }
+                    ).then((result) => {
+                        if (result) {
+                            dataContext.removeCreator(creator.id, () => {
                                 toast(`Deleted creator "${creator.name}".`);
-                                navigationDispatch({ action: "Clear" });
-                            }
-                        }).catch((reason) => { alert(reason); });
-                    }}
-                >Delete</Button>
+                                navigationDispatch({ action: "Remove", page: { type: "Creator", id: id } });
+                            });
+                        }
+                    }).catch((reason: string) => { api.error(reason); });
+                }}>Delete</Button>
                 <label>Name:</label>
                 <Input
                     className="col-span-8"
                     value={creator.name}
                     placeholder="Name"
-                    onChange={(event) => { handleNameChange(creator, event.target.value); }}
+                    onChange={(event) => { dataContext.updateCreatorName(creator.id, event.target.value); }}
                 />
                 <label>Works:</label>
-                <label className="col-span-7">{creator.works}</label>
+                <label className="col-span-7">{creator.works.length}</label>
             </div>
 
             <div className="grow grid grid-cols-2 gap-x-[10px]">
@@ -86,14 +71,14 @@ export default function CreatorPage({ id }: { id: number }) {
                         format
                         updated
                         added
-                        onDetachWork={handleDetachWork}
+                        onDetachWork={(workId) => { dataContext.detach(workId, id); }}
                     />
                 </div>
                 <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
                     <AddWorksList
                         storageKey={`ADD-WORKS-${id}-KEY`}
                         creatorWorks={creatorWorks}
-                        onButtonClick={handleAttachWork}
+                        onButtonClick={(workId) => { dataContext.attach(workId, id); }}
                     />
                 </div>
             </div>

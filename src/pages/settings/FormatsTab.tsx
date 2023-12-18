@@ -1,24 +1,20 @@
-import * as api from "../../data/api";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import Button from "../../components/Button";
+import { DataContext } from "../../contexts/data-context";
 import DeleteButton from "../../components/DeleteButton";
-import type { Format } from "../../data/api";
 import Input from "../../components/Input";
-import { StorageKey } from "../../data/storage";
-import useFormats from "../../hooks/formats";
+import useSafeContext from "../../hooks/safe-context-hook";
 
 
 
-type FormatsListProps = {
-    formats: Format[],
-    removeFormat: (id: number) => void,
-}
-function FormatsList({ formats, removeFormat }: FormatsListProps) {
+function FormatsList() {
+    const { formats, removeFormat } = useSafeContext(DataContext);
+
     const formatsItems = formats.map((format) => (
         <div key={format.id} className="flex even:bg-neutral-100">
             <p className="grow p-[5px]">{format.format}</p>
             <DeleteButton
-                onClick={() => { removeFormat(format.id); } }
+                onClick={() => { removeFormat(format.id); }}
                 title={`Remove format "${format.format}".`}
             />
         </div>
@@ -28,32 +24,17 @@ function FormatsList({ formats, removeFormat }: FormatsListProps) {
 }
 
 
-
-export default function TypesTab() {
-    const { formats, setFormats, getFormats } = useFormats();
+export default function FormatsTab() {
+    const { addFormat } = useSafeContext(DataContext);
     const [formatInput, setFormatInput] = useState("");
+    const formatInputRef = useRef<HTMLInputElement>(null);
 
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-
-        api.addFormat(formatInput).then((id) => {
-            setFormats([...formats, { id: id, format: formatInput }]);
+        addFormat(formatInput, () => {
             setFormatInput("");
-        }).catch((reason) => {
-            getFormats();
-            alert(reason);
-        });
-    }
-
-    function removeFormat(id: number) {
-        api.removeFormat(id).then(() => {
-            setFormats(formats.filter((format) => format.id !== id));
-            sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
-            sessionStorage.removeItem(StorageKey.AddWorkFormData);
-        }).catch((reason) => {
-            getFormats();
-            alert(reason);
+            if (formatInputRef.current?.value) { formatInputRef.current.value = ""; }
         });
     }
 
@@ -62,6 +43,7 @@ export default function TypesTab() {
         <div className="p-[5px] grow flex flex-col gap-y-[10px]">
             <form onSubmit={handleSubmit} className="flex gap-x-[3px]">
                 <Input
+                    ref={formatInputRef}
                     className="grow"
                     value={formatInput}
                     onChange={(event) => { setFormatInput(event.target.value); }}
@@ -70,7 +52,7 @@ export default function TypesTab() {
                 />
                 <Button>Add</Button>
             </form>
-            <FormatsList formats={formats} removeFormat={removeFormat} />
+            <FormatsList />
         </div>
     );
 }

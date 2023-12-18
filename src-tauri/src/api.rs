@@ -1,6 +1,6 @@
 use std::{sync::Mutex, path::PathBuf};
 use tauri::Manager;
-use crate::{database::{Database, Status, Type, Format, Work, UpdateWork, Creator}, menu::{set_recent_menu, set_menu_state}, config::Config};
+use crate::{database::{Database, Status, Type, Format, Work, Creator}, menu::{set_recent_menu, set_menu_state}, config::Config};
 
 
 const OPENED_DATABASE_EVENT: &str = "opened-database";
@@ -94,27 +94,6 @@ pub fn database_path(database: tauri::State<Mutex<Database>>) -> Option<std::pat
 }
 
 #[tauri::command]
-pub fn get_work(database: tauri::State<Mutex<Database>>, id: i64) -> Result<Work, String> {
-    log::info!("Getting work: ID - {id}.");
-
-    let inner = || -> Result<Work, Box<dyn std::error::Error>>  {
-        let guard = database.lock().unwrap();
-        guard.get_work(id)
-    };
-
-    match inner() {
-        Ok(work) => {
-            Ok(work)
-        },
-        Err(err) => {
-            let message = format!("Failed to get work: {err}.");
-            log::error!("{message}");
-            Err(message)
-        }
-    }
-}
-
-#[tauri::command]
 pub fn get_works(database: tauri::State<Mutex<Database>>) -> Result<Vec<Work>, String> {
     log::info!("Getting works.");
 
@@ -125,75 +104,10 @@ pub fn get_works(database: tauri::State<Mutex<Database>>) -> Result<Vec<Work>, S
 
     match inner() {
         Ok(works) => {
-            //log::info!("Got update works: {update_works:?}.");
             Ok(works)
         },
         Err(err) => {
             let message = format!("Failed to get works: {err}.");
-            log::error!("{message}");
-            Err(message)
-        }
-    }
-}
-
-#[tauri::command]
-pub fn get_update_works(database: tauri::State<Mutex<Database>>) -> Result<Vec<UpdateWork>, String> {
-    log::info!("Getting update works.");
-
-    let inner = || -> Result<Vec<UpdateWork>, Box<dyn std::error::Error>>  {
-        let guard = database.lock().unwrap();
-        guard.get_update_works()
-    };
-
-    match inner() {
-        Ok(update_works) => {
-            //log::info!("Got update works: {update_works:?}.");
-            Ok(update_works)
-        },
-        Err(err) => {
-            let message = format!("Failed to get update works: {err}.");
-            log::error!("{message}");
-            Err(message)
-        }
-    }
-}
-
-#[tauri::command]
-pub fn get_work_creators(database: tauri::State<Mutex<Database>>, work_id: i64) -> Result<Vec<Creator>, String> {
-    log::info!("Getting work creators: ID - {work_id}.");
-
-    let inner = || -> Result<Vec<Creator>, Box<dyn std::error::Error>>  {
-        let guard = database.lock().unwrap();
-        guard.get_work_creators(work_id)
-    };
-
-    match inner() {
-        Ok(creators) => {
-            Ok(creators)
-        },
-        Err(err) => {
-            let message = format!("Failed to get work creators: {err}.");
-            log::error!("{message}");
-            Err(message)
-        }
-    }
-}
-
-#[tauri::command]
-pub fn get_creator(database: tauri::State<Mutex<Database>>, id: i64) -> Result<Creator, String> {
-    log::info!("Getting creator: ID - {id}.");
-
-    let inner = || -> Result<Creator, Box<dyn std::error::Error>>  {
-        let guard = database.lock().unwrap();
-        guard.get_creator(id)
-    };
-
-    match inner() {
-        Ok(creator) => {
-            Ok(creator)
-        },
-        Err(err) => {
-            let message = format!("Failed to get creator: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -222,33 +136,12 @@ pub fn get_creators(database: tauri::State<Mutex<Database>>) -> Result<Vec<Creat
 }
 
 #[tauri::command]
-pub fn get_creator_works(database: tauri::State<Mutex<Database>>, creator_id: i64) -> Result<Vec<Work>, String> {
-    log::info!("Getting creator works: ID - {creator_id}.");
-
-    let inner = || -> Result<Vec<Work>, Box<dyn std::error::Error>>  {
-        let guard = database.lock().unwrap();
-        guard.get_creator_works(creator_id)
-    };
-
-    match inner() {
-        Ok(works) => {
-            Ok(works)
-        },
-        Err(err) => {
-            let message = format!("Failed to get creator works: {err}.");
-            log::error!("{message}");
-            Err(message)
-        }
-    }
-}
-
-#[tauri::command]
 pub fn update_work_name(database: tauri::State<Mutex<Database>>, id: i64, name: String) -> Result<(), String> {
-    log::info!("Updating work {id}: name - {name}.");
+    log::info!("Updating work [{id}]: NAME - {name}.");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        guard.update("works", "name", id, &name)
+        guard.update("works", &id, vec![("name", &name)])
     };
 
     match inner() {
@@ -256,7 +149,7 @@ pub fn update_work_name(database: tauri::State<Mutex<Database>>, id: i64, name: 
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to update work name: {err}.");
+            let message = format!("Failed to update work [{id}] name: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -264,12 +157,18 @@ pub fn update_work_name(database: tauri::State<Mutex<Database>>, id: i64, name: 
 }
 
 #[tauri::command]
-pub fn update_work_progress(database: tauri::State<Mutex<Database>>, id: i64, progress: String) -> Result<(), String> {
-    log::info!("Updating work {id}: progress - {progress}.");
+pub fn update_work_progress(
+    database: tauri::State<Mutex<Database>>,
+    id: i64, progress:
+    String, timestamp: i64
+) -> Result<(), String> {
+    log::info!("Updating work [{id}]: PROGRESS - {progress}, TIMESTAMP - {timestamp}.");
+    
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        guard.update("works", "progress", id, &progress)
+        guard.update("works", &id, vec![("progress", &progress), ("updated", &timestamp)])?;
+        Ok(())
     };
 
     match inner() {
@@ -277,7 +176,7 @@ pub fn update_work_progress(database: tauri::State<Mutex<Database>>, id: i64, pr
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to update work progress: {err}.");
+            let message = format!("Failed to update work [{id}] progress: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -285,12 +184,18 @@ pub fn update_work_progress(database: tauri::State<Mutex<Database>>, id: i64, pr
 }
 
 #[tauri::command]
-pub fn update_work_status(database: tauri::State<Mutex<Database>>, id: i64, status: String) -> Result<(), String> {
-    log::info!("Updating work {id}: status - {status}.");
+pub fn update_work_status(
+    database: tauri::State<Mutex<Database>>,
+    id: i64,
+    status: String,
+    timestamp: i64
+) -> Result<(), String> {
+    log::info!("Updating work [{id}]: STATUS - {status}, TIMESTAMP - {timestamp}.");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        guard.update("works", "status", id, &status)
+        guard.update("works", &id, vec![("status", &status), ("updated", &timestamp)])?;
+        Ok(())
     };
 
     match inner() {
@@ -298,7 +203,7 @@ pub fn update_work_status(database: tauri::State<Mutex<Database>>, id: i64, stat
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to update work status: {err}.");
+            let message = format!("Failed to update work [{id}] status: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -307,11 +212,11 @@ pub fn update_work_status(database: tauri::State<Mutex<Database>>, id: i64, stat
 
 #[tauri::command]
 pub fn update_work_type(database: tauri::State<Mutex<Database>>, id: i64, r#type: String) -> Result<(), String> {
-    log::info!("Updating work {id}: type - {}.", r#type);
+    log::info!("Updating work [{id}]: TYPE - {}.", r#type);
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        guard.update("works", "type", id, &r#type)
+        guard.update("works", &id, vec![("type", &r#type)])
     };
 
     match inner() {
@@ -319,7 +224,7 @@ pub fn update_work_type(database: tauri::State<Mutex<Database>>, id: i64, r#type
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to update work type: {err}.");
+            let message = format!("Failed to update work [{id}] type: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -328,11 +233,11 @@ pub fn update_work_type(database: tauri::State<Mutex<Database>>, id: i64, r#type
 
 #[tauri::command]
 pub fn update_work_format(database: tauri::State<Mutex<Database>>, id: i64, format: String) -> Result<(), String> {
-    log::info!("Updating work {id}: format - {}.", format);
+    log::info!("Updating work [{id}]: FORMAT - {}.", format);
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        guard.update("works", "format", id, &format)
+        guard.update("works", &id, vec![("format", &format)])
     };
 
     match inner() {
@@ -340,7 +245,7 @@ pub fn update_work_format(database: tauri::State<Mutex<Database>>, id: i64, form
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to update work format: {err}.");
+            let message = format!("Failed to update work [{id}] format: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -349,11 +254,11 @@ pub fn update_work_format(database: tauri::State<Mutex<Database>>, id: i64, form
 
 #[tauri::command]
 pub fn update_creator_name(database: tauri::State<Mutex<Database>>, id: i64, name: String) -> Result<(), String> {
-    log::info!("Updating creator {id}: name - {name}.");
+    log::info!("Updating creator [{id}]: NAME - {name}.");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        guard.update("creators", "name", id, &name)
+        guard.update("creators", &id, vec![("name", &name)])
     };
 
     match inner() {
@@ -361,7 +266,7 @@ pub fn update_creator_name(database: tauri::State<Mutex<Database>>, id: i64, nam
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to update creator name: {err}.");
+            let message = format!("Failed to update creator [{id}] name: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -369,33 +274,24 @@ pub fn update_creator_name(database: tauri::State<Mutex<Database>>, id: i64, nam
 }
 
 #[tauri::command]
-pub fn add_work(
-    database: tauri::State<Mutex<Database>>,
-    name: String,
-    progress: String,
-    status: String,
-    r#type: String,
-    format: String,
-    creators: Vec<i64>
-) -> Result<i64, String> {
-    log::info!(
-        "Adding work: NAME - {}, PROGRESS - {}, STATUS - {}, TYPE - {}, FORMAT - {} CREATORS - {:?}.",
-        name, progress, status, r#type, format, creators
-    );
+pub fn add_work(database: tauri::State<Mutex<Database>>, work: Work) -> Result<i64, String> {
+    log::info!("Adding work: WORK - {work:?}.");
 
     let inner = || -> Result<i64, Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
         let work_id = guard.add(
             "works",
             vec![
-                ("name", &name),
-                ("progress", &progress),
-                ("status", &status),
-                ("type", &r#type),
-                ("format", &format)
+                ("name", &work.name),
+                ("progress", &work.progress),
+                ("status", &work.status),
+                ("type", &work.r#type),
+                ("format", &work.format),
+                ("updated", &work.updated),
+                ("added", &work.added)
             ]
         )?;
-        creators.iter().try_for_each(|creator_id| guard.attach(work_id, *creator_id))?;
+        work.creators.iter().try_for_each(|creator_id| guard.attach(work_id, *creator_id))?;
         Ok(work_id)
     };
 
@@ -413,13 +309,13 @@ pub fn add_work(
 }
 
 #[tauri::command]
-pub fn add_creator(database: tauri::State<Mutex<Database>>, name: String, works: Vec<i64>) -> Result<i64, String> {
-    log::info!("Adding creator: NAME - {name}, WORKS - {works:?}.");
+pub fn add_creator(database: tauri::State<Mutex<Database>>, creator: Creator) -> Result<i64, String> {
+    log::info!("Adding creator: CREATOR - {creator:?}.");
 
     let inner = || -> Result<i64, Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        let creator_id = guard.add("creators", vec![("name", &name)])?;
-        works.iter().try_for_each(|work_id| guard.attach(*work_id, creator_id))?;
+        let creator_id = guard.add("creators", vec![("name", &creator.name)])?;
+        creator.works.iter().try_for_each(|work_id| guard.attach(*work_id, creator_id))?;
         Ok(creator_id)
     };
 
@@ -469,7 +365,6 @@ pub fn get_statuses(database: tauri::State<Mutex<Database>>) -> Result<Vec<Statu
 
     match inner() {
         Ok(statuses) => {
-            log::info!("Got statuses: {statuses:?}.");
             Ok(statuses)
         },
         Err(err) => {
@@ -482,20 +377,19 @@ pub fn get_statuses(database: tauri::State<Mutex<Database>>) -> Result<Vec<Statu
 
 #[tauri::command]
 pub fn update_status(database: tauri::State<Mutex<Database>>, id: i64, is_update: bool) -> Result<(), String> {
-    log::info!("Updating status {id}: is_update - {is_update}.");
+    log::info!("Updating status [{id}]: IS_UPDATE - {is_update}.");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        guard.update("statuses", "is_update", id, &is_update)
+        guard.update("statuses", &id, vec![("is_update", &is_update)])
     };
 
     match inner() {
         Ok(()) => {
-            log::info!("Updated status {id}: is_update - {is_update}.");
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to update status: {err}.");
+            let message = format!("Failed to update status [{id}] is_update: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -504,7 +398,7 @@ pub fn update_status(database: tauri::State<Mutex<Database>>, id: i64, is_update
 
 #[tauri::command]
 pub fn remove_work(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(), String> {
-    log::info!("Removing work {id}.");
+    log::info!("Removing work [{id}].");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
@@ -513,11 +407,10 @@ pub fn remove_work(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(
 
     match inner() {
         Ok(()) => {
-            log::info!("Removed work {id}.");
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to remove work: {err}.");
+            let message = format!("Failed to remove work [{id}]: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -526,7 +419,7 @@ pub fn remove_work(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(
 
 #[tauri::command]
 pub fn remove_creator(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(), String> {
-    log::info!("Removing creator {id}.");
+    log::info!("Removing creator [{id}].");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
@@ -535,11 +428,10 @@ pub fn remove_creator(database: tauri::State<Mutex<Database>>, id: i64) -> Resul
 
     match inner() {
         Ok(()) => {
-            log::info!("Removed creator {id}.");
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to remove creator: {err}.");
+            let message = format!("Failed to remove creator [{id}]: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -548,7 +440,7 @@ pub fn remove_creator(database: tauri::State<Mutex<Database>>, id: i64) -> Resul
 
 #[tauri::command]
 pub fn remove_status(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(), String> {
-    log::info!("Removing status {id}.");
+    log::info!("Removing status [{id}].");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
@@ -557,11 +449,10 @@ pub fn remove_status(database: tauri::State<Mutex<Database>>, id: i64) -> Result
 
     match inner() {
         Ok(()) => {
-            log::info!("Removed status {id}.");
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to remove status: {err}.");
+            let message = format!("Failed to remove status [{id}]: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -601,7 +492,6 @@ pub fn get_types(database: tauri::State<Mutex<Database>>) -> Result<Vec<Type>, S
 
     match inner() {
         Ok(types) => {
-            log::info!("Got types: {types:?}.");
             Ok(types)
         },
         Err(err) => {
@@ -614,7 +504,7 @@ pub fn get_types(database: tauri::State<Mutex<Database>>) -> Result<Vec<Type>, S
 
 #[tauri::command]
 pub fn remove_type(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(), String> {
-    log::info!("Removing type {id}.");
+    log::info!("Removing type [{id}].");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
@@ -623,11 +513,10 @@ pub fn remove_type(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(
 
     match inner() {
         Ok(()) => {
-            log::info!("Removed type {id}.");
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to remove type: {err}.");
+            let message = format!("Failed to remove type [{id}]: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -667,7 +556,6 @@ pub fn get_formats(database: tauri::State<Mutex<Database>>) -> Result<Vec<Format
 
     match inner() {
         Ok(formats) => {
-            log::info!("Got formats: {formats:?}.");
             Ok(formats)
         },
         Err(err) => {
@@ -680,7 +568,7 @@ pub fn get_formats(database: tauri::State<Mutex<Database>>) -> Result<Vec<Format
 
 #[tauri::command]
 pub fn remove_format(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(), String> {
-    log::info!("Removing format {id}.");
+    log::info!("Removing format [{id}].");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
@@ -689,11 +577,10 @@ pub fn remove_format(database: tauri::State<Mutex<Database>>, id: i64) -> Result
 
     match inner() {
         Ok(()) => {
-            log::info!("Removed format {id}.");
             Ok(())
         },
         Err(err) => {
-            let message = format!("Failed to remove format: {err}.");
+            let message = format!("Failed to remove format [{id}]: {err}.");
             log::error!("{message}");
             Err(message)
         }
@@ -702,7 +589,7 @@ pub fn remove_format(database: tauri::State<Mutex<Database>>, id: i64) -> Result
 
 #[tauri::command]
 pub fn attach(database: tauri::State<Mutex<Database>>, work_id: i64, creator_id: i64) -> Result<(), String> {
-    log::info!("Attaching: WORK_ID - {work_id} and CREATOR_ID - {creator_id}.");
+    log::info!("Attaching: WORK_ID - {work_id}, CREATOR_ID - {creator_id}.");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
@@ -723,7 +610,7 @@ pub fn attach(database: tauri::State<Mutex<Database>>, work_id: i64, creator_id:
 
 #[tauri::command]
 pub fn detach(database: tauri::State<Mutex<Database>>, work_id: i64, creator_id: i64) -> Result<(), String> {
-    log::info!("Detaching: WORK_ID - {work_id} and CREATOR_ID - {creator_id}.");
+    log::info!("Detaching: WORK_ID - {work_id}, CREATOR_ID - {creator_id}.");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
@@ -764,7 +651,6 @@ pub fn remove_recent_database(window: tauri::Window, config: tauri::State<Mutex<
 
     match inner() {
         Ok(()) => {
-            log::info!("Removed recent database.");
             Ok(())
         },
         Err(err) => {

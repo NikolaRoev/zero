@@ -1,10 +1,10 @@
 import { type TableProps, TableVirtuoso } from "react-virtuoso";
+import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
 import DeleteButton from "./DeleteButton";
 import { NavigationContext } from "../contexts/navigation-context";
 import { StorageKey } from "../data/storage";
 import type { Work } from "../data/api";
 import clsx from "clsx";
-import { formatDistanceToNowStrict } from "date-fns";
 import useSafeContext from "../hooks/safe-context-hook";
 import useSessionState from "../hooks/session-state";
 
@@ -70,18 +70,18 @@ function sortWorks(sort: Sort, works: Work[]): Work[] {
         }
         case "updated": {
             if (sort.order) {
-                return works.toSorted((a, b) => Date.parse(b.updated) - Date.parse(a.updated));
+                return works.toSorted((a, b) => b.updated - a.updated);
             }
             else {
-                return works.toSorted((a, b) => Date.parse(a.updated) - Date.parse(b.updated));
+                return works.toSorted((a, b) => a.updated - b.updated);
             }
         }
         case "added": {
             if (sort.order) {
-                return works.toSorted((a, b) => Date.parse(b.added) - Date.parse(a.added));
+                return works.toSorted((a, b) => b.added - a.added);
             }
             else {
-                return works.toSorted((a, b) => Date.parse(a.added) - Date.parse(b.added));
+                return works.toSorted((a, b) => a.added - b.added);
             }
         }
         default: {
@@ -197,12 +197,12 @@ export default function WorksTable(props: WorksTableProps) {
                     >{work.format}</td>}
                     {props.updated && <td
                         className={clsx("w-[1%] p-[5px] border border-neutral-700 whitespace-nowrap", props.dataClassName)}
-                        title={work.updated}
-                    >{formatDistanceToNowStrict(Date.parse(work.updated), { addSuffix: true })}</td>}
+                        title={formatISO9075(work.updated)}
+                    >{formatDistanceToNowStrict(work.updated, { addSuffix: true })}</td>}
                     {props.added && <td
                         className={clsx("w-[1%] p-[5px] border border-neutral-700 whitespace-nowrap", props.dataClassName)}
-                        title={work.added}
-                    >{formatDistanceToNowStrict(Date.parse(work.added), { addSuffix: true })}</td>}
+                        title={formatISO9075(work.added)}
+                    >{formatDistanceToNowStrict(work.added, { addSuffix: true })}</td>}
                     {props.onDetachWork && <td className="p-0 w-[1%] border border-neutral-700">
                         <DeleteButton
                             onClick={() => { if(props.onDetachWork) { props.onDetachWork(work.id); } }}

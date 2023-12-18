@@ -11,9 +11,12 @@ function LibraryPage() {
     const { navigationData } = useSafeContext(NavigationContext);
 
     const contents = () => {
+        if (navigationData.index === -1) {
+            return <HomePage />;
+        }
+
         const page = navigationData.pages[navigationData.index];
         switch (page?.type) {
-            case "Home": return <HomePage />;
             case "Work": return <WorkPage id={page.id} />;
             case "Creator": return <CreatorPage id={page.id} />;
             case undefined: return <div>ERROR</div>;

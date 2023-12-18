@@ -1,24 +1,20 @@
-import * as api from "../../data/api";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import Button from "../../components/Button";
+import { DataContext } from "../../contexts/data-context";
 import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
-import { StorageKey } from "../../data/storage";
-import type { Type } from "../../data/api";
-import useTypes from "../../hooks/types";
+import useSafeContext from "../../hooks/safe-context-hook";
 
 
 
-type TypesListProps = {
-    types: Type[],
-    removeType: (id: number) => void,
-}
-function TypesList({ types, removeType }: TypesListProps) {
+function TypesList() {
+    const { types, removeType } = useSafeContext(DataContext);
+
     const typesItems = types.map((type) => (
         <div key={type.id} className="flex even:bg-neutral-100">
             <p className="grow p-[5px]">{type.type}</p>
             <DeleteButton
-                onClick={() => { removeType(type.id); } }
+                onClick={() => { removeType(type.id); }}
                 title={`Remove type "${type.type}".`}
             />
         </div>
@@ -29,31 +25,18 @@ function TypesList({ types, removeType }: TypesListProps) {
 
 
 export default function TypesTab() {
-    const { types, setTypes, getTypes } = useTypes();
+    const { addType } = useSafeContext(DataContext);
     const [typeInput, setTypeInput] = useState("");
+    const typeInputRef = useRef<HTMLInputElement>(null);
 
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-
-        api.addType(typeInput).then((id) => {
-            setTypes([...types, { id: id, type: typeInput }]);
+        addType(typeInput, () => {
             setTypeInput("");
-        }).catch((reason) => {
-            getTypes();
-            alert(reason);
+            if (typeInputRef.current?.value) { typeInputRef.current.value = ""; }
         });
-    }
-
-    function removeType(id: number) {
-        api.removeType(id).then(() => {
-            setTypes(types.filter((type) => type.id !== id));
-            sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
-            sessionStorage.removeItem(StorageKey.AddWorkFormData);
-        }).catch((reason) => {
-            getTypes();
-            alert(reason);
-        });
+        
     }
 
 
@@ -61,6 +44,7 @@ export default function TypesTab() {
         <div className="p-[5px] grow flex flex-col gap-y-[10px]">
             <form onSubmit={handleSubmit} className="flex gap-x-[3px]">
                 <Input
+                    ref={typeInputRef}
                     className="grow"
                     value={typeInput}
                     onChange={(event) => { setTypeInput(event.target.value); }}
@@ -69,7 +53,7 @@ export default function TypesTab() {
                 />
                 <Button>Add</Button>
             </form>
-            <TypesList types={types} removeType={removeType} />
+            <TypesList />
         </div>
     );
 }

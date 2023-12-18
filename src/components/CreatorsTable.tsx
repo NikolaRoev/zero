@@ -29,10 +29,10 @@ function sortCreators(sort: Sort, creators: Creator[]): Creator[] {
         }
         case "works": {
             if (sort.order) {
-                return creators.toSorted((a, b) => a.works - b.works);
+                return creators.toSorted((a, b) => a.works.length - b.works.length);
             }
             else {
-                return creators.toSorted((a, b) => b.works - a.works);
+                return creators.toSorted((a, b) => b.works.length - a.works.length);
             }
         }
         default: {
@@ -107,7 +107,7 @@ export default function CreatorsTable(props: CreatorsTableProps) {
                         >{creator.name}</td>}
                         {props.works && <td
                             className={clsx("w-[1%] p-[5px] border border-neutral-700 whitespace-nowrap", props.dataClassName)}
-                        >{creator.works}</td>}
+                        >{creator.works.length}</td>}
                         {props.onDetachCreator && <td className="p-0 w-[1%] border border-neutral-700">
                             <DeleteButton
                                 onClick={() => { if(props.onDetachCreator) { props.onDetachCreator(creator.id); } }}

@@ -9,20 +9,15 @@ export type Work = {
     status: string,
     type: string,
     format: string,
-    updated: string,
-    added: string
-}
-
-export type UpdateWork = {
-    id: number,
-    name: string,
-    progress: string,
+    updated: number,
+    added: number,
+    creators: number[]
 }
 
 export type Creator = {
     id: number,
     name: string,
-    works: number
+    works: number[]
 }
 
 export type Status = {
@@ -60,44 +55,24 @@ export function databasePath(): Promise<string | null> {
     return invoke("database_path");
 }
 
-export function getWork(id: number): Promise<Work> {
-    return invoke("get_work", { id });
-}
-
 export function getWorks(): Promise<Work[]> {
     return invoke("get_works");
-}
-
-export function getUpdateWorks(): Promise<UpdateWork[]> {
-    return invoke("get_update_works");
-}
-
-export function getWorkCreators(workId: number): Promise<Creator[]> {
-    return invoke("get_work_creators", { workId });
-}
-
-export function getCreator(id: number): Promise<Creator> {
-    return invoke("get_creator", { id });
 }
 
 export function getCreators(): Promise<Creator[]> {
     return invoke("get_creators");
 }
 
-export function getCreatorWorks(creatorId: number): Promise<Work[]> {
-    return invoke("get_creator_works", { creatorId });
-}
-
 export function updateWorkName(id: number, name: string): Promise<void> {
     return invoke("update_work_name", { id, name });
 }
 
-export function updateWorkProgress(id: number, progress: string): Promise<void> {
-    return invoke("update_work_progress", { id, progress });
+export function updateWorkProgress(id: number, progress: string, timestamp: number): Promise<void> {
+    return invoke("update_work_progress", { id, progress, timestamp });
 }
 
-export function updateWorkStatus(id: number, status: string): Promise<void> {
-    return invoke("update_work_status", { id, status });
+export function updateWorkStatus(id: number, status: string, timestamp: number): Promise<void> {
+    return invoke("update_work_status", { id, status, timestamp });
 }
 
 export function updateWorkType(id: number, type: string): Promise<void> {
@@ -112,12 +87,12 @@ export function updateCreatorName(id: number, name: string): Promise<void> {
     return invoke("update_creator_name", { id, name });
 }
 
-export function addWork(name: string, progress: string, status: string, type: string, format: string, creators: number[]): Promise<number> {
-    return invoke("add_work", { name, progress, status, type, format, creators });
+export function addWork(work: Work): Promise<number> {
+    return invoke("add_work", { work });
 }
 
-export function addCreator(name: string, works: number[]): Promise<number> {
-    return invoke("add_creator", { name, works });
+export function addCreator(creator: Creator): Promise<number> {
+    return invoke("add_creator", { creator });
 }
 
 export function addStatus(status: string): Promise<number> {

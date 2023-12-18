@@ -1,6 +1,5 @@
-- navigation dropdown
-- better behaviour for nav when deleting stuff
+- update the select component to take children of option so we can make the update statuses underlined
 - more button for dbs
 - clean-up
 - testing
-- auto-update
+- auto-update / release action from the docs

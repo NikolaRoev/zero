@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS works (
     status   TEXT NOT NULL,
     type     TEXT NOT NULL,
     format   TEXT NOT NULL,
-    updated  TEXT NOT NULL DEFAULT (DATETIME('NOW', 'LOCALTIME')),
-    added    TEXT NOT NULL DEFAULT (DATETIME('NOW', 'LOCALTIME')),
+    updated  INTEGER NOT NULL,
+    added    INTEGER NOT NULL,
     FOREIGN KEY (status) REFERENCES statuses (status),
     FOREIGN KEY (type)   REFERENCES types    (type),
     FOREIGN KEY (format) REFERENCES formats  (format)
@@ -20,8 +20,7 @@ CREATE TABLE IF NOT EXISTS works (
 
 CREATE TABLE IF NOT EXISTS creators (
     id    INTEGER PRIMARY KEY AUTOINCREMENT,
-    name  TEXT NOT NULL,
-    works INTEGER NOT NULL DEFAULT 0
+    name  TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS work_creator (
@@ -47,58 +46,26 @@ CREATE TABLE IF NOT EXISTS formats (
     id     INTEGER PRIMARY KEY AUTOINCREMENT,
     format TEXT NOT NULL UNIQUE
 );
-
-
-CREATE TRIGGER IF NOT EXISTS update_work_progress
-    AFTER UPDATE OF 'progress'
-    ON works
-BEGIN
-    UPDATE works SET updated = DATETIME('NOW', 'LOCALTIME') WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER IF NOT EXISTS add_work
-    AFTER INSERT
-    ON work_creator
-BEGIN
-    UPDATE creators
-    SET works = (SELECT COUNT(*) FROM work_creator WHERE creator_id = NEW.creator_id)
-    WHERE id = NEW.creator_id;
-END;
-
-CREATE TRIGGER IF NOT EXISTS remove_work
-    AFTER DELETE
-    ON work_creator
-BEGIN
-    UPDATE creators
-    SET works = (SELECT COUNT(*) FROM work_creator WHERE creator_id = OLD.creator_id)
-    WHERE id = OLD.creator_id;
-END;
 ";
 
-#[derive(serde::Serialize, Debug)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Work {
-    id: i64,
-    name: String,
-    progress: String,
-    status: String,
-    r#type: String,
-    format: String,
-    updated: String,
-    added: String
+    pub id: i64,
+    pub name: String,
+    pub progress: String,
+    pub status: String,
+    pub r#type: String,
+    pub format: String,
+    pub updated: i64,
+    pub added: i64,
+    pub creators: Vec<i64>
 }
 
-#[derive(serde::Serialize, Debug)]
-pub struct UpdateWork {
-    id: i64,
-    name: String,
-    progress: String,
-}
-
-#[derive(serde::Serialize, Debug)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Creator {
-    id: i64,
-    name: String,
-    works: i64
+    pub id: i64,
+    pub name: String,
+    pub works: Vec<i64>
 }
 
 #[derive(serde::Serialize, Debug)]
@@ -136,7 +103,7 @@ impl Database {
 
     pub fn open(&mut self, path: &PathBuf) -> DatabaseResult<()> {
         let mut conn = rusqlite::Connection::open(path)?;
-        //conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
+        conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
         conn.backup(rusqlite::DatabaseName::Main, path.with_extension("backup.db"), Some(|progress| {
             log::info!("Backing up: {}/{}.", progress.pagecount - progress.remaining, progress.pagecount);
         }))?;
@@ -193,12 +160,16 @@ impl Database {
         Ok(())
     }
 
-    pub fn update(&self, table: &str, column: &str, id: i64, value: &dyn rusqlite::ToSql) -> DatabaseResult<()> {
+    pub fn update(&self, table: &str, id: &dyn rusqlite::ToSql, params: Vec<(&str, &dyn rusqlite::ToSql)>) -> DatabaseResult<()> {
+        let (columns, mut values): (Vec<&str>, Vec<&dyn rusqlite::ToSql>) = params.into_iter().unzip();
+        values.push(id);
+        let placeholders = columns.iter().map(| &column | format!("{column} = ?")).collect::<Vec<_>>().join(", ");
+
         let mut stmt = self.conn()?.prepare_cached(&format!(
-            "UPDATE {table} SET {column} = :value WHERE id = :id"
+            "UPDATE {table} SET {placeholders} WHERE id = ?"
         ))?;
-        
-        let rows = stmt.execute(named_params! {":value": value, ":id": id})?;
+
+        let rows = stmt.execute(rusqlite::params_from_iter(values))?;
 
         if rows != 1 {
             return Err(format!("Expected to update 1 row not {rows}"))?;
@@ -207,32 +178,25 @@ impl Database {
         Ok(())
     }
 
-    pub fn get_work(&self, id: i64) -> DatabaseResult<Work> {
-        let mut stmt = self.conn()?.prepare_cached("
-            SELECT * FROM works WHERE id = :id
-        ")?;
-
-        let work = stmt.query_row(named_params! {":id": id}, |row| {
-            Ok(Work {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                progress: row.get(2)?,
-                status: row.get(3)?,
-                r#type: row.get(4)?,
-                format: row.get(5)?,
-                updated: row.get(6)?,
-                added: row.get(7)?,
-            })
-        })?;
-
-        Ok(work)
-    }
-
     pub fn get_works(&self) -> DatabaseResult<Vec<Work>>{
-        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM works")?;
+        let mut stmt = self.conn()?.prepare_cached("
+            SELECT works.id, works.name, works.progress, works.status, works.type, works.format,
+                   works.updated, works.added, group_concat(work_creator.creator_id ORDER BY work_creator.ROWID)
+            FROM works
+            LEFT JOIN work_creator ON works.id = work_creator.work_id
+            GROUP BY works.id
+        ")?;
+
         let rows = stmt.query_map([], |row| {
+            let id: i64 = row.get(0)?;
+            let creators_row: Option<String> = row.get(8)?;
+            let creators = creators_row.map_or(
+                Ok(vec![]),
+                |data| data.split(',').map(|c| c.parse::<i64>()).collect::<Result<Vec<_>, _>>()
+            ).map_err(|err| rusqlite::Error::UserFunctionError(Box::new(err)))?;
+
             Ok(Work {
-                id: row.get(0)?,
+                id,
                 name: row.get(1)?,
                 progress: row.get(2)?,
                 status: row.get(3)?,
@@ -240,90 +204,33 @@ impl Database {
                 format: row.get(5)?,
                 updated: row.get(6)?,
                 added: row.get(7)?,
+                creators
             })
         })?;
 
         rows.map(|row| Ok(row?)).collect()
-    }
-
-    pub fn get_update_works(&self) -> DatabaseResult<Vec<UpdateWork>> {
-        let mut stmt = self.conn()?.prepare_cached("
-            SELECT works.id, works.name, works.progress
-            FROM works
-            JOIN statuses ON works.status = statuses.status
-            WHERE statuses.is_update = 1
-        ")?;
-        let rows = stmt.query_map([], |row| {
-            Ok(UpdateWork {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                progress: row.get(2)?
-            })
-        })?;
-
-        rows.map(|row| Ok(row?)).collect()
-    }
-
-    pub fn get_work_creators(&self, work_id: i64) -> DatabaseResult<Vec<Creator>> {
-        let mut stmt = self.conn()?.prepare_cached("
-            SELECT * FROM creators JOIN work_creator ON id = creator_id AND work_id = :work_id
-        ")?;
-
-        let rows = stmt.query_map(named_params! {":work_id": work_id}, |row| {
-            Ok(Creator {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                works: row.get(2)?
-            })
-        })?;
-
-        rows.map(|row| Ok(row?)).collect()
-    }
-
-    pub fn get_creator(&self, id: i64) -> DatabaseResult<Creator> {
-        let mut stmt = self.conn()?.prepare_cached("
-            SELECT * FROM creators WHERE id = :id
-        ")?;
-
-        let creator = stmt.query_row(named_params! {":id": id}, |row| {
-            Ok(Creator {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                works: row.get(2)?
-            })
-        })?;
-
-        Ok(creator)
     }
 
     pub fn get_creators(&self) -> DatabaseResult<Vec<Creator>> {
-        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM creators")?;
-        let rows = stmt.query_map([], |row| {
-            Ok(Creator {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                works: row.get(2)?
-            })
-        })?;
-
-        rows.map(|row| Ok(row?)).collect()
-    }
-
-    pub fn get_creator_works(&self, creator_id: i64) -> DatabaseResult<Vec<Work>> {
         let mut stmt = self.conn()?.prepare_cached("
-            SELECT * FROM works JOIN work_creator ON id = work_id AND creator_id = :creator_id
+            SELECT creators.id, creators.name, group_concat(work_creator.work_id ORDER BY work_creator.ROWID)
+            FROM creators
+            LEFT JOIN work_creator ON creators.id = work_creator.creator_id
+            GROUP BY creators.id
         ")?;
 
-        let rows = stmt.query_map(named_params! {":creator_id": creator_id}, |row| {
-            Ok(Work {
-                id: row.get(0)?,
+        let rows = stmt.query_map([], |row| {
+            let id: i64 = row.get(0)?;
+            let works_row: Option<String> = row.get(2)?;
+            let works = works_row.map_or(
+                Ok(vec![]),
+                |data| data.split(',').map(|c| c.parse::<i64>()).collect::<Result<Vec<_>, _>>()
+            ).map_err(|err| rusqlite::Error::UserFunctionError(Box::new(err)))?;
+
+            Ok(Creator {
+                id,
                 name: row.get(1)?,
-                progress: row.get(2)?,
-                status: row.get(3)?,
-                r#type: row.get(4)?,
-                format: row.get(5)?,
-                updated: row.get(6)?,
-                added: row.get(7)?
+                works
             })
         })?;
 
@@ -437,7 +344,7 @@ mod tests {
         database.add("works",
         test).unwrap();
 
-        database.update("statuses", "is_update", 1, &true).unwrap();
+        //database.update("statuses", "is_update", 1, &true).unwrap();
 
         let test = database.get_statuses().unwrap();
         for t in test {

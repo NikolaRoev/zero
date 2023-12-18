@@ -1,21 +1,16 @@
-import * as api from "../../data/api";
-import { type ChangeEvent, type FormEvent, useState } from "react";
+import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import Button from "../../components/Button";
+import { DataContext } from "../../contexts/data-context";
 import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
-import type { Status } from "../../data/api";
-import { StorageKey } from "../../data/storage";
 import clsx from "clsx";
-import { useStatuses } from "../../hooks/statuses";
+import useSafeContext from "../../hooks/safe-context-hook";
 
 
 
-type StatusesListProps = {
-    statuses: Status[],
-    removeStatus: (id: number) => void,
-    toggleStatus: (id: number, isUpdate: boolean) => void,
-}
-function StatusesList({ statuses, removeStatus, toggleStatus }: StatusesListProps) {
+function StatusesList() {
+    const { statuses, removeStatus, updateStatus } = useSafeContext(DataContext);
+
     const statusesItems = statuses.map((status) => (
         <div key={status.id} className="flex even:bg-neutral-100">
             <p className={clsx("grow p-[5px]", { "underline": status.isUpdate })}>{status.status}</p>
@@ -23,11 +18,13 @@ function StatusesList({ statuses, removeStatus, toggleStatus }: StatusesListProp
                 className="mx-[10px]"
                 type="checkbox"
                 checked={status.isUpdate}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => { toggleStatus(status.id, event.target.checked); }}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                    updateStatus(status.id, event.target.checked);
+                }}
                 title="Is Update."
             />
             <DeleteButton
-                onClick={() => { removeStatus(status.id); } }
+                onClick={() => { removeStatus(status.id); }}
                 title={`Remove status "${status.status}".`}
             />
         </div>
@@ -38,47 +35,18 @@ function StatusesList({ statuses, removeStatus, toggleStatus }: StatusesListProp
 
 
 export default function StatusesTab() {
-    const { statuses, setStatuses, getStatuses } = useStatuses();
+    const { addStatus } = useSafeContext(DataContext);
     const [statusInput, setStatusInput] = useState("");
+    const statusInputRef = useRef<HTMLInputElement>(null);
 
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-
-        api.addStatus(statusInput).then((id) => {
-            setStatuses([...statuses, { id: id, status: statusInput, isUpdate: false }]);
+        addStatus(statusInput, () => {
             setStatusInput("");
-        }).catch((reason) => {
-            getStatuses();
-            alert(reason);
+            if (statusInputRef.current?.value) { statusInputRef.current.value = ""; }
         });
-    }
-
-    function removeStatus(id: number) {
-        api.removeStatus(id).then(() => {
-            setStatuses(statuses.filter((status) => status.id !== id));
-            sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
-            sessionStorage.removeItem(StorageKey.AddWorkFormData);
-        }).catch((reason) => {
-            getStatuses();
-            alert(reason);
-        });
-    }
-
-    function toggleStatus(id: number, isUpdate: boolean) {
-        api.updateStatus(id, isUpdate).then(() => {
-            setStatuses(statuses.map((status) => {
-                if (status.id === id) {
-                    return { ...status, isUpdate: isUpdate };
-                }
-                else {
-                    return status;
-                }
-            }));
-        }).catch((reason) => {
-            getStatuses();
-            alert(reason);
-        });
+        
     }
 
 
@@ -86,6 +54,7 @@ export default function StatusesTab() {
         <div className="p-[5px] grow flex flex-col gap-y-[10px]">
             <form onSubmit={handleSubmit} className="flex gap-x-[3px]">
                 <Input
+                    ref={statusInputRef}
                     className="grow"
                     value={statusInput}
                     onChange={(event) => { setStatusInput(event.target.value); }}
@@ -94,7 +63,7 @@ export default function StatusesTab() {
                 />
                 <Button>Add</Button>
             </form>
-            <StatusesList statuses={statuses} removeStatus={removeStatus} toggleStatus={toggleStatus} />
+            <StatusesList />
         </div>
     );
 }

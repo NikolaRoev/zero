@@ -1,11 +1,11 @@
 import { BsPlus } from "react-icons/bs";
 import type { Creator } from "../data/api";
+import { DataContext } from "../contexts/data-context";
 import Input from "./Input";
 import { NavigationContext } from "../contexts/navigation-context";
 import type { StorageKey } from "../data/storage";
 import { Virtuoso } from "react-virtuoso";
 import clsx from "clsx";
-import { useCreators } from "../hooks/creators";
 import useSafeContext from "../hooks/safe-context-hook";
 import useSessionState from "../hooks/session-state";
 
@@ -14,15 +14,15 @@ import useSessionState from "../hooks/session-state";
 type AddCreatorsListProps = {
     storageKey: StorageKey | string,
     workCreators: Creator[],
-    onButtonClick: (creator: Creator) => void
+    onButtonClick: (creatorId: number) => void
 }
 
 export default function AddCreatorsList({ storageKey, workCreators, onButtonClick }: AddCreatorsListProps) {
+    const { creators } = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
-    const { creators } = useCreators();
     const [filter, setFilter] = useSessionState(storageKey, "");
 
-    const creatorsItems = creators.filter((creator) => creator.name.toLowerCase().includes(filter.toLowerCase()));
+    const creatorsItems = Array.from(creators.values()).filter((creator) => creator.name.toLowerCase().includes(filter.toLowerCase()));
     
     return (
         <>
@@ -52,7 +52,7 @@ export default function AddCreatorsList({ storageKey, workCreators, onButtonClic
                             { !attached && <button
                                 className="min-w-[32px] min-h-[32px] flex items-center justify-center hover:bg-neutral-300 active:bg-neutral-400"
                                 type="button"
-                                onClick={() => { onButtonClick(creator); }}
+                                onClick={() => { onButtonClick(creator.id); }}
                             ><BsPlus /></button> }
                         </div>
                     );

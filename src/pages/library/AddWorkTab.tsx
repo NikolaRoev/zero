@@ -1,18 +1,15 @@
-import * as api from "../../data/api";
+import type { Creator, Work } from "../../data/api";
 import AddCreatorsList from "../../components/AddCreatorsList";
 import Button from "../../components/Button";
-import type { Creator } from "../../data/api";
 import CreatorsTable from "../../components/CreatorsTable";
+import { DataContext } from "../../contexts/data-context";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import Select from "../../components/Select";
 import { StorageKey } from "../../data/storage";
 import { toast } from "react-toastify";
-import useFormats from "../../hooks/formats";
 import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer";
-import { useStatuses } from "../../hooks/statuses";
-import useTypes from "../../hooks/types";
 
 
 
@@ -22,7 +19,7 @@ type AddWorkFormData = {
     statusIndex: number,
     typeIndex: number,
     formatIndex: number,
-    creators: Creator[]
+    creators: number[]
 }
 
 const emptyAddWorkFormData: AddWorkFormData = {
@@ -41,10 +38,8 @@ type AddWorkFormAction =
     { action: "ChangeStatus", statusIndex: number } |
     { action: "ChangeType", typeIndex: number } |
     { action: "ChangeFormat", formatIndex: number } |
-    { action: "AddCreator", creator: Creator } |
+    { action: "AddCreator", id: number } |
     { action: "RemoveCreator", id: number }
-
-
 
 function addWorkFormReducer(addWorkFormData: AddWorkFormData, action: AddWorkFormAction): AddWorkFormData {
     switch (action.action) {
@@ -67,15 +62,13 @@ function addWorkFormReducer(addWorkFormData: AddWorkFormData, action: AddWorkFor
             return { ...addWorkFormData, formatIndex: action.formatIndex };
         }
         case "AddCreator": {
-            if (!addWorkFormData.creators.find((creator) => creator.id === action.creator.id)) {
-                return { ...addWorkFormData, creators: [...addWorkFormData.creators, action.creator] };
+            if (!addWorkFormData.creators.find((id) => id === action.id)) {
+                return { ...addWorkFormData, creators: [...addWorkFormData.creators, action.id] };
             }
-            else {
-                return addWorkFormData;
-            }
+            return addWorkFormData;
         }
         case "RemoveCreator": {
-            return { ...addWorkFormData, creators: addWorkFormData.creators.filter((creator) => creator.id !== action.id) };
+            return { ...addWorkFormData, creators: addWorkFormData.creators.filter((id) => id !== action.id) };
         }
         default: {
             const unreachable: never = action;
@@ -85,13 +78,10 @@ function addWorkFormReducer(addWorkFormData: AddWorkFormData, action: AddWorkFor
 }
 
 
-
 export default function AddWorkTab() {
+    const { creators, statuses, types, formats, addWork } = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
-    const { statuses } = useStatuses();
-    const { types } = useTypes();
-    const { formats } = useFormats();
-    const [addWorkFormData, dispatch] = useSessionReducer(StorageKey.AddWorkFormData, addWorkFormReducer, emptyAddWorkFormData);
+    const [addWorkFormData, addWorkFormDispatch] = useSessionReducer(StorageKey.AddWorkFormData, addWorkFormReducer, emptyAddWorkFormData);
 
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -102,17 +92,36 @@ export default function AddWorkTab() {
         const format = formats[addWorkFormData.formatIndex]?.format;
 
         if (status && type && format) {
-            api.addWork(addWorkFormData.name, addWorkFormData.progress, status, type, format, addWorkFormData.creators.map((creator) => creator.id))
-                .then((id) => {
-                    toast(<div
-                        onClick={() => { navigationDispatch({ action: "New", page: { type: "Work", id: id}}); }}
-                    >{`Added work "${addWorkFormData.name}".`}</div>);
-                    dispatch({ action: "Clear" });
-                })
-                .catch((reason) => { alert(reason); });
+            const timestamp = Date.now();
+            const work: Work = {
+                id: 0,
+                name: addWorkFormData.name,
+                progress: addWorkFormData.progress,
+                status: status,
+                type: type,
+                format: format,
+                updated: timestamp,
+                added: timestamp,
+                creators: addWorkFormData.creators
+            };
+
+            addWork(work, (id) => {
+                toast(<div
+                    onClick={() => { navigationDispatch({ action: "New", page: { type: "Work", id: id}}); }}
+                >{`Added work "${addWorkFormData.name}".`}</div>);
+                addWorkFormDispatch({ action: "Clear" });
+            });
         }
     }
 
+
+    const workCreators: Creator[] = [];
+    for (const creatorId of addWorkFormData.creators) {
+        const creator = creators.get(creatorId);
+        if (creator) {
+            workCreators.push(creator);
+        }
+    }
 
     return (
         <div className="p-[5px] grow flex flex-col">
@@ -122,14 +131,14 @@ export default function AddWorkTab() {
                         <Button
                             className="ml-auto"
                             type="button"
-                            onClick={() => { dispatch({ action: "Clear" }); }}
+                            onClick={() => { addWorkFormDispatch({ action: "Clear" }); }}
                         >Clear</Button>
                     </div>
                     <label>Name:</label>
                     <Input
                         className="col-span-8"
                         value={addWorkFormData.name}
-                        onChange={(event) => { dispatch({ action: "ChangeName", name: event.target.value }); }}
+                        onChange={(event) => { addWorkFormDispatch({ action: "ChangeName", name: event.target.value }); }}
                         placeholder="Name"
                         required={true}
                     />
@@ -137,7 +146,7 @@ export default function AddWorkTab() {
                     <Input
                         className="col-span-8"
                         value={addWorkFormData.progress}
-                        onChange={(event) => { dispatch({ action: "ChangeProgress", progress: event.target.value }); }}
+                        onChange={(event) => { addWorkFormDispatch({ action: "ChangeProgress", progress: event.target.value }); }}
                         placeholder="Progress"
                         required={true}
                     />
@@ -146,7 +155,7 @@ export default function AddWorkTab() {
                         className="col-span-2"
                         value={addWorkFormData.statusIndex}
                         items={statuses.map((status, index) => ({ label: status.status, value: index }))}
-                        onChange={(value) => { dispatch({ action: "ChangeStatus", statusIndex: value}); }}
+                        onChange={(value) => { addWorkFormDispatch({ action: "ChangeStatus", statusIndex: value}); }}
                         selectMsg="Select Status"
                         errorMsg="No Statuses"
                     />
@@ -155,7 +164,7 @@ export default function AddWorkTab() {
                         className="col-span-2"
                         value={addWorkFormData.typeIndex}
                         items={types.map((type, index) => ({ label: type.type, value: index }))}
-                        onChange={(value) => { dispatch({ action: "ChangeType", typeIndex: value}); }}
+                        onChange={(value) => { addWorkFormDispatch({ action: "ChangeType", typeIndex: value}); }}
                         selectMsg="Select Type"
                         errorMsg="No Types"
                     />
@@ -164,7 +173,7 @@ export default function AddWorkTab() {
                         className="col-span-2"
                         value={addWorkFormData.formatIndex}
                         items={formats.map((format, index) => ({ label: format.format, value: index }))}
-                        onChange={(value) => { dispatch({ action: "ChangeFormat", formatIndex: value}); }}
+                        onChange={(value) => { addWorkFormDispatch({ action: "ChangeFormat", formatIndex: value}); }}
                         selectMsg="Select Format"
                         errorMsg="No Formats"
                     />
@@ -173,18 +182,18 @@ export default function AddWorkTab() {
                     <div className="flex flex-col border border-neutral-700 rounded overflow-y-auto">
                         <label className="p-[5px] border-b border-neutral-700 ">Creators:</label>
                         <CreatorsTable
-                            creators={addWorkFormData.creators}
+                            creators={workCreators}
                             storageKey={StorageKey.AddWorkCreatorsSort}
                             name
                             works
-                            onDetachCreator={(id) => { dispatch({ action: "RemoveCreator", id: id }); } }
+                            onDetachCreator={(id) => { addWorkFormDispatch({ action: "RemoveCreator", id: id }); } }
                         />
                     </div>
                     <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
                         <AddCreatorsList
-                            workCreators={addWorkFormData.creators}
+                            workCreators={workCreators}
                             storageKey={StorageKey.AddWorkCreatorsFilter}
-                            onButtonClick={(creator) => { dispatch({ action: "AddCreator", creator: creator }); }}
+                            onButtonClick={(creatorId) => { addWorkFormDispatch({ action: "AddCreator", id: creatorId }); }}
                         />
                     </div>
                 </div>

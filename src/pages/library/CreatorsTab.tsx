@@ -1,23 +1,18 @@
 import CreatorsTable from "../../components/CreatorsTable";
+import { DataContext } from "../../contexts/data-context";
 import Input from "../../components/Input";
 import { StorageKey } from "../../data/storage";
-import { useCreators } from "../../hooks/creators";
+import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionState from "../../hooks/session-state";
 
 
 
 export default function CreatorsTab() {
-    const { creators } = useCreators();
+    const { creators } = useSafeContext(DataContext);
     const [filter, setFilter] = useSessionState(StorageKey.LibraryCreatorsFilter, "");
 
 
-    const creatorsItems = creators.filter((creator) => {
-        if (!creator.name.toLowerCase().includes(filter.toLowerCase())) {
-            return false;
-        }
-
-        return true;
-    });
+    const creatorsItems = Array.from(creators.values()).filter((creator) => creator.name.toLowerCase().includes(filter.toLowerCase()));
     
     return (
         <div className="p-[5px] grow flex flex-col gap-y-[10px]">

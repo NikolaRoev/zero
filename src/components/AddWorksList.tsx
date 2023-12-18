@@ -1,4 +1,5 @@
 import { BsPlus } from "react-icons/bs";
+import { DataContext } from "../contexts/data-context";
 import Input from "./Input";
 import { NavigationContext } from "../contexts/navigation-context";
 import type { StorageKey } from "../data/storage";
@@ -7,22 +8,21 @@ import type { Work } from "../data/api";
 import clsx from "clsx";
 import useSafeContext from "../hooks/safe-context-hook";
 import useSessionState from "../hooks/session-state";
-import { useWorks } from "../hooks/works";
 
 
 
 type AddWorksListProps = {
     storageKey: StorageKey | string,
     creatorWorks: Work[],
-    onButtonClick: (work: Work) => void
+    onButtonClick: (workId: number) => void
 }
 
 export default function AddWorksList({ storageKey, creatorWorks, onButtonClick }: AddWorksListProps) {
+    const { works } = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
-    const { works } = useWorks();
     const [filter, setFilter] = useSessionState(storageKey, "");
 
-    const worksItems = works.filter((work) => work.name.toLowerCase().includes(filter.toLowerCase()));
+    const worksItems = Array.from(works.values()).filter((work) => work.name.toLowerCase().includes(filter.toLowerCase()));
     
     return (
         <>
@@ -52,7 +52,7 @@ export default function AddWorksList({ storageKey, creatorWorks, onButtonClick }
                             { !attached && <button
                                 className="min-w-[32px] min-h-[32px] flex items-center justify-center hover:bg-neutral-300 active:bg-neutral-400"
                                 type="button"
-                                onClick={() => { onButtonClick(work); }}
+                                onClick={() => { onButtonClick(work.id); }}
                             ><BsPlus /></button> }
                         </div>
                     );

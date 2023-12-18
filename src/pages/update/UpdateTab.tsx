@@ -1,33 +1,37 @@
-import * as api from "../../data/api";
-import { type ChangeEvent, useEffect, useRef } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
+import { DataContext } from "../../contexts/data-context";
 import Input from "../../components/Input";
 import { StorageKey } from "../../data/storage";
-import type { UpdateWork } from "../../data/api";
 import { Virtuoso } from "react-virtuoso";
+import type { Work } from "../../data/api";
+import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionState from "../../hooks/session-state";
-import { useUpdateWorks } from "../../hooks/works";
 
 
 
 type UpdateWorkRowProps = {
-    updateWork: UpdateWork,
+    updateWork: Work,
     onNameChange: (id: number, value: string) => void,
     onProgressChange: (id: number, value: string) => void
 }
 
-function UpdateWorkRow({ updateWork, onNameChange, onProgressChange }: UpdateWorkRowProps) {
+function UpdateWorkRow(props: UpdateWorkRowProps) {
     return (
         <div className="px-[15px] py-[10px] flex flex-col bg-neutral-50">
             <input
                 className="text-[14px] grow focus:outline-none overflow-ellipsis bg-neutral-50"
-                value={updateWork.name}
-                onInput={(event: ChangeEvent<HTMLInputElement>) => { onNameChange(updateWork.id, event.target.value); }}
+                value={props.updateWork.name}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                    props.onNameChange(props.updateWork.id, event.target.value);
+                }}
                 spellCheck={false}
             />
             <input
                 className="text-[14px] grow focus:outline-none overflow-ellipsis bg-neutral-50"
-                value={updateWork.progress}
-                onInput={(event: ChangeEvent<HTMLInputElement>) => { onProgressChange(updateWork.id, event.target.value); }}
+                value={props.updateWork.progress}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                    props.onProgressChange(props.updateWork.id, event.target.value);
+                }}
                 spellCheck={false}
             />
         </div>
@@ -35,11 +39,11 @@ function UpdateWorkRow({ updateWork, onNameChange, onProgressChange }: UpdateWor
 }
 
 
-
 export default function UpdateTab() {
+    const { works, statuses, updateWorkName, updateWorkProgress } = useSafeContext(DataContext);
     const filterInput = useRef<HTMLInputElement>(null);
     const [filter, setFilter] = useSessionState(StorageKey.UpdateFilter, "");
-    const { updateWorks, setUpdateWorks, getUpdateWorks } = useUpdateWorks();
+    const [editingIds, setEditingIds] = useState<number[]>([]);
 
 
     useEffect(() => {
@@ -58,40 +62,11 @@ export default function UpdateTab() {
     }, []);
 
 
-    function handleNameChange(id: number, value: string) {
-        setUpdateWorks(updateWorks.map((updateWork) => {
-            if (updateWork.id === id) {
-                return { ...updateWork, name: value };
-            }
-            else {
-                return updateWork;
-            }
-        }));
-
-        api.updateWorkName(id, value).catch((reason) => {
-            getUpdateWorks();
-            alert(reason);
-        });
-    }
-
-    function handleProgressChange(id: number, value: string) {
-        setUpdateWorks(updateWorks.map((updateWork) => {
-            if (updateWork.id === id) {
-                return { ...updateWork, progress: value };
-            }
-            else {
-                return updateWork;
-            }
-        }));
-
-        api.updateWorkProgress(id, value).catch((reason) => {
-            getUpdateWorks();
-            alert(reason);
-        });
-    }
-
-
-    const updateWorksItems = updateWorks.filter((work) => work.name.toLowerCase().includes(filter.toLowerCase()));
+    const updateStatuses = statuses.filter((status) => status.isUpdate);
+    const updateWorks = Array.from(works.values()).filter((work) => updateStatuses.find((status) => status.status === work.status));
+    const updateWorksItems = updateWorks.filter((work) => (
+        work.name.toLowerCase().includes(filter.toLowerCase()) || editingIds.includes(work.id)
+    ));
 
     return (
         <div className="p-[5px] grow flex flex-col gap-y-[10px] bg-neutral-50">
@@ -100,7 +75,10 @@ export default function UpdateTab() {
                 value={filter}
                 placeholder="Find"
                 type="search"
-                onChange={(event) => { setFilter(event.target.value); }}
+                onChange={(event) => {
+                    setFilter(event.target.value);
+                    setEditingIds([]);
+                }}
             />
 
             <Virtuoso
@@ -109,8 +87,14 @@ export default function UpdateTab() {
                 itemContent={(_, updateWork) => (
                     <UpdateWorkRow
                         updateWork={updateWork}
-                        onNameChange={handleNameChange}
-                        onProgressChange={handleProgressChange}
+                        onNameChange={(id, value) => {
+                            updateWorkName(id, value);
+                            setEditingIds([...editingIds, id]);
+                        }}
+                        onProgressChange={(id, value) => {
+                            updateWorkProgress(id, value);
+                            setEditingIds([...editingIds, id]);
+                        }}
                     />
                 )}
             />

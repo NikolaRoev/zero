@@ -1,15 +1,13 @@
 import Button from "../../components/Button";
+import { DataContext } from "../../contexts/data-context";
 import { Fragment } from "react";
 import Input from "../../components/Input";
 import Select from "../../components/Select";
 import { StorageKey } from "../../data/storage";
 import WorksTable from "../../components/WorksTable";
 import clsx from "clsx";
-import useFormats from "../../hooks/formats";
+import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer";
-import { useStatuses } from "../../hooks/statuses";
-import useTypes from "../../hooks/types";
-import { useWorks } from "../../hooks/works";
 
 
 
@@ -71,10 +69,7 @@ function filterReducer(filter: Filter, action: FilterAction): Filter {
 
 
 export default function WorksTab() {
-    const { works } = useWorks();
-    const { statuses } = useStatuses();
-    const { types } = useTypes();
-    const { formats } = useFormats();
+    const { works, statuses, types, formats } = useSafeContext(DataContext);
     const [filter, filterDispatch] = useSessionReducer(StorageKey.LibraryWorksFilter, filterReducer, emptyFilter);
 
     
@@ -113,7 +108,6 @@ export default function WorksTab() {
     ));
 
     const formatsItems = formats.map((format) => (
-        //const id = useId();
         <Fragment key={format.id}>
             <input
                 id={`format-${format.format}`}
@@ -128,7 +122,7 @@ export default function WorksTab() {
         </Fragment>
     ));
 
-    const worksItems = works.filter((work) => {
+    const worksItems = Array.from(works.values()).filter((work) => {
         switch (filter.by) {
             case "name": {
                 if (!work.name.toLowerCase().includes(filter.value.toLowerCase())) {
