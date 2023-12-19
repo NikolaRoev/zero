@@ -1,5 +1,5 @@
 import * as api from "../data/api";
-import { Tab, TabBar, TabButton, Tabs, TabsContents } from "../components/Tabs";
+import { Tab, Tabs } from "../components/Tabs";
 import { useDatabasePath, useRecentDatabases } from "../hooks/database-hook";
 import ConfigurationTab from "./settings/ConfigurationTab";
 import DataContextProvider from "../contexts/data-context";
@@ -54,16 +54,9 @@ function MainScreen() {
     return (
         <DataContextProvider>
             <Tabs storageKey={StorageKey.MainScreenTabs} className="flex grow flex-col">
-                <TabBar>
-                    <TabButton>Update</TabButton>
-                    <TabButton>Library</TabButton>
-                    <TabButton>Configuration</TabButton>
-                </TabBar>
-                <TabsContents>
-                    <Tab><UpdateTab /></Tab>
-                    <Tab><LibraryTab /></Tab>
-                    <Tab><ConfigurationTab /></Tab>
-                </TabsContents>
+                <Tab label="Update"><UpdateTab /></Tab>
+                <Tab label="Library"><LibraryTab /></Tab>
+                <Tab label="Configuration"><ConfigurationTab /></Tab>
             </Tabs>
         </DataContextProvider>
     );

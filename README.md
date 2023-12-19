@@ -1,4 +1,4 @@
-- simplify tabs
+- add toast to config
 - generic add list
 - more button for dbs
 - clean-up

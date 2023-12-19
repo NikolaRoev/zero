@@ -6,31 +6,15 @@ import useSessionState from "../hooks/session-state";
 
 
 type TabProps = {
-    children: ReactElement | ReactElement[],
+    children: React.ReactNode,
+    label: React.ReactNode
 };
+
 export const Tab = ({ children }: TabProps) => <>{children}</>;
 
 
-type TabsContentsProps = {
-    children: ReactElement<TabProps>[],
-};
-export const TabsContents = ({}: TabsContentsProps) => <></>;
-
-
-type TabButtonProps = {
-    children: ReactElement | ReactElement[] | string,
-};
-export const TabButton = ({}: TabButtonProps) => <></>;
-
-
-type TabBarProps = {
-    children: ReactElement<TabButtonProps>[],
-};
-export const TabBar = ({}: TabBarProps) => <></>;
-
-
 type TabsProps = {
-    children: [ReactElement<TabBarProps>, ReactElement<TabsContentsProps>],
+    children: ReactElement<TabProps>[],
     storageKey: StorageKey,
     className?: string,
     defaultIndex?: number
@@ -39,27 +23,24 @@ type TabsProps = {
 export function Tabs({ children, storageKey, className, defaultIndex = 0 }: TabsProps) {
     const [index, setIndex] = useSessionState(storageKey, defaultIndex);
 
-    const tabBar = children.find((child) => child.type === TabBar) as ReactElement<TabBarProps>;
-    const tabsContents = children.find((child) => child.type === TabsContents) as ReactElement<TabsContentsProps>;
-
     return (
         <div className={className}>
             <div className="pl-[5px] bg-neutral-300">
                 {
-                    tabBar.props.children.map((tabButton: ReactElement<TabButtonProps>, tabButtonIndex) => (
+                    children.map((tab, tabIndex) => (
                         <button
-                            key={tabButtonIndex}
+                            key={tabIndex}
                             className={clsx(
                                 "px-[15px] rounded-tr-[8px] rounded-tl-[8px]",
-                                { "hover:bg-neutral-200 active:bg-neutral-50": tabButtonIndex !== index },
-                                tabButtonIndex === index ? "bg-neutral-50" : "bg-neutral-300"
+                                { "hover:bg-neutral-200 active:bg-neutral-50": tabIndex !== index },
+                                tabIndex === index ? "bg-neutral-50" : "bg-neutral-300"
                             )}
-                            onClick={() => { setIndex(tabButtonIndex); }}
-                        >{tabButton.props.children}</button>
+                            onClick={() => { setIndex(tabIndex); }}
+                        >{tab.props.label}</button>
                     ))
                 }
             </div>
-            {tabsContents.props.children[index]}
+            {children[index]}
         </div>
     );
 }
