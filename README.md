@@ -1,4 +1,5 @@
-- sort indicators in the tables
+- generic add list
+- generic work/creator info panel ??? maybe
 - more button for dbs
 - clean-up
 - testing

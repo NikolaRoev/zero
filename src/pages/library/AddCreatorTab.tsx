@@ -1,11 +1,15 @@
+import * as sort from "../../utility/sortingFunctions";
 import type { Creator, Work } from "../../data/api";
+import { Table, TableCell, TableRow } from "../../components/Table";
+import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
 import AddWorksList from "../../components/AddWorksList";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
+import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
-import WorksTable from "../../components/WorksTable";
+import clsx from "clsx";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer";
@@ -111,19 +115,55 @@ export default function AddCreatorTab() {
                 <div className="grow grid grid-cols-2 gap-x-[10px]">
                     <div className="flex flex-col border border-neutral-700 rounded overflow-y-auto">
                         <label className="p-[5px] border-b border-neutral-700 ">Works:</label>
-                        <WorksTable
-                            works={creatorWorks}
-                            storageKey={StorageKey.AddCreatorWorksSort}
-                            headerClassName="text-sm"
-                            dataClassName="text-xs"
-                            name
-                            progress
-                            status
-                            type
-                            format
-                            updated
-                            added
-                            onDetachWork={(id) => { dispatch({ action: "RemoveWork", id: id }); } }
+                        <Table
+                            sortStorageKey={StorageKey.AddCreatorWorksSort}
+                            data={creatorWorks}
+                            header={{ className: clsx("text-sm"), rows: [
+                                { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
+                                { contents: "Name", sort: { action: "Sort", sortFnGen: sort.workNameSortFnGen } },
+                                { contents: "Progress", sort: { action: "Sort", sortFnGen: sort.workProgressSortFnGen } },
+                                { contents: "Status", sort: { action: "Sort", sortFnGen: sort.workStatusSortFnGen } },
+                                { contents: "Type", sort: { action: "Sort", sortFnGen: sort.workTypeSortFnGen } },
+                                { contents: "Format", sort: { action: "Sort", sortFnGen: sort.workFormatSortFnGen } },
+                                { contents: "Updated", sort: { action: "Sort", sortFnGen: sort.workUpdatedSortFnGen } },
+                                { contents: "Added", sort: { action: "Sort", sortFnGen: sort.workAddedSortFnGen } },
+                                { contents: "" }
+                            ] }}
+                            computeItemKey={(_, work) => work.id}
+                            itemContent={(index, work) => (
+                                <TableRow>
+                                    <TableCell className="w-[1%] p-[5px] text-xs">{index + 1}.</TableCell>
+                                    <TableCell
+                                        className={clsx(
+                                            "max-w-0 p-[5px] text-xs overflow-hidden overflow-ellipsis",
+                                            "hover:bg-neutral-200 active:bg-neutral-300"
+                                        )}
+                                        title={work.name}
+                                        onClick={() => { navigationDispatch({action: "New", page: {id: work.id, type: "Work"}}); }}
+                                    >{work.name}</TableCell>
+                                    <TableCell
+                                        className="w-[1%] p-[5px] text-xs"
+                                        title={work.progress}
+                                    >{work.progress}</TableCell>
+                                    <TableCell className="w-[1%] p-[5px] text-xs">{work.status}</TableCell>
+                                    <TableCell className="w-[1%] p-[5px] text-xs">{work.type}</TableCell>
+                                    <TableCell className="w-[1%] p-[5px] text-xs">{work.format}</TableCell>
+                                    <TableCell
+                                        className="w-[1%] p-[5px] text-xs"
+                                        title={formatISO9075(work.updated)}
+                                    >{formatDistanceToNowStrict(work.updated, { addSuffix: true })}</TableCell>
+                                    <TableCell
+                                        className="w-[1%] p-[5px] text-xs"
+                                        title={formatISO9075(work.added)}
+                                    >{formatDistanceToNowStrict(work.added, { addSuffix: true })}</TableCell>
+                                    <TableCell className="w-[1%] p-0">
+                                        <DeleteButton
+                                            onClick={() => { dispatch({ action: "RemoveWork", id: work.id }); }}
+                                            title={`Remove work "${work.name}".`}
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         />
                     </div>
                     <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">

@@ -1,7 +1,6 @@
-import type { StorageKey } from "../data/storage";
 import { useReducer } from "react";
 
-export default function useSessionReducer<S, A>(key: StorageKey, reducer: (state: S, action: A) => S, initialState: S) {
+export default function useSessionReducer<S, A>(key: string, reducer: (state: S, action: A) => S, initialState: S) {
     const innerReducer = (state: S, action: A) => {
         const newState = reducer(state, action);
         sessionStorage.setItem(key, JSON.stringify(newState));

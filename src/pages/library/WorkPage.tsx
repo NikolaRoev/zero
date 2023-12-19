@@ -1,13 +1,16 @@
 import * as api from "../../data/api";
+import * as sort from "../../utility/sortingFunctions";
 import { Option, Select } from "../../components/Select";
+import { Table, TableCell, TableRow } from "../../components/Table";
 import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
 import AddCreatorsList from "../../components/AddCreatorsList";
 import Button from "../../components/Button";
 import type { Creator } from "../../data/api";
-import CreatorsTable from "../../components/CreatorsTable";
 import { DataContext } from "../../contexts/data-context";
+import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
+import clsx from "clsx";
 import { confirm } from "@tauri-apps/api/dialog";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
@@ -111,12 +114,39 @@ export default function WorkPage({ id }: { id: number }) {
             <div className="grow grid grid-cols-2 gap-x-[10px]">
                 <div className="flex flex-col border border-neutral-700 rounded">
                     <label className="p-[5px] border-b border-neutral-700 ">Creators:</label>
-                    <CreatorsTable
-                        creators={workCreators}
-                        storageKey={`WORK-CREATORS-${id}-SORT-KEY`}
-                        name
-                        works
-                        onDetachCreator={(creatorId) => { dataContext.detach(id, creatorId); }} />
+                    <Table
+                        sortStorageKey={`WORK-CREATORS-${id}-SORT-KEY`}
+                        data={workCreators}
+                        header={{ rows: [
+                            { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
+                            { contents: "Name", sort: { action: "Sort", sortFnGen: sort.creatorNameSortFnGen } },
+                            { contents: "Works", sort: { action: "Sort", sortFnGen: sort.creatorWorksSortFnGen } },
+                            { contents: "" }
+                        ] }}
+                        computeItemKey={(_, creator) => creator.id}
+                        itemContent={(index, creator) => (
+                            <TableRow>
+                                <TableCell className="w-[1%] p-[5px]">{index + 1}.</TableCell>
+                                <TableCell
+                                    className={clsx(
+                                        "max-w-0 p-[5px] overflow-hidden overflow-ellipsis",
+                                        "hover:bg-neutral-200 active:bg-neutral-300"
+                                    )}
+                                    title={creator.name}
+                                    onClick={() => { navigationDispatch({action: "New", page: {id: creator.id, type: "Creator"}}); }}
+                                >{creator.name}</TableCell>
+                                <TableCell
+                                    className="w-[1%] p-[5px]"
+                                >{creator.works.length}</TableCell>
+                                <TableCell className="w-[1%] p-0">
+                                    <DeleteButton
+                                        onClick={() => { dataContext.detach(id, creator.id); }}
+                                        title={`Detach creator "${creator.name}".`}
+                                    />
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    />
                 </div>
                 <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
                     <AddCreatorsList
@@ -128,5 +158,4 @@ export default function WorkPage({ id }: { id: number }) {
             </div>
         </div>
     );
-
 }

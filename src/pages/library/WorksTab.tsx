@@ -1,10 +1,13 @@
-import {Option, Select} from "../../components/Select";
+import * as sort from "../../utility/sortingFunctions";
+import { Option, Select } from "../../components/Select";
+import { Table, TableCell, TableRow } from "../../components/Table";
+import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
 import { Fragment } from "react";
 import Input from "../../components/Input";
+import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
-import WorksTable from "../../components/WorksTable";
 import clsx from "clsx";
 import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer";
@@ -70,6 +73,7 @@ function filterReducer(filter: Filter, action: FilterAction): Filter {
 
 export default function WorksTab() {
     const { works, statuses, types, formats } = useSafeContext(DataContext);
+    const { navigationDispatch } = useSafeContext(NavigationContext);
     const [filter, filterDispatch] = useSessionReducer(StorageKey.LibraryWorksFilter, filterReducer, emptyFilter);
 
     
@@ -189,13 +193,43 @@ export default function WorksTab() {
                     </fieldset>
                 </div>
             </div>
-            <WorksTable
-                works={worksItems}
-                storageKey={StorageKey.LibraryWorksSort}
-                name
-                progress
-                updated
-                added
+
+            <Table
+                sortStorageKey={StorageKey.LibraryWorksSort}
+                data={worksItems}
+                header={{ rows: [
+                    { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
+                    { contents: "Name", sort: { action: "Sort", sortFnGen: sort.workNameSortFnGen } },
+                    { contents: "Progress", sort: { action: "Sort", sortFnGen: sort.workProgressSortFnGen } },
+                    { contents: "Updated", sort: { action: "Sort", sortFnGen: sort.workUpdatedSortFnGen } },
+                    { contents: "Added", sort: { action: "Sort", sortFnGen: sort.workAddedSortFnGen } }
+                ] }}
+                computeItemKey={(_, work) => work.id}
+                itemContent={(index, work) => (
+                    <TableRow>
+                        <TableCell className="w-[1%] p-[5px]">{index + 1}.</TableCell>
+                        <TableCell
+                            className={clsx(
+                                "max-w-0 p-[5px] overflow-hidden overflow-ellipsis",
+                                "hover:bg-neutral-200 active:bg-neutral-300"
+                            )}
+                            title={work.name}
+                            onClick={() => { navigationDispatch({action: "New", page: {id: work.id, type: "Work"}}); }}
+                        >{work.name}</TableCell>
+                        <TableCell
+                            className="w-[1%] p-[5px]"
+                            title={work.progress}
+                        >{work.progress}</TableCell>
+                        <TableCell
+                            className="w-[1%] p-[5px]"
+                            title={formatISO9075(work.updated)}
+                        >{formatDistanceToNowStrict(work.updated, { addSuffix: true })}</TableCell>
+                        <TableCell
+                            className="w-[1%] p-[5px]"
+                            title={formatISO9075(work.added)}
+                        >{formatDistanceToNowStrict(work.added, { addSuffix: true })}</TableCell>
+                    </TableRow>
+                )}
             />
         </div>
     );

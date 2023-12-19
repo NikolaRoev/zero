@@ -1,12 +1,15 @@
+import * as sort from "../../utility/sortingFunctions";
 import type { Creator, Work } from "../../data/api";
 import { Option, Select } from "../../components/Select";
+import { Table, TableCell, TableRow } from "../../components/Table";
 import AddCreatorsList from "../../components/AddCreatorsList";
 import Button from "../../components/Button";
-import CreatorsTable from "../../components/CreatorsTable";
 import { DataContext } from "../../contexts/data-context";
+import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
+import clsx from "clsx";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer";
@@ -193,12 +196,38 @@ export default function AddWorkTab() {
                 <div className="grow grid grid-cols-2 gap-x-[10px]">
                     <div className="flex flex-col border border-neutral-700 rounded overflow-y-auto">
                         <label className="p-[5px] border-b border-neutral-700 ">Creators:</label>
-                        <CreatorsTable
-                            creators={workCreators}
-                            storageKey={StorageKey.AddWorkCreatorsSort}
-                            name
-                            works
-                            onDetachCreator={(id) => { addWorkFormDispatch({ action: "RemoveCreator", id: id }); } }
+                        <Table
+                            sortStorageKey={StorageKey.AddWorkCreatorsSort}
+                            data={workCreators}
+                            header={{ rows: [
+                                { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
+                                { contents: "Name", sort: { action: "Sort", sortFnGen: sort.creatorNameSortFnGen } },
+                                { contents: "Works", sort: { action: "Sort", sortFnGen: sort.creatorWorksSortFnGen } },
+                                { contents: "" }
+                            ] }}
+                            computeItemKey={(_, creator) => creator.id}
+                            itemContent={(index, creator) => (
+                                <TableRow>
+                                    <TableCell className="w-[1%] p-[5px]">{index + 1}.</TableCell>
+                                    <TableCell
+                                        className={clsx(
+                                            "max-w-0 p-[5px] overflow-hidden overflow-ellipsis",
+                                            "hover:bg-neutral-200 active:bg-neutral-300"
+                                        )}
+                                        title={creator.name}
+                                        onClick={() => { navigationDispatch({action: "New", page: {id: creator.id, type: "Creator"}}); }}
+                                    >{creator.name}</TableCell>
+                                    <TableCell
+                                        className="w-[1%] p-[5px]"
+                                    >{creator.works.length}</TableCell>
+                                    <TableCell className="w-[1%] p-0">
+                                        <DeleteButton
+                                            onClick={() => { addWorkFormDispatch({ action: "RemoveCreator", id: creator.id }); }}
+                                            title={`Detach creator "${creator.name}".`}
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         />
                     </div>
                     <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
