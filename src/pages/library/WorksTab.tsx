@@ -3,8 +3,8 @@ import { Option, Select } from "../../components/Select";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
 import Button from "../../components/Button";
+import CheckboxGroup from "../../components/CheckboxGroup";
 import { DataContext } from "../../contexts/data-context";
-import { Fragment } from "react";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
@@ -76,55 +76,6 @@ export default function WorksTab() {
     const { navigationDispatch } = useSafeContext(NavigationContext);
     const [filter, filterDispatch] = useSessionReducer(StorageKey.LibraryWorksFilter, filterReducer, emptyFilter);
 
-    
-    const statusesItems = statuses.map((status) => (
-        <Fragment key={status.id}>
-            <input
-                id={`status-${status.status}`}
-                type="checkbox"
-                checked={filter.statuses.includes(status.status)}
-                onChange={(event) => {
-                    if (event.target.checked) { filterDispatch({ action: "AddStatus", status: status.status}); }
-                    else { filterDispatch({ action: "RemoveStatus", status: status.status}); }
-                }}
-            />
-            <label
-                htmlFor={`status-${status.status}`}
-                title={status.isUpdate ? "Update status." : undefined}
-                className={clsx({ "underline": status.isUpdate })}
-            >{status.status}</label>
-        </Fragment>
-    ));
-
-    const typesItems = types.map((type) => (
-        <Fragment key={type.id}>
-            <input
-                id={`type-${type.type}`}
-                type="checkbox"
-                checked={filter.types.includes(type.type)}
-                onChange={(event) => {
-                    if (event.target.checked) { filterDispatch({ action: "AddType", type: type.type}); }
-                    else { filterDispatch({ action: "RemoveType", type: type.type}); }
-                }}
-            />
-            <label htmlFor={`type-${type.type}`}>{type.type}</label>
-        </Fragment>
-    ));
-
-    const formatsItems = formats.map((format) => (
-        <Fragment key={format.id}>
-            <input
-                id={`format-${format.format}`}
-                type="checkbox"
-                checked={filter.formats.includes(format.format)}
-                onChange={(event) => {
-                    if (event.target.checked) { filterDispatch({ action: "AddFormat", format: format.format}); }
-                    else { filterDispatch({ action: "RemoveFormat", format: format.format}); }
-                }}
-            />
-            <label htmlFor={`format-${format.format}`}>{format.format}</label>
-        </Fragment>
-    ));
 
     const worksItems = Array.from(works.values()).filter((work) => {
         switch (filter.by) {
@@ -181,16 +132,50 @@ export default function WorksTab() {
                     </Select>
                     <Button onClick={() => { filterDispatch({ action: "Clear"}); }}>Clear</Button>
                 </div>
-                <div className="flex gap-x-[5px]">
-                    <fieldset className="grow p-[5px] border border-neutral-700 rounded-[5px] flex gap-x-[5px]">
-                        <legend>Statuses</legend>{statusesItems}
-                    </fieldset>
-                    <fieldset className="grow p-[5px] border border-neutral-700 rounded-[5px] flex gap-x-[5px]">
-                        <legend>Types</legend>{typesItems}
-                    </fieldset>
-                    <fieldset className="grow p-[5px] border border-neutral-700 rounded-[5px] flex gap-x-[5px]">
-                        <legend>Formats</legend>{formatsItems}
-                    </fieldset>
+                <div className="grid grid-cols-3 gap-x-[5px]">
+                    <CheckboxGroup
+                        legend="Statuses"
+                        items={statuses}
+                        generate={(status) => ({
+                            key: status.id,
+                            checked: filter.statuses.includes(status.status),
+                            onChange: (event) => {
+                                if (event.target.checked) { filterDispatch({ action: "AddStatus", status: status.status}); }
+                                else { filterDispatch({ action: "RemoveStatus", status: status.status}); }
+                            },
+                            labelContents: status.status,
+                            labelClassName: clsx({ "underline": status.isUpdate }),
+                            labelTitle: status.isUpdate ? "Update status." : undefined
+                        })}
+                    />
+
+                    <CheckboxGroup
+                        legend="Types"
+                        items={types}
+                        generate={(type) => ({
+                            key: type.id,
+                            checked: filter.types.includes(type.type),
+                            onChange: (event) => {
+                                if (event.target.checked) { filterDispatch({ action: "AddType", type: type.type}); }
+                                else { filterDispatch({ action: "RemoveType", type: type.type}); }
+                            },
+                            labelContents: type.type
+                        })}
+                    />
+
+                    <CheckboxGroup
+                        legend="Formats"
+                        items={formats}
+                        generate={(format) => ({
+                            key: format.id,
+                            checked: filter.formats.includes(format.format),
+                            onChange: (event) => {
+                                if (event.target.checked) { filterDispatch({ action: "AddFormat", format: format.format}); }
+                                else { filterDispatch({ action: "RemoveFormat", format: format.format}); }
+                            },
+                            labelContents: format.format
+                        })}
+                    />
                 </div>
             </div>
 

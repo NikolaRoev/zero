@@ -1,5 +1,5 @@
+- simplify tabs
 - generic add list
-- generic work/creator info panel ??? maybe
 - more button for dbs
 - clean-up
 - testing
