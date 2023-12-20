@@ -1,5 +1,4 @@
-import * as sort from "../../utility/sortingFunctions";
-import type { Creator, Work } from "../../data/api";
+import * as data from "../../data/data";
 import { Option, Select } from "../../components/Select";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import AddList from "../../components/AddList";
@@ -12,7 +11,7 @@ import { StorageKey } from "../../data/storage";
 import clsx from "clsx";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
-import useSessionReducer from "../../hooks/session-reducer";
+import useSessionReducer from "../../hooks/session-reducer-hook";
 
 
 
@@ -84,7 +83,11 @@ function addWorkFormReducer(addWorkFormData: AddWorkFormData, action: AddWorkFor
 export default function AddWorkTab() {
     const dataContext = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
-    const [addWorkFormData, addWorkFormDispatch] = useSessionReducer(StorageKey.AddWorkFormData, addWorkFormReducer, emptyAddWorkFormData);
+    const [addWorkFormData, addWorkFormDispatch] = useSessionReducer(
+        StorageKey.AddWorkFormData,
+        addWorkFormReducer,
+        emptyAddWorkFormData
+    );
 
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -96,7 +99,7 @@ export default function AddWorkTab() {
 
         if (status && type && format) {
             const timestamp = Date.now();
-            const work: Work = {
+            const work: data.Work = {
                 id: 0,
                 name: addWorkFormData.name,
                 progress: addWorkFormData.progress,
@@ -118,7 +121,7 @@ export default function AddWorkTab() {
     }
 
 
-    const workCreators: Creator[] = [];
+    const workCreators: data.Creator[] = [];
     for (const creatorId of addWorkFormData.creators) {
         const creator = dataContext.creators.get(creatorId);
         if (creator) {
@@ -201,8 +204,8 @@ export default function AddWorkTab() {
                             data={workCreators}
                             header={{ rows: [
                                 { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
-                                { contents: "Name", sort: { action: "Sort", sortFnGen: sort.creatorNameSortFnGen } },
-                                { contents: "Works", sort: { action: "Sort", sortFnGen: sort.creatorWorksSortFnGen } },
+                                { contents: "Name", sort: { action: "Sort", sortFnGen: data.creatorNameSortFnGen } },
+                                { contents: "Works", sort: { action: "Sort", sortFnGen: data.creatorWorksSortFnGen } },
                                 { contents: "" }
                             ] }}
                             computeItemKey={(_, creator) => creator.id}
@@ -215,15 +218,19 @@ export default function AddWorkTab() {
                                             "hover:bg-neutral-200 active:bg-neutral-300"
                                         )}
                                         title={creator.name}
-                                        onClick={() => { navigationDispatch({action: "New", page: {id: creator.id, type: "Creator"}}); }}
+                                        onClick={() => {
+                                            navigationDispatch({action: "New", page: {id: creator.id, type: "Creator"}});
+                                        }}
                                     >{creator.name}</TableCell>
                                     <TableCell
                                         className="w-[1%] p-[5px] text-sm"
                                     >{creator.works.length}</TableCell>
                                     <TableCell className="w-[1%] p-0">
                                         <DeleteButton
-                                            onClick={() => { addWorkFormDispatch({ action: "RemoveCreator", id: creator.id }); }}
                                             title={`Detach creator "${creator.name}".`}
+                                            onClick={() => {
+                                                addWorkFormDispatch({ action: "RemoveCreator", id: creator.id });
+                                            }}
                                         />
                                     </TableCell>
                                 </TableRow>

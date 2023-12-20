@@ -1,5 +1,4 @@
-import * as sort from "../../utility/sortingFunctions";
-import type { Creator, Work } from "../../data/api";
+import * as data from "../../data/data";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
 import AddList from "../../components/AddList";
@@ -12,7 +11,7 @@ import { StorageKey } from "../../data/storage";
 import clsx from "clsx";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
-import useSessionReducer from "../../hooks/session-reducer";
+import useSessionReducer from "../../hooks/session-reducer-hook";
 
 
 
@@ -63,13 +62,17 @@ function addCreatorFormReducer(addCreatorFormData: AddCreatorFormData, action: A
 export default function AddCreatorTab() {
     const dataContext = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
-    const [addCreatorFormData, addCreatorFormDispatch] = useSessionReducer(StorageKey.AddCreatorFormData, addCreatorFormReducer, emptyAddCreatorFormData);
+    const [addCreatorFormData, addCreatorFormDispatch] = useSessionReducer(
+        StorageKey.AddCreatorFormData,
+        addCreatorFormReducer,
+        emptyAddCreatorFormData
+    );
 
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        const creator: Creator = {
+        const creator: data.Creator = {
             id: 0,
             name: addCreatorFormData.name,
             works: addCreatorFormData.works
@@ -84,7 +87,7 @@ export default function AddCreatorTab() {
     }
 
 
-    const creatorWorks: Work[] = [];
+    const creatorWorks: data.Work[] = [];
     for (const workId of addCreatorFormData.works) {
         const work = dataContext.works.get(workId);
         if (work) {
@@ -120,13 +123,13 @@ export default function AddCreatorTab() {
                             data={creatorWorks}
                             header={{ className: clsx("text-sm"), rows: [
                                 { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
-                                { contents: "Name", sort: { action: "Sort", sortFnGen: sort.workNameSortFnGen } },
-                                { contents: "Progress", sort: { action: "Sort", sortFnGen: sort.workProgressSortFnGen } },
-                                { contents: "Status", sort: { action: "Sort", sortFnGen: sort.workStatusSortFnGen } },
-                                { contents: "Type", sort: { action: "Sort", sortFnGen: sort.workTypeSortFnGen } },
-                                { contents: "Format", sort: { action: "Sort", sortFnGen: sort.workFormatSortFnGen } },
-                                { contents: "Updated", sort: { action: "Sort", sortFnGen: sort.workUpdatedSortFnGen } },
-                                { contents: "Added", sort: { action: "Sort", sortFnGen: sort.workAddedSortFnGen } },
+                                { contents: "Name", sort: { action: "Sort", sortFnGen: data.workNameSortFnGen } },
+                                { contents: "Progress", sort: { action: "Sort", sortFnGen: data.workProgressSortFnGen } },
+                                { contents: "Status", sort: { action: "Sort", sortFnGen: data.workStatusSortFnGen } },
+                                { contents: "Type", sort: { action: "Sort", sortFnGen: data.workTypeSortFnGen } },
+                                { contents: "Format", sort: { action: "Sort", sortFnGen: data.workFormatSortFnGen } },
+                                { contents: "Updated", sort: { action: "Sort", sortFnGen: data.workUpdatedSortFnGen } },
+                                { contents: "Added", sort: { action: "Sort", sortFnGen: data.workAddedSortFnGen } },
                                 { contents: "" }
                             ] }}
                             computeItemKey={(_, work) => work.id}
@@ -158,8 +161,10 @@ export default function AddCreatorTab() {
                                     >{formatDistanceToNowStrict(work.added, { addSuffix: true })}</TableCell>
                                     <TableCell className="w-[1%] p-0">
                                         <DeleteButton
-                                            onClick={() => { addCreatorFormDispatch({ action: "RemoveWork", id: work.id }); }}
                                             title={`Remove work "${work.name}".`}
+                                            onClick={() => {
+                                                addCreatorFormDispatch({ action: "RemoveWork", id: work.id });
+                                            }}
                                         />
                                     </TableCell>
                                 </TableRow>
@@ -170,13 +175,21 @@ export default function AddCreatorTab() {
                         <AddList
                             storageKey={StorageKey.AddCreatorWorksFilter}
                             data={Array.from(dataContext.works.values())}
-                            filterFn={(works, filter) => works.filter((work) => work.name.toLowerCase().includes(filter.toLowerCase()))}
-                            findFn={(work) => creatorWorks.find((creatorWork) => creatorWork.id === work.id) !== undefined }
+                            filterFn={(works, filter) => works.filter((work) => (
+                                work.name.toLowerCase().includes(filter.toLowerCase()))
+                            )}
+                            findFn={(work) => (
+                                creatorWorks.find((creatorWork) => creatorWork.id === work.id) !== undefined
+                            )}
                             computeItemKey={(_, work) => work.id}
                             itemContent={(work) => ({
                                 contents: work.name,
-                                onItemClick: () => { navigationDispatch({ action: "New", page: { type: "Work", id: work.id } }); },
-                                onButtonClick: () => { addCreatorFormDispatch({ action: "AddWork", id: work.id }); }
+                                onItemClick: () => {
+                                    navigationDispatch({ action: "New", page: { type: "Work", id: work.id } });
+                                },
+                                onButtonClick: () => {
+                                    addCreatorFormDispatch({ action: "AddWork", id: work.id });
+                                }
                             })}
                         />
                     </div>

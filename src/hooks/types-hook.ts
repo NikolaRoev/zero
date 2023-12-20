@@ -1,7 +1,7 @@
 import * as api from "../data/api";
 import { useEffect, useState } from "react";
 import { StorageKey } from "../data/storage";
-import type { Type } from "../data/api";
+import type { Type } from "../data/data";
 import { message } from "@tauri-apps/api/dialog";
 
 

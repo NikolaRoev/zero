@@ -1,4 +1,4 @@
-- move the sort fn and the work/creator types to data
+- info messages for form ids etc.
 - more button for dbs
 - clean-up
 - testing

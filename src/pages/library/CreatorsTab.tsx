@@ -1,4 +1,4 @@
-import * as sort from "../../utility/sortingFunctions";
+import * as data from "../../data/data";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { DataContext } from "../../contexts/data-context";
 import Input from "../../components/Input";
@@ -6,7 +6,7 @@ import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
 import clsx from "clsx";
 import useSafeContext from "../../hooks/safe-context-hook";
-import useSessionState from "../../hooks/session-state";
+import useSessionState from "../../hooks/session-state-hook";
 
 
 
@@ -34,8 +34,8 @@ export default function CreatorsTab() {
                 data={creatorsItems}
                 header={{ rows: [
                     { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
-                    { contents: "Name", sort: { action: "Sort", sortFnGen: sort.creatorNameSortFnGen } },
-                    { contents: "Works", sort: { action: "Sort", sortFnGen: sort.creatorWorksSortFnGen } }
+                    { contents: "Name", sort: { action: "Sort", sortFnGen: data.creatorNameSortFnGen } },
+                    { contents: "Works", sort: { action: "Sort", sortFnGen: data.creatorWorksSortFnGen } }
                 ] }}
                 computeItemKey={(_, creator) => creator.id}
                 itemContent={(index, creator) => (
@@ -47,7 +47,9 @@ export default function CreatorsTab() {
                                 "hover:bg-neutral-200 active:bg-neutral-300"
                             )}
                             title={creator.name}
-                            onClick={() => { navigationDispatch({action: "New", page: {id: creator.id, type: "Creator"}}); }}
+                            onClick={() => {
+                                navigationDispatch({action: "New", page: {id: creator.id, type: "Creator"}});
+                            }}
                         >{creator.name}</TableCell>
                         <TableCell
                             className="w-[1%] p-[5px]"

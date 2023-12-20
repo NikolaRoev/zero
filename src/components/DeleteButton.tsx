@@ -5,12 +5,12 @@ import { useState } from "react";
 
 
 type DeleteButtonProps = {
-    onClick: () => void,
-    title: string,
     className?: string,
+    title: string,
+    onClick: () => void
 }
 
-export default function DeleteButton({ onClick, title, className }: DeleteButtonProps) {
+export default function DeleteButton(props: DeleteButtonProps) {
     const [triggered, setTriggered] = useState(false);
 
 
@@ -23,7 +23,7 @@ export default function DeleteButton({ onClick, title, className }: DeleteButton
             }, 1500);
         }
         else {
-            onClick();
+            props.onClick();
         }
     }
 
@@ -32,11 +32,11 @@ export default function DeleteButton({ onClick, title, className }: DeleteButton
         <button
             className={clsx(
                 "min-w-[32px] min-h-[32px] flex items-center justify-center hover:bg-neutral-300 active:bg-neutral-400",
-                className
+                props.className
             )}
-            onClick={handleClick}
-            title={title}
             type="button"
+            title={props.title}
+            onClick={handleClick}
         >{triggered ? <BsXCircle /> : <BsX />}</button>
     );
 }

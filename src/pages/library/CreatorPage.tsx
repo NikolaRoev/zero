@@ -1,5 +1,5 @@
 import * as api from "../../data/api";
-import * as sort from "../../utility/sortingFunctions";
+import * as data from "../../data/data";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
 import AddList from "../../components/AddList";
@@ -8,7 +8,6 @@ import { DataContext } from "../../contexts/data-context";
 import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
-import type { Work } from "../../data/api";
 import clsx from "clsx";
 import { confirm } from "@tauri-apps/api/dialog";
 import { toast } from "react-toastify";
@@ -21,7 +20,7 @@ export default function CreatorPage({ id }: { id: number }) {
     const { navigationDispatch } = useSafeContext(NavigationContext);
     const creator = dataContext.creators.get(id);
 
-    const creatorWorks: Work[] = [];
+    const creatorWorks: data.Work[] = [];
     if (creator) {
         for (const workId of creator.works) {
             const work = dataContext.works.get(workId);
@@ -68,13 +67,13 @@ export default function CreatorPage({ id }: { id: number }) {
                         data={creatorWorks}
                         header={{ className: clsx("text-sm"), rows: [
                             { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
-                            { contents: "Name", sort: { action: "Sort", sortFnGen: sort.workNameSortFnGen } },
-                            { contents: "Progress", sort: { action: "Sort", sortFnGen: sort.workProgressSortFnGen } },
-                            { contents: "Status", sort: { action: "Sort", sortFnGen: sort.workStatusSortFnGen } },
-                            { contents: "Type", sort: { action: "Sort", sortFnGen: sort.workTypeSortFnGen } },
-                            { contents: "Format", sort: { action: "Sort", sortFnGen: sort.workFormatSortFnGen } },
-                            { contents: "Updated", sort: { action: "Sort", sortFnGen: sort.workUpdatedSortFnGen } },
-                            { contents: "Added", sort: { action: "Sort", sortFnGen: sort.workAddedSortFnGen } },
+                            { contents: "Name", sort: { action: "Sort", sortFnGen: data.workNameSortFnGen } },
+                            { contents: "Progress", sort: { action: "Sort", sortFnGen: data.workProgressSortFnGen } },
+                            { contents: "Status", sort: { action: "Sort", sortFnGen: data.workStatusSortFnGen } },
+                            { contents: "Type", sort: { action: "Sort", sortFnGen: data.workTypeSortFnGen } },
+                            { contents: "Format", sort: { action: "Sort", sortFnGen: data.workFormatSortFnGen } },
+                            { contents: "Updated", sort: { action: "Sort", sortFnGen: data.workUpdatedSortFnGen } },
+                            { contents: "Added", sort: { action: "Sort", sortFnGen: data.workAddedSortFnGen } },
                             { contents: "" }
                         ] }}
                         computeItemKey={(_, work) => work.id}
@@ -87,7 +86,9 @@ export default function CreatorPage({ id }: { id: number }) {
                                         "hover:bg-neutral-200 active:bg-neutral-300"
                                     )}
                                     title={work.name}
-                                    onClick={() => { navigationDispatch({action: "New", page: {id: work.id, type: "Work"}}); }}
+                                    onClick={() => {
+                                        navigationDispatch({action: "New", page: {id: work.id, type: "Work"}});
+                                    }}
                                 >{work.name}</TableCell>
                                 <TableCell
                                     className="w-[1%] p-[5px] text-xs"
@@ -106,8 +107,8 @@ export default function CreatorPage({ id }: { id: number }) {
                                 >{formatDistanceToNowStrict(work.added, { addSuffix: true })}</TableCell>
                                 <TableCell className="w-[1%] p-0">
                                     <DeleteButton
-                                        onClick={() => { dataContext.detach(work.id, id); }}
                                         title={`Detach work "${work.name}".`}
+                                        onClick={() => { dataContext.detach(work.id, id); }}
                                     />
                                 </TableCell>
                             </TableRow>

@@ -6,17 +6,21 @@ import useSafeContext from "../hooks/safe-context-hook";
 
 
 
-const NavContext = createContext<{ navPanelOpen: boolean, setNavPanelOpen: React.Dispatch<React.SetStateAction<boolean>> } | null>(null);
+type NavContextData = {
+    navPanelOpen: boolean,
+    setNavPanelOpen: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+const NavContext = createContext<NavContextData | null>(null);
 
 
 type NavLinkProps = {
     children?: React.ReactNode,
-    className?: string,
     title?: string,
     onClick: () => void
 }
 
-export function NavLink({ children, className, title, onClick }: NavLinkProps) {
+export function NavLink({ children, title, onClick }: NavLinkProps) {
     const { setNavPanelOpen } = useSafeContext(NavContext);
 
     return (
@@ -24,8 +28,7 @@ export function NavLink({ children, className, title, onClick }: NavLinkProps) {
             className={clsx(
                 "grow px-[10px] py-[3px] text-left",
                 "hover:bg-neutral-200 active:bg-neutral-300 rounded",
-                "whitespace-nowrap overflow-hidden overflow-ellipsis",
-                className
+                "whitespace-nowrap overflow-hidden overflow-ellipsis"
             )}
             title={title}
             onClick={() => { setNavPanelOpen(false); onClick(); }}
@@ -50,7 +53,6 @@ export function NavButton({ children, className, title, onClick }: NavButtonProp
         onPressStart: (e) => { e.continuePropagation(); },
         onPress: () => { onClick(); }
     });
-
 
     return (
         <button
@@ -86,7 +88,10 @@ export function NavPanel({ children }: { children: React.ReactNode }) {
     return (
         navPanelOpen && <div
             ref={navPanelRef}
-            className="min-w-[100px] max-w-[300px] max-h-1/2 absolute z-10 flex flex-col bg-neutral-50 shadow-lg shadow-neutral-700 rounded overflow-y-auto"
+            className={clsx(
+                "min-w-[100px] max-w-[300px] max-h-1/2 absolute z-50",
+                "flex flex-col bg-neutral-50 shadow-lg shadow-neutral-700 rounded overflow-y-auto"
+            )}
         ><div className="flex flex-col rounded">{children}</div></div>
     );
 }

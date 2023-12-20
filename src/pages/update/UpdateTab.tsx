@@ -3,9 +3,9 @@ import { DataContext } from "../../contexts/data-context";
 import Input from "../../components/Input";
 import { StorageKey } from "../../data/storage";
 import { Virtuoso } from "react-virtuoso";
-import type { Work } from "../../data/api";
+import type { Work } from "../../data/data";
 import useSafeContext from "../../hooks/safe-context-hook";
-import useSessionState from "../../hooks/session-state";
+import useSessionState from "../../hooks/session-state-hook";
 
 
 

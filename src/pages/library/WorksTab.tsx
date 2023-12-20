@@ -1,4 +1,4 @@
-import * as sort from "../../utility/sortingFunctions";
+import * as data from "../../data/data";
 import { Option, Select } from "../../components/Select";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
@@ -10,7 +10,7 @@ import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
 import clsx from "clsx";
 import useSafeContext from "../../hooks/safe-context-hook";
-import useSessionReducer from "../../hooks/session-reducer";
+import useSessionReducer from "../../hooks/session-reducer-hook";
 
 
 
@@ -184,10 +184,10 @@ export default function WorksTab() {
                 data={worksItems}
                 header={{ rows: [
                     { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
-                    { contents: "Name", sort: { action: "Sort", sortFnGen: sort.workNameSortFnGen } },
-                    { contents: "Progress", sort: { action: "Sort", sortFnGen: sort.workProgressSortFnGen } },
-                    { contents: "Updated", sort: { action: "Sort", sortFnGen: sort.workUpdatedSortFnGen } },
-                    { contents: "Added", sort: { action: "Sort", sortFnGen: sort.workAddedSortFnGen } }
+                    { contents: "Name", sort: { action: "Sort", sortFnGen: data.workNameSortFnGen } },
+                    { contents: "Progress", sort: { action: "Sort", sortFnGen: data.workProgressSortFnGen } },
+                    { contents: "Updated", sort: { action: "Sort", sortFnGen: data.workUpdatedSortFnGen } },
+                    { contents: "Added", sort: { action: "Sort", sortFnGen: data.workAddedSortFnGen } }
                 ] }}
                 computeItemKey={(_, work) => work.id}
                 itemContent={(index, work) => (
@@ -199,7 +199,9 @@ export default function WorksTab() {
                                 "hover:bg-neutral-200 active:bg-neutral-300"
                             )}
                             title={work.name}
-                            onClick={() => { navigationDispatch({action: "New", page: {id: work.id, type: "Work"}}); }}
+                            onClick={() => {
+                                navigationDispatch({action: "New", page: {id: work.id, type: "Work"}});
+                            }}
                         >{work.name}</TableCell>
                         <TableCell
                             className="w-[1%] p-[5px]"

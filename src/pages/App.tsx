@@ -1,7 +1,7 @@
 import * as api from "../data/api";
 import { Tab, Tabs } from "../components/Tabs";
 import { useDatabasePath, useRecentDatabases } from "../hooks/database-hook";
-import ConfigurationTab from "./settings/ConfigurationTab";
+import ConfigurationTab from "./configuration/ConfigurationTab";
 import DataContextProvider from "../contexts/data-context";
 import DeleteButton from "../components/DeleteButton";
 import LibraryTab from "./library/LibraryTab";

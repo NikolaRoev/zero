@@ -1,4 +1,36 @@
-import type { Creator, Work } from "../data/api";
+export type Work = {
+    id: number,
+    name: string,
+    progress: string,
+    status: string,
+    type: string,
+    format: string,
+    updated: number,
+    added: number,
+    creators: number[]
+}
+
+export type Creator = {
+    id: number,
+    name: string,
+    works: number[]
+}
+
+export type Status = {
+    id: number,
+    status: string,
+    isUpdate: boolean
+}
+
+export type Type = {
+    id: number,
+    type: string
+}
+
+export type Format = {
+    id: number,
+    format: string
+}
 
 
 

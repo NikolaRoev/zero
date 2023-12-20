@@ -1,11 +1,10 @@
 import * as api from "../../data/api";
-import * as sort from "../../utility/sortingFunctions";
+import * as data from "../../data/data";
 import { Option, Select } from "../../components/Select";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
 import AddList from "../../components/AddList";
 import Button from "../../components/Button";
-import type { Creator } from "../../data/api";
 import { DataContext } from "../../contexts/data-context";
 import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
@@ -22,7 +21,7 @@ export default function WorkPage({ id }: { id: number }) {
     const { navigationDispatch } = useSafeContext(NavigationContext);
     const work = dataContext.works.get(id);
 
-    const workCreators: Creator[] = [];
+    const workCreators: data.Creator[] = [];
     if (work) {
         for (const creatorId of work.creators) {
             const creator = dataContext.creators.get(creatorId);
@@ -119,8 +118,8 @@ export default function WorkPage({ id }: { id: number }) {
                         data={workCreators}
                         header={{ rows: [
                             { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
-                            { contents: "Name", sort: { action: "Sort", sortFnGen: sort.creatorNameSortFnGen } },
-                            { contents: "Works", sort: { action: "Sort", sortFnGen: sort.creatorWorksSortFnGen } },
+                            { contents: "Name", sort: { action: "Sort", sortFnGen: data.creatorNameSortFnGen } },
+                            { contents: "Works", sort: { action: "Sort", sortFnGen: data.creatorWorksSortFnGen } },
                             { contents: "" }
                         ] }}
                         computeItemKey={(_, creator) => creator.id}
@@ -133,15 +132,17 @@ export default function WorkPage({ id }: { id: number }) {
                                         "hover:bg-neutral-200 active:bg-neutral-300"
                                     )}
                                     title={creator.name}
-                                    onClick={() => { navigationDispatch({action: "New", page: {id: creator.id, type: "Creator"}}); }}
+                                    onClick={() => {
+                                        navigationDispatch({action: "New", page: {id: creator.id, type: "Creator"}});
+                                    }}
                                 >{creator.name}</TableCell>
                                 <TableCell
                                     className="w-[1%] p-[5px]"
                                 >{creator.works.length}</TableCell>
                                 <TableCell className="w-[1%] p-0">
                                     <DeleteButton
-                                        onClick={() => { dataContext.detach(id, creator.id); }}
                                         title={`Detach creator "${creator.name}".`}
+                                        onClick={() => { dataContext.detach(id, creator.id); }}
                                     />
                                 </TableCell>
                             </TableRow>

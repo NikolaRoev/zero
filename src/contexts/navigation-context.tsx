@@ -4,7 +4,7 @@ import { DataContext } from "./data-context";
 import clsx from "clsx";
 import { createContext } from "react";
 import useSafeContext from "../hooks/safe-context-hook";
-import useSessionReducer from "../hooks/session-reducer";
+import useSessionReducer from "../hooks/session-reducer-hook";
 
 
 
@@ -17,11 +17,6 @@ type NavigationData = {
     pages: Page[]
 }
 
-const emtpyNavigationData: NavigationData = {
-    index: -1,
-    pages: []
-};
-
 type NavigationAction =
     { action: "Remove", page: Page } |
     { action: "Home" } |
@@ -29,6 +24,14 @@ type NavigationAction =
     { action: "Forward" } |
     { action: "New", page: Page } |
     { action: "Go To", index: number }
+
+
+type NavigationContextData = {
+    navigationData: NavigationData,
+    navigationDispatch: React.Dispatch<NavigationAction>
+};
+
+export const NavigationContext = createContext<NavigationContextData | null>(null);
 
 
 function navigationReducer(navigationData: NavigationData, action: NavigationAction): NavigationData {
@@ -79,13 +82,13 @@ function navigationReducer(navigationData: NavigationData, action: NavigationAct
     }
 }
 
-export const NavigationContext = createContext<{
-    navigationData: NavigationData,
-    navigationDispatch: React.Dispatch<NavigationAction>
-} | null>(null);
 
 export default function NavigationContextProvider({ children, storageKey }: { children: React.ReactNode, storageKey: string }) {
-    const [navigationData, navigationDispatch] = useSessionReducer(storageKey, navigationReducer, emtpyNavigationData);
+    const [navigationData, navigationDispatch] = useSessionReducer(
+        storageKey,
+        navigationReducer,
+        { index: -1, pages: [] }
+    );
     const { works, creators } = useSafeContext(DataContext);
 
     const backItems: React.ReactNode[] = [];

@@ -1,6 +1,6 @@
 import * as api from "../data/api";
 import { useEffect, useState } from "react";
-import type { Creator } from "../data/api";
+import type { Creator } from "../data/data";
 import { message } from "@tauri-apps/api/dialog";
 
 
