@@ -1,5 +1,4 @@
 import { type ReactElement } from "react";
-import type { StorageKey } from "../data/storage";
 import clsx from "clsx";
 import useSessionState from "../hooks/session-state";
 
@@ -15,7 +14,7 @@ export const Tab = ({ children }: TabProps) => <>{children}</>;
 
 type TabsProps = {
     children: ReactElement<TabProps>[],
-    storageKey: StorageKey,
+    storageKey: string,
     className?: string,
     defaultIndex?: number
 }

@@ -1,4 +1,3 @@
-- change StorageKey to just be string
 - move the sort fn and the work/creator types to data
 - more button for dbs
 - clean-up

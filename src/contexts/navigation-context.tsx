@@ -1,7 +1,6 @@
 import { BsArrowLeft, BsArrowRight, BsHouse } from "react-icons/bs";
 import { NavButton, NavDropDown, NavLink, NavPanel } from "../components/NavButton";
 import { DataContext } from "./data-context";
-import { StorageKey } from "../data/storage";
 import clsx from "clsx";
 import { createContext } from "react";
 import useSafeContext from "../hooks/safe-context-hook";
@@ -85,7 +84,7 @@ export const NavigationContext = createContext<{
     navigationDispatch: React.Dispatch<NavigationAction>
 } | null>(null);
 
-export default function NavigationContextProvider({ children, storageKey }: { children: React.ReactNode, storageKey: StorageKey }) {
+export default function NavigationContextProvider({ children, storageKey }: { children: React.ReactNode, storageKey: string }) {
     const [navigationData, navigationDispatch] = useSessionReducer(storageKey, navigationReducer, emtpyNavigationData);
     const { works, creators } = useSafeContext(DataContext);
 
