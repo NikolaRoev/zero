@@ -136,7 +136,7 @@ export default function WorksTab() {
                     <CheckboxGroup
                         legend="Statuses"
                         items={statuses}
-                        generate={(status) => ({
+                        checkboxContent={(status) => ({
                             key: status.id,
                             checked: filter.statuses.includes(status.status),
                             onChange: (event) => {
@@ -152,7 +152,7 @@ export default function WorksTab() {
                     <CheckboxGroup
                         legend="Types"
                         items={types}
-                        generate={(type) => ({
+                        checkboxContent={(type) => ({
                             key: type.id,
                             checked: filter.types.includes(type.type),
                             onChange: (event) => {
@@ -166,7 +166,7 @@ export default function WorksTab() {
                     <CheckboxGroup
                         legend="Formats"
                         items={formats}
-                        generate={(format) => ({
+                        checkboxContent={(format) => ({
                             key: format.id,
                             checked: filter.formats.includes(format.format),
                             onChange: (event) => {

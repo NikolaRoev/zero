@@ -36,7 +36,7 @@ function Checkbox(props: CheckboxProps) {
 type CheckboxGroupProps<T> = {
     legend: React.ReactNode,
     items: T[],
-    generate: (item: T) => CheckboxProps
+    checkboxContent: (item: T) => CheckboxProps
 }
 
 export default function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
@@ -47,7 +47,7 @@ export default function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
         )}>
             <legend>{props.legend}</legend>
             {props.items.map((item) => {
-                const {key, ...rest} = props.generate(item);
+                const {key, ...rest} = props.checkboxContent(item);
                 return (<Checkbox key={key} {...rest} />);
             })}
         </fieldset>
