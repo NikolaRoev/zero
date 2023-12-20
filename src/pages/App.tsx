@@ -24,9 +24,12 @@ function StartScreen() {
         <div key={value} className={clsx("flex", { "bg-neutral-100": index % 2 })}>
             <div className="p-[5px]">{index + 1}.</div>
             <div
-                className="p-[5px] overflow-hidden whitespace-nowrap overflow-ellipsis grow hover:bg-neutral-200 active:bg-neutral-300"
-                onClick={() => { openDatabase(value); }}
+                className={clsx(
+                    "grow p-[5px] overflow-hidden whitespace-nowrap overflow-ellipsis",
+                    "hover:bg-neutral-200 active:bg-neutral-300"
+                )}
                 title={value}
+                onClick={() => { openDatabase(value); }}
             >{value}</div>
             <DeleteButton
                 onClick={() => {

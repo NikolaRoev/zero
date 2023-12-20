@@ -1,6 +1,6 @@
 import * as api from "../data/api";
 import * as e from "../data/events";
-import {  type Event, type UnlistenFn, listen } from "@tauri-apps/api/event";
+import {  type Event, listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
 
 
@@ -27,11 +27,11 @@ export function useDatabasePath() {
         });
 
         return () => {
-            closedUnlisten.then((f: UnlistenFn) => { f(); }).catch((reason) => {
+            closedUnlisten.then((f) => { f?.(); }).catch((reason) => {
                 api.error(`Failed to unlisten for database closed event ${reason}`);
             });
 
-            openUnlisten.then((f: UnlistenFn) => { f(); }).catch((reason) => {
+            openUnlisten.then((f) => { f?.(); }).catch((reason) => {
                 api.error(`Failed to unlisten for database opened event: ${reason}`);
             });
         };
