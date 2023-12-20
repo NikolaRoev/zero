@@ -2,7 +2,7 @@ import * as sort from "../../utility/sortingFunctions";
 import type { Creator, Work } from "../../data/api";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
-import AddWorksList from "../../components/AddWorksList";
+import AddList from "../../components/AddList";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
 import DeleteButton from "../../components/DeleteButton";
@@ -61,9 +61,9 @@ function addCreatorFormReducer(addCreatorFormData: AddCreatorFormData, action: A
 
 
 export default function AddCreatorTab() {
-    const { works, addCreator } = useSafeContext(DataContext);
+    const dataContext = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
-    const [addCreatorFormData, dispatch] = useSessionReducer(StorageKey.AddCreatorFormData, addCreatorFormReducer, emptyAddCreatorFormData);
+    const [addCreatorFormData, addCreatorFormDispatch] = useSessionReducer(StorageKey.AddCreatorFormData, addCreatorFormReducer, emptyAddCreatorFormData);
 
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -75,18 +75,18 @@ export default function AddCreatorTab() {
             works: addCreatorFormData.works
         };
 
-        addCreator(creator, (id) => {
+        dataContext.addCreator(creator, (id) => {
             toast(<div
                 onClick={() => { navigationDispatch({ action: "New", page: { type: "Creator", id: id}}); }}
             >{`Added creator "${addCreatorFormData.name}".`}</div>);
-            dispatch({ action: "Clear" });
+            addCreatorFormDispatch({ action: "Clear" });
         });
     }
 
 
     const creatorWorks: Work[] = [];
     for (const workId of addCreatorFormData.works) {
-        const work = works.get(workId);
+        const work = dataContext.works.get(workId);
         if (work) {
             creatorWorks.push(work);
         }
@@ -100,14 +100,14 @@ export default function AddCreatorTab() {
                         <Button
                             className="ml-auto"
                             type="button"
-                            onClick={() => { dispatch({ action: "Clear" }); }}
+                            onClick={() => { addCreatorFormDispatch({ action: "Clear" }); }}
                         >Clear</Button>
                     </div>
                     <label>Name:</label>
                     <Input
                         className="col-span-8"
                         value={addCreatorFormData.name}
-                        onChange={(event) => { dispatch({ action: "ChangeName", name: event.target.value }); }}
+                        onChange={(event) => { addCreatorFormDispatch({ action: "ChangeName", name: event.target.value }); }}
                         placeholder="Name"
                         required={true}
                     />
@@ -158,7 +158,7 @@ export default function AddCreatorTab() {
                                     >{formatDistanceToNowStrict(work.added, { addSuffix: true })}</TableCell>
                                     <TableCell className="w-[1%] p-0">
                                         <DeleteButton
-                                            onClick={() => { dispatch({ action: "RemoveWork", id: work.id }); }}
+                                            onClick={() => { addCreatorFormDispatch({ action: "RemoveWork", id: work.id }); }}
                                             title={`Remove work "${work.name}".`}
                                         />
                                     </TableCell>
@@ -167,10 +167,17 @@ export default function AddCreatorTab() {
                         />
                     </div>
                     <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
-                        <AddWorksList
-                            creatorWorks={creatorWorks}
+                        <AddList
                             storageKey={StorageKey.AddCreatorWorksFilter}
-                            onButtonClick={(workId) => { dispatch({ action: "AddWork", id: workId }); }}
+                            data={Array.from(dataContext.works.values())}
+                            filterFn={(works, filter) => works.filter((work) => work.name.toLowerCase().includes(filter.toLowerCase()))}
+                            findFn={(work) => creatorWorks.find((creatorWork) => creatorWork.id === work.id) !== undefined }
+                            computeItemKey={(_, work) => work.id}
+                            itemContent={(work) => ({
+                                contents: work.name,
+                                onItemClick: () => { navigationDispatch({ action: "New", page: { type: "Work", id: work.id } }); },
+                                onButtonClick: () => { addCreatorFormDispatch({ action: "AddWork", id: work.id }); }
+                            })}
                         />
                     </div>
                 </div>

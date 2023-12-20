@@ -3,7 +3,7 @@ import * as sort from "../../utility/sortingFunctions";
 import { Option, Select } from "../../components/Select";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
-import AddCreatorsList from "../../components/AddCreatorsList";
+import AddList from "../../components/AddList";
 import Button from "../../components/Button";
 import type { Creator } from "../../data/api";
 import { DataContext } from "../../contexts/data-context";
@@ -149,10 +149,23 @@ export default function WorkPage({ id }: { id: number }) {
                     />
                 </div>
                 <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
-                    <AddCreatorsList
-                        workCreators={workCreators}
+                    <AddList
                         storageKey={`ADD-CREATORS-${id}-KEY`}
-                        onButtonClick={(creatorId) => { dataContext.attach(id, creatorId); }}
+                        data={Array.from(dataContext.creators.values())}
+                        filterFn={(creators, filter) => creators.filter((creator) => (
+                            creator.name.toLowerCase().includes(filter.toLowerCase()))
+                        )}
+                        findFn={(creator) => (
+                            workCreators.find((workCreator) => workCreator.id === creator.id) !== undefined
+                        )}
+                        computeItemKey={(_, creator) => creator.id}
+                        itemContent={(creator) => ({
+                            contents: creator.name,
+                            onItemClick: () => {
+                                navigationDispatch({ action: "New", page: { type: "Creator", id: creator.id } });
+                            },
+                            onButtonClick: () => { dataContext.attach(id, creator.id); }
+                        })}
                     />
                 </div>
             </div>

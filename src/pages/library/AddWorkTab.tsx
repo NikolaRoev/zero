@@ -2,7 +2,7 @@ import * as sort from "../../utility/sortingFunctions";
 import type { Creator, Work } from "../../data/api";
 import { Option, Select } from "../../components/Select";
 import { Table, TableCell, TableRow } from "../../components/Table";
-import AddCreatorsList from "../../components/AddCreatorsList";
+import AddList from "../../components/AddList";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
 import DeleteButton from "../../components/DeleteButton";
@@ -82,7 +82,7 @@ function addWorkFormReducer(addWorkFormData: AddWorkFormData, action: AddWorkFor
 
 
 export default function AddWorkTab() {
-    const { creators, statuses, types, formats, addWork } = useSafeContext(DataContext);
+    const dataContext = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
     const [addWorkFormData, addWorkFormDispatch] = useSessionReducer(StorageKey.AddWorkFormData, addWorkFormReducer, emptyAddWorkFormData);
 
@@ -90,9 +90,9 @@ export default function AddWorkTab() {
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        const status = statuses[addWorkFormData.statusIndex]?.status;
-        const type = types[addWorkFormData.typeIndex]?.type;
-        const format = formats[addWorkFormData.formatIndex]?.format;
+        const status = dataContext.statuses[addWorkFormData.statusIndex]?.status;
+        const type = dataContext.types[addWorkFormData.typeIndex]?.type;
+        const format = dataContext.formats[addWorkFormData.formatIndex]?.format;
 
         if (status && type && format) {
             const timestamp = Date.now();
@@ -108,7 +108,7 @@ export default function AddWorkTab() {
                 creators: addWorkFormData.creators
             };
 
-            addWork(work, (id) => {
+            dataContext.addWork(work, (id) => {
                 toast(<div
                     onClick={() => { navigationDispatch({ action: "New", page: { type: "Work", id: id}}); }}
                 >{`Added work "${addWorkFormData.name}".`}</div>);
@@ -120,7 +120,7 @@ export default function AddWorkTab() {
 
     const workCreators: Creator[] = [];
     for (const creatorId of addWorkFormData.creators) {
-        const creator = creators.get(creatorId);
+        const creator = dataContext.creators.get(creatorId);
         if (creator) {
             workCreators.push(creator);
         }
@@ -161,7 +161,7 @@ export default function AddWorkTab() {
                         selectMsg="Select Status"
                         errorMsg="No Statuses"
                     >
-                        {statuses.map((status, index) => (
+                        {dataContext.statuses.map((status, index) => (
                             <Option
                                 key={status.status}
                                 value={index}
@@ -176,7 +176,7 @@ export default function AddWorkTab() {
                         selectMsg="Select Type"
                         errorMsg="No Types"
                     >
-                        {types.map((type, index) => (
+                        {dataContext.types.map((type, index) => (
                             <Option key={type.type} value={index}>{type.type}</Option>
                         ))}
                     </Select>
@@ -188,7 +188,7 @@ export default function AddWorkTab() {
                         selectMsg="Select Format"
                         errorMsg="No Formats"
                     >
-                        {formats.map((format, index) => (
+                        {dataContext.formats.map((format, index) => (
                             <Option key={format.format} value={index}>{format.format}</Option>
                         ))}
                     </Select>
@@ -231,10 +231,25 @@ export default function AddWorkTab() {
                         />
                     </div>
                     <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
-                        <AddCreatorsList
-                            workCreators={workCreators}
+                        <AddList
                             storageKey={StorageKey.AddWorkCreatorsFilter}
-                            onButtonClick={(creatorId) => { addWorkFormDispatch({ action: "AddCreator", id: creatorId }); }}
+                            data={Array.from(dataContext.creators.values())}
+                            filterFn={(creators, filter) => creators.filter((creator) => (
+                                creator.name.toLowerCase().includes(filter.toLowerCase()))
+                            )}
+                            findFn={(creator) => (
+                                workCreators.find((workCreator) => workCreator.id === creator.id) !== undefined
+                            )}
+                            computeItemKey={(_, creator) => creator.id}
+                            itemContent={(creator) => ({
+                                contents: creator.name,
+                                onItemClick: () => {
+                                    navigationDispatch({ action: "New", page: { type: "Creator", id: creator.id } });
+                                },
+                                onButtonClick: () => {
+                                    addWorkFormDispatch({ action: "AddCreator", id: creator.id });
+                                }
+                            })}
                         />
                     </div>
                 </div>

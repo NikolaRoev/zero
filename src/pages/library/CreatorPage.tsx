@@ -2,7 +2,7 @@ import * as api from "../../data/api";
 import * as sort from "../../utility/sortingFunctions";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
-import AddWorksList from "../../components/AddWorksList";
+import AddList from "../../components/AddList";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
 import DeleteButton from "../../components/DeleteButton";
@@ -115,10 +115,23 @@ export default function CreatorPage({ id }: { id: number }) {
                     />
                 </div>
                 <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
-                    <AddWorksList
+                    <AddList
                         storageKey={`ADD-WORKS-${id}-KEY`}
-                        creatorWorks={creatorWorks}
-                        onButtonClick={(workId) => { dataContext.attach(workId, id); }}
+                        data={Array.from(dataContext.works.values())}
+                        filterFn={(works, filter) => works.filter((work) => (
+                            work.name.toLowerCase().includes(filter.toLowerCase()))
+                        )}
+                        findFn={(work) => (
+                            creatorWorks.find((creatorWork) => creatorWork.id === work.id) !== undefined
+                        )}
+                        computeItemKey={(_, work) => work.id}
+                        itemContent={(work) => ({
+                            contents: work.name,
+                            onItemClick: () => {
+                                navigationDispatch({ action: "New", page: { type: "Work", id: work.id } });
+                            },
+                            onButtonClick: () => { dataContext.attach(work.id, id); }
+                        })}
                     />
                 </div>
             </div>

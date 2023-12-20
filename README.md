@@ -1,6 +1,6 @@
-- add toast to config
-- generic add list
+- change StorageKey to just be string
+- move the sort fn and the work/creator types to data
 - more button for dbs
 - clean-up
 - testing
-- auto-update / release action from the docs
+- auto-update / release action from the docs / check for updates button
