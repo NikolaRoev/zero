@@ -6,7 +6,7 @@ import { forwardRef } from "react";
 type InputProps = {
     id?: string,
     className?: string,
-    name?: string,
+    name?: string | undefined,
     value?: string | number | readonly string[],
     onChange?: React.ChangeEventHandler<HTMLInputElement>,
     placeholder?: string,

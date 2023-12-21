@@ -106,8 +106,9 @@ export default function AddCreatorTab() {
                             onClick={() => { addCreatorFormDispatch({ action: "Clear" }); }}
                         >Clear</Button>
                     </div>
-                    <label>Name:</label>
+                    <label htmlFor="name-input">Name:</label>
                     <Input
+                        id="name-input"
                         className="col-span-8"
                         value={addCreatorFormData.name}
                         onChange={(event) => { addCreatorFormDispatch({ action: "ChangeName", name: event.target.value }); }}
@@ -117,7 +118,7 @@ export default function AddCreatorTab() {
                 </div>
                 <div className="grow grid grid-cols-2 gap-x-[10px]">
                     <div className="flex flex-col border border-neutral-700 rounded overflow-y-auto">
-                        <label className="p-[5px] border-b border-neutral-700 ">Works:</label>
+                        <span className="p-[5px] border-b border-neutral-700 ">Works:</span>
                         <Table
                             sortStorageKey={StorageKey.AddCreatorWorksSort}
                             data={creatorWorks}
@@ -173,6 +174,7 @@ export default function AddCreatorTab() {
                     </div>
                     <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
                         <AddList
+                            inputName="add-creator-add-works-list-search-input"
                             storageKey={StorageKey.AddCreatorWorksFilter}
                             data={Array.from(dataContext.works.values())}
                             filterFn={(works, filter) => works.filter((work) => (

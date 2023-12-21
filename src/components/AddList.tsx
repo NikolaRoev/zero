@@ -13,6 +13,7 @@ type AddListItemData = {
 }
 
 type AddListProps<T> = {
+    inputName?: string,
     storageKey: string,
     data: T[],
     filterFn: (data: T[], filter: string) => T[],
@@ -27,6 +28,7 @@ export default function AddList<T>(props: AddListProps<T>) {
     return (
         <>
             <Input
+                name={props.inputName}
                 value={filter}
                 placeholder="Find"
                 type="search"

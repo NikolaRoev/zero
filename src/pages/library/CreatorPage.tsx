@@ -33,8 +33,8 @@ export default function CreatorPage({ id }: { id: number }) {
     return (
         creator && <div className="grow p-[5px] flex flex-col gap-y-[10px]">
             <div className="p-[5px] grid grid-cols-9 gap-x-[40px] gap-y-[5px] border border-neutral-700 rounded">
-                <label className="whitespace-nowrap">Creator ID:</label>
-                <label className="col-span-7">{creator.id}</label>
+                <span className="whitespace-nowrap">Creator ID:</span>
+                <span className="col-span-7">{creator.id}</span>
                 <Button onClick={() => {
                     confirm(
                         `Delete creator "${creator.name}"?`,
@@ -48,20 +48,21 @@ export default function CreatorPage({ id }: { id: number }) {
                         }
                     }).catch((reason: string) => { api.error(reason); });
                 }}>Delete</Button>
-                <label>Name:</label>
+                <label htmlFor="name-input">Name:</label>
                 <Input
+                    id="name-input"
                     className="col-span-8"
                     value={creator.name}
                     placeholder="Name"
                     onChange={(event) => { dataContext.updateCreatorName(creator.id, event.target.value); }}
                 />
-                <label>Works:</label>
-                <label className="col-span-7">{creator.works.length}</label>
+                <span>Works:</span>
+                <span className="col-span-7">{creator.works.length}</span>
             </div>
 
             <div className="grow grid grid-cols-2 gap-x-[10px]">
                 <div className="flex flex-col border border-neutral-700 rounded">
-                    <label className="p-[5px] border-b border-neutral-700 ">Works:</label>
+                    <span className="p-[5px] border-b border-neutral-700 ">Works:</span>
                     <Table
                         sortStorageKey={`CREATOR-WORKS-${id}-SORT-KEY`}
                         data={creatorWorks}
@@ -117,6 +118,7 @@ export default function CreatorPage({ id }: { id: number }) {
                 </div>
                 <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
                     <AddList
+                        inputName="creator-add-works-list-search-input"
                         storageKey={`ADD-WORKS-${id}-KEY`}
                         data={Array.from(dataContext.works.values())}
                         filterFn={(works, filter) => works.filter((work) => (

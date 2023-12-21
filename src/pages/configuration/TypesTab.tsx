@@ -47,6 +47,7 @@ export default function TypesTab() {
             <form onSubmit={handleSubmit} className="flex gap-x-[3px]">
                 <Input
                     ref={typeInputRef}
+                    name="type-add-input"
                     className="grow"
                     value={typeInput}
                     onChange={(event) => { setTypeInput(event.target.value); }}

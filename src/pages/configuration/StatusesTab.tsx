@@ -21,6 +21,7 @@ function StatusesList() {
                         <>
                             <p className={clsx("grow p-[5px]", { "underline": status.isUpdate })}>{status.status}</p>
                             <input
+                                name={`status-${status.id}-is-update-checkbox`}
                                 className="mx-[10px]"
                                 type="checkbox"
                                 checked={status.isUpdate}
@@ -61,6 +62,7 @@ export default function StatusesTab() {
             <form onSubmit={handleSubmit} className="flex gap-x-[3px]">
                 <Input
                     ref={statusInputRef}
+                    name="status-add-input"
                     className="grow"
                     value={statusInput}
                     onChange={(event) => { setStatusInput(event.target.value); }}

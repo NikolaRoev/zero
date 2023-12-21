@@ -19,6 +19,7 @@ function UpdateWorkRow(props: UpdateWorkRowProps) {
     return (
         <div className="px-[15px] py-[10px] flex flex-col bg-neutral-50">
             <input
+                name={`update-name-input-${props.updateWork.id}`}
                 className="text-[14px] grow focus:outline-none overflow-ellipsis bg-neutral-50"
                 value={props.updateWork.name}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
@@ -27,6 +28,7 @@ function UpdateWorkRow(props: UpdateWorkRowProps) {
                 spellCheck={false}
             />
             <input
+                name={`update-progress-input-${props.updateWork.id}`}
                 className="text-[14px] grow focus:outline-none overflow-ellipsis bg-neutral-50"
                 value={props.updateWork.progress}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +74,7 @@ export default function UpdateTab() {
         <div className="p-[5px] grow flex flex-col gap-y-[10px] bg-neutral-50">
             <Input
                 ref={filterInput}
+                name="update-search-input"
                 value={filter}
                 placeholder="Find"
                 type="search"

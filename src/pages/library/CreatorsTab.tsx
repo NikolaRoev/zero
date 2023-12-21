@@ -22,6 +22,7 @@ export default function CreatorsTab() {
         <div className="p-[5px] grow flex flex-col gap-y-[10px]">
             <div className="flex flex-col">
                 <Input
+                    name="creators-search-input"
                     value={filter}
                     placeholder="Find"
                     type="search"

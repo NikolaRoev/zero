@@ -116,6 +116,7 @@ export default function WorksTab() {
             <div className="flex flex-col gap-y-[5px]">
                 <div className="flex gap-x-[3px]">
                     <Input
+                        name="works-search-input"
                         className="grow"
                         value={filter.value}
                         placeholder="Find"
@@ -123,6 +124,7 @@ export default function WorksTab() {
                         onChange={(event) => { filterDispatch({ action: "ChangeValue", value: event.target.value }); }}
                     />
                     <Select
+                        name="works-search-select"
                         value={filter.by}
                         onChange={(value: By) => { filterDispatch({ action: "ChangeBy", by: value }); }}
                         selectMsg="Find By"

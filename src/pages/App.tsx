@@ -83,7 +83,7 @@ function StartScreen() {
                 zero
             </span>
             <div className="translate-x-1/2 translate-y-1/2 w-1/2 h-1/2 flex flex-col border border-neutral-700 rounded">
-                <label className="p-[5px] border-b border-neutral-700"> Open Recent Databases:</label>
+                <span className="p-[5px] border-b border-neutral-700"> Open Recent Databases:</span>
                 <RecentDatabasesList />
             </div>
         </>

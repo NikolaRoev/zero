@@ -46,6 +46,7 @@ export default function FormatsTab() {
             <form onSubmit={handleSubmit} className="flex gap-x-[3px]">
                 <Input
                     ref={formatInputRef}
+                    name="format-add-input"
                     className="grow"
                     value={formatInput}
                     onChange={(event) => { setFormatInput(event.target.value); }}

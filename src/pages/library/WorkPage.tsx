@@ -34,8 +34,8 @@ export default function WorkPage({ id }: { id: number }) {
     return (
         work && <div className="grow p-[5px] flex flex-col gap-y-[10px]">
             <div className="p-[5px] grid grid-cols-9 gap-x-[40px] gap-y-[5px] border border-neutral-700 rounded">
-                <label className="whitespace-nowrap">Work ID:</label>
-                <label className="col-span-7">{work.id}</label>
+                <span className="whitespace-nowrap">Work ID:</span>
+                <span className="col-span-7">{work.id}</span>
                 <Button onClick={() => {
                     confirm(
                         `Delete work "${work.name}"?`,
@@ -49,22 +49,25 @@ export default function WorkPage({ id }: { id: number }) {
                         }
                     }).catch((reason: string) => { api.error(reason); });
                 }}>Delete</Button>
-                <label>Name:</label>
+                <label htmlFor="name-input">Name:</label>
                 <Input
+                    id="name-input"
                     className="col-span-8"
                     value={work.name}
                     placeholder="Name"
                     onChange={(event) => { dataContext.updateWorkName(work.id, event.target.value); }}
                 />
-                <label>Progress:</label>
+                <label htmlFor="progress-input">Progress:</label>
                 <Input
+                    id="progress-input"
                     className="col-span-8"
                     value={work.progress}
                     placeholder="Progress"
                     onChange={(event) => { dataContext.updateWorkProgress(work.id, event.target.value); }}
                 />
-                <label>Status:</label>
+                <label htmlFor="status-select">Status:</label>
                 <Select
+                    id="status-select"
                     className="col-span-2"
                     value={work.status}
                     onChange={(value) => { dataContext.updateWorkStatus(work.id, value); }}
@@ -77,8 +80,9 @@ export default function WorkPage({ id }: { id: number }) {
                         >{status.status}</Option>
                     ))}
                 </Select>
-                <label>Type:</label>
+                <label htmlFor="type-select">Type:</label>
                 <Select
+                    id="type-select"
                     className="col-span-2"
                     value={work.type}
                     onChange={(value) => { dataContext.updateWorkType(work.id, value); }}
@@ -88,8 +92,9 @@ export default function WorkPage({ id }: { id: number }) {
                         <Option key={type.type} value={type.type}>{type.type}</Option>
                     ))}
                 </Select>
-                <label>Format:</label>
+                <label htmlFor="format-select">Format:</label>
                 <Select
+                    id="format-select"
                     className="col-span-2"
                     value={work.format}
                     onChange={(value) => { dataContext.updateWorkFormat(work.id, value); }}
@@ -100,19 +105,19 @@ export default function WorkPage({ id }: { id: number }) {
                     ))}
                 </Select>
 
-                <label>Updated:</label>
-                <label className="col-span-8">
+                <span >Updated:</span>
+                <span className="col-span-8">
                     {formatISO9075(work.updated)} ({formatDistanceToNowStrict(work.updated, { addSuffix: true })})
-                </label>
+                </span>
 
-                <label>Added:</label>
-                <label className="col-span-8">
+                <span>Added:</span>
+                <span className="col-span-8">
                     {formatISO9075(work.added)} ({formatDistanceToNowStrict(work.added, { addSuffix: true })})
-                </label>
+                </span>
             </div>
             <div className="grow grid grid-cols-2 gap-x-[10px]">
                 <div className="flex flex-col border border-neutral-700 rounded">
-                    <label className="p-[5px] border-b border-neutral-700 ">Creators:</label>
+                    <span className="p-[5px] border-b border-neutral-700 ">Creators:</span>
                     <Table
                         sortStorageKey={`WORK-CREATORS-${id}-SORT-KEY`}
                         data={workCreators}
@@ -151,6 +156,7 @@ export default function WorkPage({ id }: { id: number }) {
                 </div>
                 <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
                     <AddList
+                        inputName="work-add-creators-list-search-input"
                         storageKey={`ADD-CREATORS-${id}-KEY`}
                         data={Array.from(dataContext.creators.values())}
                         filterFn={(creators, filter) => creators.filter((creator) => (

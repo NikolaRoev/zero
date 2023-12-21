@@ -12,10 +12,12 @@ export function Option<T extends string | number | readonly string[]>(props: Opt
 }
 
 type SelectProps<T> = {
+    id?: string,
     children: React.ReactElement<OptionProps<T>>[],
     value: T,
     onChange: (value: T) => void,
     className?: string,
+    name?: string,
     selectMsg?: string
     errorMsg?: string
 }
@@ -23,6 +25,8 @@ type SelectProps<T> = {
 export function Select<T extends string | number | readonly string[]>(props: SelectProps<T>) {
     return (
         <select
+            id={props.id}
+            name={props.name}
             className={clsx(
                 "px-[5px] py-[2px] border border-neutral-700 rounded-[5px] focus:outline-none",
                 props.className

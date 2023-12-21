@@ -140,24 +140,27 @@ export default function AddWorkTab() {
                             onClick={() => { addWorkFormDispatch({ action: "Clear" }); }}
                         >Clear</Button>
                     </div>
-                    <label>Name:</label>
+                    <label htmlFor="name-input">Name:</label>
                     <Input
+                        id="name-input"
                         className="col-span-8"
                         value={addWorkFormData.name}
                         onChange={(event) => { addWorkFormDispatch({ action: "ChangeName", name: event.target.value }); }}
                         placeholder="Name"
                         required={true}
                     />
-                    <label>Progress:</label>
+                    <label htmlFor="progress-input">Progress:</label>
                     <Input
+                        id="progress-input"
                         className="col-span-8"
                         value={addWorkFormData.progress}
                         onChange={(event) => { addWorkFormDispatch({ action: "ChangeProgress", progress: event.target.value }); }}
                         placeholder="Progress"
                         required={true}
                     />
-                    <label>Status:</label>
+                    <label htmlFor="status-select">Status:</label>
                     <Select
+                        id="status-select"
                         className="col-span-2"
                         value={addWorkFormData.statusIndex}
                         onChange={(value) => { addWorkFormDispatch({ action: "ChangeStatus", statusIndex: value}); }}
@@ -171,8 +174,9 @@ export default function AddWorkTab() {
                             >{status.status}</Option>
                         ))}
                     </Select>
-                    <label>Type:</label>
+                    <label htmlFor="type-select">Type:</label>
                     <Select
+                        id="type-select"
                         className="col-span-2"
                         value={addWorkFormData.typeIndex}
                         onChange={(value) => { addWorkFormDispatch({ action: "ChangeType", typeIndex: value}); }}
@@ -183,8 +187,9 @@ export default function AddWorkTab() {
                             <Option key={type.type} value={index}>{type.type}</Option>
                         ))}
                     </Select>
-                    <label>Format:</label>
+                    <label htmlFor="format-select">Format:</label>
                     <Select
+                        id="format-select"
                         className="col-span-2"
                         value={addWorkFormData.formatIndex}
                         onChange={(value) => { addWorkFormDispatch({ action: "ChangeFormat", formatIndex: value}); }}
@@ -198,7 +203,7 @@ export default function AddWorkTab() {
                 </div>
                 <div className="grow grid grid-cols-2 gap-x-[10px]">
                     <div className="flex flex-col border border-neutral-700 rounded overflow-y-auto">
-                        <label className="p-[5px] border-b border-neutral-700 ">Creators:</label>
+                        <span className="p-[5px] border-b border-neutral-700 ">Creators:</span>
                         <Table
                             sortStorageKey={StorageKey.AddWorkCreatorsSort}
                             data={workCreators}
@@ -239,6 +244,7 @@ export default function AddWorkTab() {
                     </div>
                     <div className="p-[5px] gap-y-[5px] grow flex flex-col border border-neutral-700 rounded">
                         <AddList
+                            inputName="add-work-add-creators-list-search-input"
                             storageKey={StorageKey.AddWorkCreatorsFilter}
                             data={Array.from(dataContext.creators.values())}
                             filterFn={(creators, filter) => creators.filter((creator) => (
