@@ -1,5 +1,4 @@
 - info messages for form ids etc.
-- more button for dbs
 - clean-up
 - testing
 - auto-update / release action from the docs / check for updates button

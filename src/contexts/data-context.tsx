@@ -2,11 +2,11 @@ import * as api from "../data/api";
 import type { Creator, Format, Status, Type, Work } from "../data/data";
 import { createContext } from "react";
 import { message } from "@tauri-apps/api/dialog";
-import { useCreators } from "../hooks/creators-hook";
-import useFormats from "../hooks/formats-hook";
-import { useStatuses } from "../hooks/statuses-hook";
-import useTypes from "../hooks/types-hook";
-import { useWorks } from "../hooks/works-hook";
+import { useCreators } from "../hooks/creator-hooks";
+import useFormats from "../hooks/format-hooks";
+import { useStatuses } from "../hooks/status-hooks";
+import useTypes from "../hooks/type-hooks";
+import { useWorks } from "../hooks/work-hooks";
 
 
 

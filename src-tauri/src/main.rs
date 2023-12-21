@@ -4,6 +4,7 @@ mod api;
 mod application;
 mod config;
 mod database;
+mod event;
 mod log;
 mod menu;
 

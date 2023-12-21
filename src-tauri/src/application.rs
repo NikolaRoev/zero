@@ -39,18 +39,21 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
 
     let menu_handle = window.menu_handle();
-    set_recent_menu(&menu_handle, config.get_recent_databases())?;
-
+    
     let mut database = crate::database::Database::default();
     if let Some(last) = config.get_last_database() {
         log::info!("Opening last database: {last:?}");
         database.open(last)?;
+        config.add_recent_database(last.into());
         set_menu_state(&menu_handle, true)?;
     }
     else {
         set_menu_state(&menu_handle, false)?;
     }
 
+    set_recent_menu(&menu_handle, config.get_recent_databases())?;
+
+    
     app.manage(Mutex::new(config));
     app.manage(Mutex::new(database));
 

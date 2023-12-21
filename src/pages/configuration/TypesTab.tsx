@@ -1,8 +1,8 @@
 import { type FormEvent, useRef, useState } from "react";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
-import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
+import RemoveList from "../../components/RemoveList";
 import useSafeContext from "../../hooks/safe-context-hook";
 
 
@@ -10,17 +10,19 @@ import useSafeContext from "../../hooks/safe-context-hook";
 function TypesList() {
     const { types, removeType } = useSafeContext(DataContext);
 
-    const typesItems = types.map((type) => (
-        <div key={type.id} className="flex even:bg-neutral-100">
-            <p className="grow p-[5px]">{type.type}</p>
-            <DeleteButton
-                onClick={() => { removeType(type.id); }}
-                title={`Remove type "${type.type}".`}
+    return (
+        <div className="grow border border-neutral-700 rounded-[5px]">
+            <RemoveList
+                data={types}
+                computeItemKey={(_, type) => type.id }
+                itemContent={(_, type) => ({
+                    contents: <p className="grow p-[5px]">{type.type}</p>,
+                    buttonTitle: `Remove format "${type.type}".`,
+                    onButtonClick: () => { removeType(type.id); }
+                })}
             />
         </div>
-    ));
-
-    return <div className="grow border border-neutral-700 rounded-[5px] overflow-y-auto">{typesItems}</div>;
+    );
 }
 
 

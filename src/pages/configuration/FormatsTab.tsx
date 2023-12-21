@@ -1,8 +1,8 @@
 import { type FormEvent, useRef, useState } from "react";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
-import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
+import RemoveList from "../../components/RemoveList";
 import useSafeContext from "../../hooks/safe-context-hook";
 
 
@@ -10,17 +10,19 @@ import useSafeContext from "../../hooks/safe-context-hook";
 function FormatsList() {
     const { formats, removeFormat } = useSafeContext(DataContext);
 
-    const formatsItems = formats.map((format) => (
-        <div key={format.id} className="flex even:bg-neutral-100">
-            <p className="grow p-[5px]">{format.format}</p>
-            <DeleteButton
-                onClick={() => { removeFormat(format.id); }}
-                title={`Remove format "${format.format}".`}
+    return (
+        <div className="grow border border-neutral-700 rounded-[5px]">
+            <RemoveList
+                data={formats}
+                computeItemKey={(_, format) => format.id }
+                itemContent={(_, format) => ({
+                    contents: <p className="grow p-[5px]">{format.format}</p>,
+                    buttonTitle: `Remove format "${format.format}".`,
+                    onButtonClick: () => { removeFormat(format.id); }
+                })}
             />
         </div>
-    ));
-
-    return <div className="grow border border-neutral-700 rounded-[5px] overflow-y-auto">{formatsItems}</div>;
+    );
 }
 
 

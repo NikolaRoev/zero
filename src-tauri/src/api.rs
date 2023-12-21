@@ -1,10 +1,6 @@
 use std::{sync::Mutex, path::PathBuf};
-use tauri::Manager;
 use crate::{database::{Database, Status, Type, Format, Work, Creator}, menu::{set_recent_menu, set_menu_state}, config::Config};
 
-
-const OPENED_DATABASE_EVENT: &str = "opened-database";
-const CLOSED_DATABASE_EVENT: &str = "closed-database";
 
 
 #[tauri::command]
@@ -34,11 +30,13 @@ pub fn open_database(
         config_guard.set_last_database(Some(path.clone()));
         config_guard.add_recent_database(path.clone());
 
+        window.emit(crate::event::CHANGE_RECENT_DATABASES_EVENT, ()).unwrap();
+
         let menu_handle = window.menu_handle();
         set_recent_menu(&menu_handle, config_guard.get_recent_databases())?;
         set_menu_state(&menu_handle, true)?;
 
-        Ok(window.emit(OPENED_DATABASE_EVENT, path)?)
+        Ok(window.emit(crate::event::OPENED_DATABASE_EVENT, path)?)
     };
 
     match inner() {
@@ -55,7 +53,6 @@ pub fn open_database(
 
 #[tauri::command]
 pub fn close_database(
-    app_handle: tauri::AppHandle,
     window: tauri::Window,
     config: tauri::State<Mutex<Config>>,
     database: tauri::State<Mutex<Database>>,
@@ -71,7 +68,7 @@ pub fn close_database(
 
         set_menu_state(&window.menu_handle(), false)?;
 
-        Ok(app_handle.emit_all(CLOSED_DATABASE_EVENT, ())?)
+        Ok(window.emit(crate::event::CLOSED_DATABASE_EVENT, ())?)
     };
 
     match inner() {
@@ -644,6 +641,8 @@ pub fn remove_recent_database(window: tauri::Window, config: tauri::State<Mutex<
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let mut guard = config.lock().unwrap();
         guard.remove_recent_database(path)?;
+
+        window.emit(crate::event::CHANGE_RECENT_DATABASES_EVENT, ())?;
 
         let menu_handle = window.menu_handle();
         set_recent_menu(&menu_handle, guard.get_recent_databases())

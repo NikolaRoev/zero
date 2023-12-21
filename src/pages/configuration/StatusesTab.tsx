@@ -1,8 +1,8 @@
 import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
-import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
+import RemoveList from "../../components/RemoveList";
 import clsx from "clsx";
 import useSafeContext from "../../hooks/safe-context-hook";
 
@@ -11,26 +11,32 @@ import useSafeContext from "../../hooks/safe-context-hook";
 function StatusesList() {
     const { statuses, removeStatus, updateStatus } = useSafeContext(DataContext);
 
-    const statusesItems = statuses.map((status) => (
-        <div key={status.id} className="flex even:bg-neutral-100">
-            <p className={clsx("grow p-[5px]", { "underline": status.isUpdate })}>{status.status}</p>
-            <input
-                className="mx-[10px]"
-                type="checkbox"
-                checked={status.isUpdate}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                    updateStatus(status.id, event.target.checked);
-                }}
-                title="Is Update."
-            />
-            <DeleteButton
-                onClick={() => { removeStatus(status.id); }}
-                title={`Remove status "${status.status}".`}
+    return (
+        <div className="grow border border-neutral-700 rounded-[5px]">
+            <RemoveList
+                data={statuses}
+                computeItemKey={(_, status) => status.id }
+                itemContent={(_, status) => ({
+                    contents: (
+                        <>
+                            <p className={clsx("grow p-[5px]", { "underline": status.isUpdate })}>{status.status}</p>
+                            <input
+                                className="mx-[10px]"
+                                type="checkbox"
+                                checked={status.isUpdate}
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                    updateStatus(status.id, event.target.checked);
+                                }}
+                                title="Is Update."
+                            />
+                        </>
+                    ),
+                    buttonTitle: `Remove status "${status.status}".`,
+                    onButtonClick: () => { removeStatus(status.id); }
+                })}
             />
         </div>
-    ));
-
-    return <div className="grow border border-neutral-700 rounded-[5px] overflow-y-auto">{statusesItems}</div>;
+    );
 }
 
 

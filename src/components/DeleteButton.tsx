@@ -6,7 +6,7 @@ import { useState } from "react";
 
 type DeleteButtonProps = {
     className?: string,
-    title: string,
+    title?: string | undefined,
     onClick: () => void
 }
 
