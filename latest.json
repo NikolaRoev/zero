@@ -1,0 +1,19 @@
+{
+  "version": "1.1.0",
+  "notes": "",
+  "pub_date": "2023-12-22T12:50:03.531Z",
+  "platforms": {
+    "darwin-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUZG1UZUg0S3M1RHRJYmszcUlXUG14amRLRHgzWjNlS29QUmJJdmpZQ1VEejdmamVlNDJHck1nSmtZNFZOc3JVdUM4dXl0OWQ3UDdhKytsd1dUWTd5ODJZL2JkaTZhc1FnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAzMjQ5MjQ5CWZpbGU6emVyby5hcHAudGFyLmd6CkhEaGdlSEVkMjhtbEhPaGdGRHBTMml3YTNLZEd1Q3VwRHo0bGREUkRNWktLQXUzMlhJYjUzM1Z6NEtTVllqUnpqZU4xYVd6cGw1UzJHK05rbE5wU0J3PT0K",
+      "url": "https://github.com/NikolaRoev/zero/releases/download/1.1.0/zero_x64.app.tar.gz"
+    },
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUZG1UZUg0S3M1RHQyemRiK2plYjZzV1V6YVVOUFNyUEJGRkNKb244NG45OWUzOHY4V000UDA4VTJKcHFJMlkvWmJSZkwvYnFqL3BtSGFjdm9DcHZFSkw0VUZpVElnWndNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAzMjQ5Mjk0CWZpbGU6emVyb18xLjEuMF94NjRfZW4tVVMubXNpLnppcApwZGR2QnZ6STdpUERvL0JzQ25EL2U3Z3JUSmtmOHJGbGhCU2psQVpRUXNwYWRaU3ZhZ1plQkZPK3RlK1RrS2JXTlYrbjJPaGRrMFJZSElzWE15QnlDQT09Cg==",
+      "url": "https://github.com/NikolaRoev/zero/releases/download/1.1.0/zero_1.1.0_x64_en-US.msi.zip"
+    },
+    "linux-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUZG1UZUg0S3M1RHJlNWJUOFdyVVE2ZHAybnBtRDFlQjZSTnBhbVpDNXlSWXlkb0hYQ2JJbkk4ZjVzMGkySFQ1VFpnSkJJZk1tZldBOStBaVNMcThtdTg2ZGUvWEU0L1E0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAzMjQ5Mzk2CWZpbGU6emVyb18xLjEuMF9hbWQ2NC5BcHBJbWFnZS50YXIuZ3oKNWExTnNIMVByRmFvTUV0cjhxQWovWFFNTERhRXE4dXlaR1ByZmg1Um82bFhWai90OE9pRzBYS2ZRK05zRWJTdjZHMUs2ek1QYXRhc0pRZ0pFZXFRQlE9PQo=",
+      "url": "https://github.com/NikolaRoev/zero/releases/download/1.1.0/zero_1.1.0_amd64.AppImage.tar.gz"
+    }
+  }
+}

@@ -1,3 +1,3 @@
-- auto-update / release action from the docs / check for updates button
 - clean-up
 - testing
+- grab the newly created latest.json file and commit it to the repo
