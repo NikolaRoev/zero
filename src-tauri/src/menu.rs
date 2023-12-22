@@ -176,7 +176,18 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
         },
         "dev_tools" => event.window().open_devtools(),
         "check_for_updates" => {
-            event.window().emit("tauri://update", ()).unwrap();
+            tauri::async_runtime::spawn(async move {
+                match event.window().app_handle().updater().check().await {
+                    Ok(update) => {
+                        if update.is_update_available() {
+                            update.download_and_install().await.unwrap();
+                        }
+                    }
+                    Err(e) => {
+                        log::error!("failed to get update: {}", e);
+                    }
+                }
+            });
         },
         "about" => {
             let handle = event.window().app_handle();
