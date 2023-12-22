@@ -31,8 +31,3 @@ jobs:
         with:
           tagName: __VERSION__
           releaseName: __VERSION__
-      - uses: actions/github-script@v6
-        with:
-          script: |
-            const test = await import("${{ github.workspace }}/package.json");
-            console.log(test);
