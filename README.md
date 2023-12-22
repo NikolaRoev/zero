@@ -1,3 +1,3 @@
-- clean-up
 - auto-update / release action from the docs / check for updates button
+- clean-up
 - testing

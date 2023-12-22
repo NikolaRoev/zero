@@ -176,7 +176,7 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
         },
         "dev_tools" => event.window().open_devtools(),
         "check_for_updates" => {
-            //TODO
+            event.window().emit("tauri://update", ()).unwrap();
         },
         "about" => {
             let handle = event.window().app_handle();

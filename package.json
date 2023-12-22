@@ -8,7 +8,8 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "unit-tests": "cd src-tauri && cargo test",
-    "integration-tests": "tauri build && jest"
+    "integration-tests": "tauri build && jest",
+    "asd": "tauri signer generate"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.8",
