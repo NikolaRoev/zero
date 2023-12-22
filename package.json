@@ -3,13 +3,10 @@
   "scripts": {
     "update-dependencies": "ncu -u && cd src-tauri && cargo upgrade",
     "lint": "tsc && eslint .",
-    "dev": "vite dev",
-    "build": "vite build",
-    "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build",
+    "dev": "tauri dev",
+    "build": "tauri build",
     "unit-tests": "cd src-tauri && cargo test",
-    "integration-tests": "tauri build && jest",
-    "asd": "tauri signer generate"
+    "integration-tests": "tauri build && jest"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.8",
