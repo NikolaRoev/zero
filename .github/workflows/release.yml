@@ -24,10 +24,15 @@ jobs:
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
 
       - run: npm ci
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
         with:
           tagName: __VERSION__
           releaseName: __VERSION__
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            const test = await import("${{ github.workspace }}/package.json");
+            console.log(test);
