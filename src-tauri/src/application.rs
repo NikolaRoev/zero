@@ -69,6 +69,9 @@ pub fn callback(app: &tauri::AppHandle, event: tauri::RunEvent) {
                 log::error!("Failed to save config: {err}.");
             }
         },
+        tauri::RunEvent::Updater(event) => {
+            log::debug!("{:?}", event);
+        },
         tauri::RunEvent::Exit => log::info!("Exited zero."),
         _ => {}
     }
