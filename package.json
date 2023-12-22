@@ -3,6 +3,7 @@
   "scripts": {
     "update-dependencies": "ncu -u && cd src-tauri && cargo upgrade",
     "lint": "tsc && eslint .",
+    "tauri": "tauri",
     "dev": "tauri dev",
     "build": "tauri build",
     "unit-tests": "cd src-tauri && cargo test",
