@@ -1,19 +1,19 @@
 {
-  "version": "1.3.0",
+  "version": "1.5.0",
   "notes": "",
-  "pub_date": "2023-12-22T13:32:09.970Z",
+  "pub_date": "2023-12-22T14:00:44.499Z",
   "platforms": {
-    "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUZG1UZUg0S3M1RG5RSWE3UmRpQ0duQzVVSGRIRFc0UmdzVktmVFhXc096RWxGMy9xTXVYcEYxc1VXWEJNK29oeGkxZkM2dnpYKzdtQkJ1L1dudVUrTmdDM2dEQTFXbVFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAzMjUxODUxCWZpbGU6emVyb18xLjMuMF9hbWQ2NC5BcHBJbWFnZS50YXIuZ3oKVE02djJNTTVvTHVLYVlSV1praGx2bERFcWl1NWQ3VTFRNlhaN2FWb3ZQM1NjZFJPQm8rQTM5S2dpMGZTNURTdlZaMWlQdmJQM09Tc1dvSEw0b0x2QUE9PQo=",
-      "url": "https://github.com/NikolaRoev/zero/releases/download/1.3.0/zero_1.3.0_amd64.AppImage.tar.gz"
-    },
     "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUZG1UZUg0S3M1RHNPVHAyMHlRZHpXWi9qVmowS3BpM3dvV0xwSm9rVzl0MWJ3VkkwNWVGT3ZoeW9CL20wcDMzbGZuRTJmSjl5c2FqaC9iUWRYSDY4MXRpQTJtLzJ3VVEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAzMjUxODgwCWZpbGU6emVyby5hcHAudGFyLmd6CnAzMXQ2V0tQK3NEajNOOWVmdHpVRFZxZ2dUdUxHbjEvWi9GMEN2UHJ2azZFaUl3bVRlY1lwdFRUV1d2dkVuanJSa1h6OGdVMldGdStMZW16cXY2L0R3PT0K",
-      "url": "https://github.com/NikolaRoev/zero/releases/download/1.3.0/zero_x64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUZG1UZUg0S3M1RGlMTFh2cXExS21GV05xZDIvWUFRa3lMWWRyWFBkaElDYjI5ZnlxaVlrQ0lrU3ZCV2ZPOHIzRGplTHYxOEdhcGtoLzBENTFKbCtTQlp2ZWowUVZ1OFFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAzMjUzNTU1CWZpbGU6emVyby5hcHAudGFyLmd6CldYZTNTeUY4bEIrTjRJUFNFTjBJQXRFYm1KQllkV2k1anJlSG1vYmNGTnlSYyt2dzZCeVE4MDVtWHNwemRKNHRGUGN5QS83QXNFak9taFBkdzYvakNRPT0K",
+      "url": "https://github.com/NikolaRoev/zero/releases/download/1.5.0/zero_x64.app.tar.gz"
+    },
+    "linux-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUZG1UZUg0S3M1RG16ajRubGo2NG5UZGdqVUZ4WXBIN0tGMEY1TGM5ckxJWXdOdE5MRUFQMFRJOTkwYXZOZDR0azN5Sks5NjhjdWZjcCtPTjIrLzQ4c2FWZ1cwMDY1Q1FVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAzMjUzNjE1CWZpbGU6emVyb18xLjUuMF9hbWQ2NC5BcHBJbWFnZS50YXIuZ3oKcG9CMmZsZDVXRXpodjNnNExKKy9NVUpDYWs0eTVzNzNoTk9IM1Q4QW1GL0JPcnQ2eHJZZlZmRGMxRTZVc1NTR3JwWXFqVHdFc1hFcWM3Z2RPQ2oxQ0E9PQo=",
+      "url": "https://github.com/NikolaRoev/zero/releases/download/1.5.0/zero_1.5.0_amd64.AppImage.tar.gz"
     },
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUZG1UZUg0S3M1RGd6eU91a3RDZTZuT2lSOTRBcVhuOXlNNDlVaXAvbGhyOS9VSXlZQkc5Wm93RXRjYlRhMDFwVW1zdWQ0ak8zaGtUeUFFSHhLTW9meDhYUUpTNWt0dGdBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAzMjUxOTI1CWZpbGU6emVyb18xLjMuMF94NjRfZW4tVVMubXNpLnppcApsODVkbnhsbkhzWXBJWHVSMFBtYk5TV1ZBb0tSYUEzOUplUk1sV01EMGNSU3piU2tLMXVCd2ljS3dxYnV1TElScmE2K0tGVUJhd2swUEpFVGFEQ0hEdz09Cg==",
-      "url": "https://github.com/NikolaRoev/zero/releases/download/1.3.0/zero_1.3.0_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUZG1UZUg0S3M1RHB5c29sSndUeVRSNnpZRXc0QVpvWkdYM2pyOG9PeEdiZjZQbnBtTWxCTUdPNEF5d1ZoM1dPZ0NFUWtSdDBVNkNPQkNERXhqMVdDQUdqdjl6NTQ1cUFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAzMjUzNjM5CWZpbGU6emVyb18xLjUuMF94NjRfZW4tVVMubXNpLnppcApZYmduNXE0Y1FvLzcvQnhYdUZiS3hua1pHcGJPdEZwdHJzSEJEL0ZwU3hCWU9kdko2K0lqeDA5U1Bhbkw0eVBhWXF5amw2R1RIcm9iL2FCZHZjUlpCdz09Cg==",
+      "url": "https://github.com/NikolaRoev/zero/releases/download/1.5.0/zero_1.5.0_x64_en-US.msi.zip"
     }
   }
 }
