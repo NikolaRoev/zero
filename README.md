@@ -1,4 +1,2 @@
 - clean-up
 - testing
-- icon
-- grab the newly created latest.json file and commit it to the repo or wait for 2.0
