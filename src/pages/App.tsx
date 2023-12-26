@@ -2,6 +2,7 @@ import * as api from "../data/api";
 import * as event from "../data/events";
 import { Tab, Tabs } from "../components/Tabs";
 import { useDatabase, useRecentDatabases } from "../hooks/database-hooks";
+import { BsX } from "react-icons/bs";
 import ConfigurationTab from "./configuration/ConfigurationTab";
 import DataContextProvider from "../contexts/data-context";
 import Dialog from "../components/Dialog";
@@ -68,10 +69,23 @@ function MoreRecentDatabasesDialog() {
 
     return (
         <Dialog
-            className="w-[50vw] h-[60vh]"
             isOpen={isOpen}
             onClose={() => { setIsOpen(false); }}
-        ><RecentDatabasesList /></Dialog>
+        >
+            <div className="w-[50vw] h-[60vh] flex flex-col border border-neutral-700 rounded">
+                <div className="border-b border-neutral-700">
+                    <button
+                        className={clsx(
+                            "ml-auto w-[24px] h-[24px]",
+                            "flex justify-center items-center",
+                            "hover:bg-neutral-200 active:bg-neutral-300 rounded"
+                        )}
+                        onClick={() => { setIsOpen(false); }}
+                    ><BsX /></button>
+                </div>
+                <RecentDatabasesList />
+            </div>
+        </Dialog>
     );
 }
 
