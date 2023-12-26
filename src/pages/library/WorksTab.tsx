@@ -194,10 +194,10 @@ export default function WorksTab() {
                 computeItemKey={(_, work) => work.id}
                 itemContent={(index, work) => (
                     <TableRow>
-                        <TableCell className="w-[1%] p-[5px]">{index + 1}.</TableCell>
+                        <TableCell className="w-[1%] p-[5px] text-sm">{index + 1}.</TableCell>
                         <TableCell
                             className={clsx(
-                                "max-w-0 p-[5px] overflow-hidden overflow-ellipsis",
+                                "max-w-0 p-[5px] text-sm overflow-hidden overflow-ellipsis",
                                 "hover:bg-neutral-200 active:bg-neutral-300"
                             )}
                             title={work.name}
@@ -206,17 +206,27 @@ export default function WorksTab() {
                             }}
                         >{work.name}</TableCell>
                         <TableCell
-                            className="w-[1%] p-[5px]"
+                            className="w-[1%] p-[5px] text-sm"
                             title={work.progress}
                         >{work.progress}</TableCell>
                         <TableCell
-                            className="w-[1%] p-[5px]"
+                            className="w-[1%] p-[5px] text-xs"
                             title={formatISO9075(work.updated)}
-                        >{formatDistanceToNowStrict(work.updated, { addSuffix: true })}</TableCell>
+                        >
+                            <div className="flex gap-x-[5px]">
+                                <span>{formatISO9075(work.updated, { representation: "date" })}</span>
+                                <span>({formatDistanceToNowStrict(work.updated, { addSuffix: true })})</span>
+                            </div>
+                        </TableCell>
                         <TableCell
-                            className="w-[1%] p-[5px]"
+                            className="w-[1%] p-[5px] text-xs"
                             title={formatISO9075(work.added)}
-                        >{formatDistanceToNowStrict(work.added, { addSuffix: true })}</TableCell>
+                        >
+                            <div className="flex gap-x-[5px]">
+                                <span>{formatISO9075(work.added, { representation: "date" })}</span>
+                                <span>({formatDistanceToNowStrict(work.added, { addSuffix: true })})</span>
+                            </div>
+                        </TableCell>
                     </TableRow>
                 )}
             />
