@@ -42,7 +42,7 @@ export default function FormatsTab() {
 
 
     return (
-        <div className="p-[5px] grow flex flex-col gap-y-[10px]">
+        <div className="px-[5px] py-[10px] grow flex flex-col gap-y-[10px]">
             <form onSubmit={handleSubmit} className="flex gap-x-[3px]">
                 <Input
                     ref={formatInputRef}
