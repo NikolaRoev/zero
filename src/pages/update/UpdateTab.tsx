@@ -71,7 +71,7 @@ export default function UpdateTab() {
     ));
 
     return (
-        <div className="p-[5px] grow flex flex-col gap-y-[10px] bg-neutral-50">
+        <div className="px-[5px] py-[10px] grow flex flex-col gap-y-[10px] bg-neutral-50">
             <Input
                 ref={filterInput}
                 name="update-search-input"

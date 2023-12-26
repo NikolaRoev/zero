@@ -96,16 +96,9 @@ export default function AddCreatorTab() {
     }
 
     return (
-        <div className="p-[5px] grow flex flex-col">
+        <div className="px-[5px] py-[10px] grow flex flex-col">
             <form onSubmit={handleSubmit} className="flex flex-col grow gap-y-[10px]">
                 <div className="p-[5px] grid grid-cols-9 gap-x-[40px] gap-y-[5px] border border-neutral-700 rounded">
-                    <div className="col-span-9 flex rounded">
-                        <Button
-                            className="ml-auto"
-                            type="button"
-                            onClick={() => { addCreatorFormDispatch({ action: "Clear" }); }}
-                        >Clear</Button>
-                    </div>
                     <label htmlFor="name-input">Name:</label>
                     <Input
                         id="name-input"
@@ -196,8 +189,13 @@ export default function AddCreatorTab() {
                         />
                     </div>
                 </div>
-                <div className="pb-[5px] col-span-9">
+                <div className="col-span-9 flex justify-between">
                     <Button className="w-[100px]">Add</Button>
+                    <Button
+                        className="w-[100px]"
+                        type="button"
+                        onClick={() => { addCreatorFormDispatch({ action: "Clear" }); }}
+                    >Clear</Button>
                 </div>
             </form>
         </div>

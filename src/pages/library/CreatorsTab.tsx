@@ -19,7 +19,7 @@ export default function CreatorsTab() {
     const creatorsItems = Array.from(creators.values()).filter((creator) => creator.name.toLowerCase().includes(filter.toLowerCase()));
     
     return (
-        <div className="p-[5px] grow flex flex-col gap-y-[10px]">
+        <div className="px-[5px] py-[10px] grow flex flex-col gap-y-[10px]">
             <div className="flex flex-col">
                 <Input
                     name="creators-search-input"
