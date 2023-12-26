@@ -17,7 +17,7 @@ type UpdateWorkRowProps = {
 
 function UpdateWorkRow(props: UpdateWorkRowProps) {
     return (
-        <div className="px-[15px] py-[10px] flex flex-col bg-neutral-50">
+        <div className="px-[20px] py-[10px] flex flex-col bg-neutral-50">
             <input
                 name={`update-name-input-${props.updateWork.id}`}
                 className="text-[14px] grow focus:outline-none overflow-ellipsis bg-neutral-50"
@@ -71,9 +71,10 @@ export default function UpdateTab() {
     ));
 
     return (
-        <div className="px-[5px] py-[10px] grow flex flex-col gap-y-[10px] bg-neutral-50">
+        <div className="grow flex flex-col gap-y-[10px] bg-neutral-50">
             <Input
                 ref={filterInput}
+                className="mx-[5px] mt-[10px]"
                 name="update-search-input"
                 value={filter}
                 placeholder="Find"
