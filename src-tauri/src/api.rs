@@ -640,7 +640,7 @@ pub fn remove_recent_database(window: tauri::Window, config: tauri::State<Mutex<
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
         let mut guard = config.lock().unwrap();
-        guard.remove_recent_database(path)?;
+        guard.remove_recent_database(&path)?;
 
         window.emit(crate::event::CHANGE_RECENT_DATABASES_EVENT, ())?;
 

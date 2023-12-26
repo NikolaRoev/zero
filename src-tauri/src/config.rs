@@ -65,8 +65,8 @@ impl Config {
         self.database_recent.insert(0, path);
     }
 
-    pub fn remove_recent_database(&mut self, path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-        if let Some(index) = self.database_recent.iter().position(|item| *item == path) {
+    pub fn remove_recent_database(&mut self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+        if let Some(index) = self.database_recent.iter().position(|item| item == path) {
             self.database_recent.remove(index);
             Ok(())
         }
