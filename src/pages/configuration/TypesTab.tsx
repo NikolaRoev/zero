@@ -11,7 +11,7 @@ function TypesList() {
     const { types, removeType } = useSafeContext(DataContext);
 
     return (
-        <div className="grow border border-neutral-700 rounded-[5px]">
+        <div className="grow border border-neutral-700 rounded">
             <RemoveList
                 data={types}
                 computeItemKey={(_, type) => type.id }

@@ -43,7 +43,7 @@ export default function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
     return (
         <fieldset className={clsx(
             "px-[10px] pb-[5px] flex flex-wrap content-start",
-            "border border-neutral-700 rounded-[5px] gap-x-[20px] gap-y-[5px]"
+            "border border-neutral-700 rounded gap-x-[20px] gap-y-[5px]"
         )}>
             <legend>{props.legend}</legend>
             {props.items.map((item) => {

@@ -1,10 +1,13 @@
 import * as data from "../../data/data";
 import { Option, Select } from "../../components/Select";
 import { Table, TableCell, TableRow } from "../../components/Table";
-import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
+import { formatDistanceToNowStrict, formatISO9075, isSameDay, isWithinInterval } from "date-fns";
+import { fromAbsolute, getLocalTimeZone } from "@internationalized/date";
 import Button from "../../components/Button";
 import CheckboxGroup from "../../components/CheckboxGroup";
 import { DataContext } from "../../contexts/data-context";
+import type { DateRange } from "react-aria";
+import { DateRangePicker } from "../../components/DateRangePicker";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
@@ -20,7 +23,9 @@ type Filter = {
     by: By,
     statuses: string[],
     types: string[],
-    formats: string[]
+    formats: string[],
+    updatedRange: { start: number, end: number } | null,
+    addedRange: { start: number, end: number } | null
 }
 
 const emptyFilter: Filter = {
@@ -28,7 +33,9 @@ const emptyFilter: Filter = {
     by: "name",
     statuses: [],
     types: [],
-    formats: []
+    formats: [],
+    updatedRange: null,
+    addedRange: null
 };
 
 type FilterAction =
@@ -40,7 +47,9 @@ type FilterAction =
     { action: "AddType", type: string } |
     { action: "RemoveType", type: string } |
     { action: "AddFormat", format: string } |
-    { action: "RemoveFormat", format: string }
+    { action: "RemoveFormat", format: string } |
+    { action: "ChangeUpdatedRange", range: DateRange | null } |
+    { action: "ChangeAddedRange", range: DateRange | null }
 
 function filterReducer(filter: Filter, action: FilterAction): Filter {
     switch (action.action) {
@@ -62,6 +71,18 @@ function filterReducer(filter: Filter, action: FilterAction): Filter {
             return { ...filter, formats: [...filter.formats, action.format ] };
         case "RemoveFormat":
             return { ...filter, formats: filter.formats.filter((f) => f !== action.format) };
+        case "ChangeUpdatedRange": {
+            return { ...filter, updatedRange: action.range && {
+                start: action.range.start.toDate(getLocalTimeZone()).getTime(),
+                end: action.range.end.toDate(getLocalTimeZone()).getTime()
+            } };
+        }
+        case "ChangeAddedRange": {
+            return { ...filter, addedRange: action.range && {
+                start: action.range.start.toDate(getLocalTimeZone()).getTime(),
+                end: action.range.end.toDate(getLocalTimeZone()).getTime()
+            } };
+        }
         default: {
             const unreachable: never = action;
             throw new Error(`Invalid action: ${unreachable}`);
@@ -108,6 +129,28 @@ export default function WorksTab() {
         if (filter.formats.length && !filter.formats.includes(work.format)) {
             return false;
         }
+
+        if (filter.updatedRange) {
+            if (filter.updatedRange.start <= filter.updatedRange.end) {
+                if ((!isSameDay(work.updated, filter.updatedRange.start) &&
+                !isSameDay(work.updated, filter.updatedRange.end)) &&
+                !isWithinInterval(work.updated, filter.updatedRange)) {
+                    return false;
+                }
+            }
+        }
+
+        if (filter.addedRange) {
+            if (filter.addedRange.start <= filter.addedRange.end) {
+                if ((!isSameDay(work.added, filter.addedRange.start) &&
+                    !isSameDay(work.added, filter.addedRange.end)) &&
+                    !isWithinInterval(work.added, filter.addedRange)) {
+                    return false;
+                }
+            }
+        }
+        
+
         return true;
     });
     
@@ -134,7 +177,7 @@ export default function WorksTab() {
                     </Select>
                     <Button onClick={() => { filterDispatch({ action: "Clear"}); }}>Clear</Button>
                 </div>
-                <div className="grid grid-cols-3 gap-x-[5px]">
+                <div className="grid grid-cols-4 gap-x-[5px]">
                     <CheckboxGroup
                         legend="Statuses"
                         items={statuses}
@@ -178,6 +221,26 @@ export default function WorksTab() {
                             labelContents: format.format
                         })}
                     />
+                    <div className="p-[10px] flex flex-col gap-y-[5px] items-center justify-center">
+                        <DateRangePicker
+                            label="Updated"
+                            granularity="day"
+                            value={filter.updatedRange && {
+                                start: fromAbsolute(filter.updatedRange.start, getLocalTimeZone()),
+                                end: fromAbsolute(filter.updatedRange.end, getLocalTimeZone())
+                            }}
+                            onChange={(range: DateRange) => { filterDispatch({ action: "ChangeUpdatedRange", range: range}); }}
+                        />
+                        <DateRangePicker
+                            label="Added"
+                            granularity="day"
+                            value={filter.addedRange && {
+                                start: fromAbsolute(filter.addedRange.start, getLocalTimeZone()),
+                                end: fromAbsolute(filter.addedRange.end, getLocalTimeZone())
+                            }}
+                            onChange={(range: DateRange) => { filterDispatch({ action: "ChangeAddedRange", range: range}); }}
+                        />
+                    </div>
                 </div>
             </div>
 

@@ -112,7 +112,7 @@ export default function NavigationContextProvider({ children, storageKey }: { ch
                 <div className="h-[30px] p-[5px] flex gap-x-[8px] bg-neutral-50">
                     <button
                         className={clsx(
-                            "p-[2px] rounded-[5px] select-none",
+                            "p-[2px] rounded select-none",
                             "hover:bg-neutral-200 active:bg-neutral-300",
                             { "pointer-events-none": navigationData.index === -1 }
                         )}
@@ -122,7 +122,7 @@ export default function NavigationContextProvider({ children, storageKey }: { ch
                     <NavDropDown>
                         <NavButton
                             className={clsx(
-                                "p-[2px] rounded-[5px] select-none",
+                                "p-[2px] rounded select-none",
                                 "hover:bg-neutral-200 active:bg-neutral-300",
                                 { "pointer-events-none": navigationData.index === -1 }
                             )}
@@ -137,7 +137,7 @@ export default function NavigationContextProvider({ children, storageKey }: { ch
                     <NavDropDown>
                         <NavButton
                             className={clsx(
-                                "p-[2px] rounded-[5px] select-none",
+                                "p-[2px] rounded select-none",
                                 "hover:bg-neutral-200 active:bg-neutral-300",
                                 { "pointer-events-none": navigationData.index >= (navigationData.pages.length - 1) }
                             )}

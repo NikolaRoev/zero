@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 
 
 
-
 type DialogProps = {
     children: React.ReactNode,
     isOpen: boolean,

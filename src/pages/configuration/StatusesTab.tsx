@@ -12,7 +12,7 @@ function StatusesList() {
     const { statuses, removeStatus, updateStatus } = useSafeContext(DataContext);
 
     return (
-        <div className="grow border border-neutral-700 rounded-[5px]">
+        <div className="grow border border-neutral-700 rounded">
             <RemoveList
                 data={statuses}
                 computeItemKey={(_, status) => status.id }

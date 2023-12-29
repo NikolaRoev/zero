@@ -28,7 +28,7 @@ export function Select<T extends string | number | readonly string[]>(props: Sel
             id={props.id}
             name={props.name}
             className={clsx(
-                "px-[5px] py-[2px] border border-neutral-700 rounded-[5px] focus:outline-none",
+                "px-[5px] py-[2px] border border-neutral-700 rounded focus:outline-none",
                 props.className
             )}
             value={props.value}
