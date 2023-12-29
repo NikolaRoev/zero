@@ -177,51 +177,51 @@ export default function WorksTab() {
                     </Select>
                     <Button onClick={() => { filterDispatch({ action: "Clear"}); }}>Clear</Button>
                 </div>
-                <div className="grid grid-cols-4 gap-x-[5px]">
-                    <CheckboxGroup
-                        legend="Statuses"
-                        items={statuses}
-                        checkboxContent={(status) => ({
-                            key: status.id,
-                            checked: filter.statuses.includes(status.status),
-                            onChange: (event) => {
-                                if (event.target.checked) { filterDispatch({ action: "AddStatus", status: status.status}); }
-                                else { filterDispatch({ action: "RemoveStatus", status: status.status}); }
-                            },
-                            labelContents: status.status,
-                            labelClassName: clsx({ "underline": status.isUpdate }),
-                            labelTitle: status.isUpdate ? "Update status." : undefined
-                        })}
-                    />
-
-                    <CheckboxGroup
-                        legend="Types"
-                        items={types}
-                        checkboxContent={(type) => ({
-                            key: type.id,
-                            checked: filter.types.includes(type.type),
-                            onChange: (event) => {
-                                if (event.target.checked) { filterDispatch({ action: "AddType", type: type.type}); }
-                                else { filterDispatch({ action: "RemoveType", type: type.type}); }
-                            },
-                            labelContents: type.type
-                        })}
-                    />
-
-                    <CheckboxGroup
-                        legend="Formats"
-                        items={formats}
-                        checkboxContent={(format) => ({
-                            key: format.id,
-                            checked: filter.formats.includes(format.format),
-                            onChange: (event) => {
-                                if (event.target.checked) { filterDispatch({ action: "AddFormat", format: format.format}); }
-                                else { filterDispatch({ action: "RemoveFormat", format: format.format}); }
-                            },
-                            labelContents: format.format
-                        })}
-                    />
-                    <div className="p-[10px] flex flex-col gap-y-[5px] items-center justify-center">
+                <div className="flex flex-wrap">
+                    <div className="grid grid-cols-3 gap-x-[5px]">
+                        <CheckboxGroup
+                            legend="Statuses"
+                            items={statuses}
+                            checkboxContent={(status) => ({
+                                key: status.id,
+                                checked: filter.statuses.includes(status.status),
+                                onChange: (event) => {
+                                    if (event.target.checked) { filterDispatch({ action: "AddStatus", status: status.status}); }
+                                    else { filterDispatch({ action: "RemoveStatus", status: status.status}); }
+                                },
+                                labelContents: status.status,
+                                labelClassName: clsx({ "underline": status.isUpdate }),
+                                labelTitle: status.isUpdate ? "Update status." : undefined
+                            })}
+                        />
+                        <CheckboxGroup
+                            legend="Types"
+                            items={types}
+                            checkboxContent={(type) => ({
+                                key: type.id,
+                                checked: filter.types.includes(type.type),
+                                onChange: (event) => {
+                                    if (event.target.checked) { filterDispatch({ action: "AddType", type: type.type}); }
+                                    else { filterDispatch({ action: "RemoveType", type: type.type}); }
+                                },
+                                labelContents: type.type
+                            })}
+                        />
+                        <CheckboxGroup
+                            legend="Formats"
+                            items={formats}
+                            checkboxContent={(format) => ({
+                                key: format.id,
+                                checked: filter.formats.includes(format.format),
+                                onChange: (event) => {
+                                    if (event.target.checked) { filterDispatch({ action: "AddFormat", format: format.format}); }
+                                    else { filterDispatch({ action: "RemoveFormat", format: format.format}); }
+                                },
+                                labelContents: format.format
+                            })}
+                        />
+                    </div>
+                    <div className="grow p-[10px] flex flex-col gap-y-[5px] items-center justify-center">
                         <DateRangePicker
                             label="Updated"
                             granularity="day"
