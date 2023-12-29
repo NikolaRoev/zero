@@ -34,6 +34,7 @@ function Checkbox(props: CheckboxProps) {
 
 
 type CheckboxGroupProps<T> = {
+    className?: string,
     legend: React.ReactNode,
     items: T[],
     checkboxContent: (item: T) => CheckboxProps
@@ -42,8 +43,9 @@ type CheckboxGroupProps<T> = {
 export default function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
     return (
         <fieldset className={clsx(
-            "max-w-[25vw] px-[10px] pb-[5px] flex flex-wrap content-start",
-            "border border-neutral-700 rounded gap-x-[20px] gap-y-[5px]"
+            "px-[10px] pb-[5px] flex flex-wrap content-start",
+            "border border-neutral-700 rounded gap-x-[20px] gap-y-[5px]",
+            props.className
         )}>
             <legend>{props.legend}</legend>
             {props.items.map((item) => {

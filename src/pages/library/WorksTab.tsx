@@ -180,6 +180,7 @@ export default function WorksTab() {
                 <div className="flex flex-wrap">
                     <div className="grid grid-cols-3 gap-x-[5px]">
                         <CheckboxGroup
+                            className="w-[25vw]"
                             legend="Statuses"
                             items={statuses}
                             checkboxContent={(status) => ({
@@ -195,6 +196,7 @@ export default function WorksTab() {
                             })}
                         />
                         <CheckboxGroup
+                            className="w-[25vw]"
                             legend="Types"
                             items={types}
                             checkboxContent={(type) => ({
@@ -208,6 +210,7 @@ export default function WorksTab() {
                             })}
                         />
                         <CheckboxGroup
+                            className="w-[25vw]"
                             legend="Formats"
                             items={formats}
                             checkboxContent={(format) => ({
@@ -221,7 +224,7 @@ export default function WorksTab() {
                             })}
                         />
                     </div>
-                    <div className="grow p-[10px] flex flex-col gap-y-[5px] items-center justify-center">
+                    <div className="grow p-[5px] flex flex-col gap-y-[5px] items-center justify-center">
                         <DateRangePicker
                             label="Updated"
                             granularity="day"
