@@ -75,9 +75,9 @@ export default function WorkPage({ id }: { id: number }) {
                 >
                     {dataContext.statuses.map((status) => (
                         <Option
-                            key={status.status}
-                            value={status.status}
-                        >{status.status}</Option>
+                            key={status.name}
+                            value={status.name}
+                        >{status.name}</Option>
                     ))}
                 </Select>
                 <label htmlFor="type-select">Type:</label>
@@ -89,7 +89,7 @@ export default function WorkPage({ id }: { id: number }) {
                     selectMsg="Change Type"
                 >
                     {dataContext.types.map((type) => (
-                        <Option key={type.type} value={type.type}>{type.type}</Option>
+                        <Option key={type.name} value={type.name}>{type.name}</Option>
                     ))}
                 </Select>
                 <label htmlFor="format-select">Format:</label>
@@ -101,7 +101,7 @@ export default function WorkPage({ id }: { id: number }) {
                     selectMsg="Change Format"
                 >
                     {dataContext.formats.map((format) => (
-                        <Option key={format.format} value={format.format}>{format.format}</Option>
+                        <Option key={format.name} value={format.name}>{format.name}</Option>
                     ))}
                 </Select>
 

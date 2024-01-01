@@ -1,4 +1,4 @@
-import { type FormEvent, useRef, useState } from "react";
+import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
 import Input from "../../components/Input";
@@ -8,7 +8,7 @@ import useSafeContext from "../../hooks/safe-context-hook";
 
 
 function FormatsList() {
-    const { formats, removeFormat } = useSafeContext(DataContext);
+    const { formats, removeFormat, updateFormatName } = useSafeContext(DataContext);
 
     return (
         <div className="grow border border-neutral-700 rounded">
@@ -16,8 +16,17 @@ function FormatsList() {
                 data={formats}
                 computeItemKey={(_, format) => format.id }
                 itemContent={(_, format) => ({
-                    contents: <p className="grow p-[5px]">{format.format}</p>,
-                    buttonTitle: `Remove format "${format.format}".`,
+                    contents: (
+                        <input
+                            className="grow p-[5px] bg-transparent focus:outline-none rounded"
+                            value={format.name}
+                            spellCheck={false}
+                            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                updateFormatName(format.id, format.name, event.target.value);
+                            }}
+                        />
+                    ),
+                    buttonTitle: `Remove format "${format.name}".`,
                     onButtonClick: () => { removeFormat(format.id); }
                 })}
             />

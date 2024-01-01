@@ -91,10 +91,8 @@ function CalendarCell(props: AriaCalendarCellProps & { state: RangeCalendarState
         formattedDate
     } = useCalendarCell(props, props.state, ref);
     
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const isSelectionStart = props.state.highlightedRange && isSameDay(props.date, props.state.highlightedRange.start);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const isSelectionEnd = props.state.highlightedRange && isSameDay(props.date, props.state.highlightedRange.end);
+    const isSelectionStart = isSelected && isSameDay(props.date, props.state.highlightedRange.start);
+    const isSelectionEnd = isSelected && isSameDay(props.date, props.state.highlightedRange.end);
 
     return (
         <td {...cellProps}>

@@ -18,18 +18,18 @@ export type Creator = {
 
 export type Status = {
     id: number,
-    status: string,
+    name: string,
     isUpdate: boolean
 }
 
 export type Type = {
     id: number,
-    type: string
+    name: string
 }
 
 export type Format = {
     id: number,
-    format: string
+    name: string
 }
 
 

@@ -29,8 +29,6 @@ type DataContextContents = {
     removeType: (id: number) => void,
     removeFormat: (id: number) => void,
 
-    updateStatus: (id: number, isUpdate: boolean) => void,
-
     updateWorkName: (id: number, name: string) => void,
     updateWorkProgress: (id: number, progress: string) => void,
     updateWorkStatus: (id: number, status: string) => void,
@@ -40,7 +38,12 @@ type DataContextContents = {
     updateCreatorName: (id: number, name: string) => void,
 
     attach: (workId: number, creatorId: number) => void,
-    detach: (workId: number, creatorId: number) => void
+    detach: (workId: number, creatorId: number) => void,
+
+    updateStatusName: (id: number, oldName: string, newName: string) => void,
+    updateStatusIsUpdate: (id: number, isUpdate: boolean) => void,
+    updateTypeName: (id: number, oldName: string, newName: string) => void,
+    updateFormatName: (id: number, oldName: string, newName: string) => void
 }
 
 export const DataContext = createContext<DataContextContents | null>(null);
@@ -49,9 +52,9 @@ export const DataContext = createContext<DataContextContents | null>(null);
 export default function DataContextProvider({ children }: { children: React.ReactNode }) {
     const works = useWorks();
     const creators = useCreators();
-    const { statuses, addStatus, removeStatus, updateStatus } = useStatuses();
-    const { types, addType, removeType } = useTypes();
-    const { formats, addFormat, removeFormat } = useFormats();
+    const statuses = useStatuses();
+    const types = useTypes();
+    const formats = useFormats();
 
 
     function addWork(work: Work, callback: (id: number) => void) {
@@ -118,28 +121,74 @@ export default function DataContextProvider({ children }: { children: React.Reac
         });
     }
 
+    function updateStatusName(id: number, oldName: string, newName: string) {
+        statuses.updateStatusName(id, newName);
+        works.works.forEach((work) => {
+            if (work.status === oldName) {
+                work.status = newName;
+            }
+        });
+        works.setWorks(new Map(works.works));
+        
+        api.updateStatusName(id, newName).catch(async (reason) => {
+            statuses.getStatuses();
+            works.getWorks();
+            await message(`${reason}`, { title: "Failed to update Status name.", type: "error" });
+        });
+    }
+
+    function updateTypeName(id: number, oldName: string, newName: string) {
+        types.updateTypeName(id, newName);
+        works.works.forEach((work) => {
+            if (work.type === oldName) {
+                work.type = newName;
+            }
+        });
+        works.setWorks(new Map(works.works));
+        
+        api.updateTypeName(id, newName).catch(async (reason) => {
+            types.getTypes();
+            works.getWorks();
+            await message(`${reason}`, { title: "Failed to update Type name.", type: "error" });
+        });
+    }
+
+    function updateFormatName(id: number, oldName: string, newName: string) {
+        formats.updateFormatName(id, newName);
+        works.works.forEach((work) => {
+            if (work.format === oldName) {
+                work.format = newName;
+            }
+        });
+        works.setWorks(new Map(works.works));
+        
+        api.updateFormatName(id, newName).catch(async (reason) => {
+            formats.getFormats();
+            works.getWorks();
+            await message(`${reason}`, { title: "Failed to update Format name.", type: "error" });
+        });
+    }
+
 
     return (
         <DataContext.Provider value={{
             works: works.works,
             creators: creators.creators,
-            statuses,
-            types,
-            formats,
+            statuses: statuses.statuses,
+            types: types.types,
+            formats: formats.formats,
 
             addWork,
             addCreator,
-            addStatus,
-            addType,
-            addFormat,
+            addStatus: statuses.addStatus,
+            addType: types.addType,
+            addFormat: formats.addFormat,
 
             removeWork,
             removeCreator,
-            removeStatus,
-            removeType,
-            removeFormat,
-
-            updateStatus,
+            removeStatus: statuses.removeStatus,
+            removeType: types.removeType,
+            removeFormat: formats.removeFormat,
 
             updateWorkName: works.updateWorkName,
             updateWorkProgress: works.updateWorkProgress,
@@ -150,7 +199,12 @@ export default function DataContextProvider({ children }: { children: React.Reac
             updateCreatorName: creators.updateCreatorName,
 
             attach,
-            detach
+            detach,
+
+            updateStatusName,
+            updateStatusIsUpdate: statuses.updateStatusIsUpdate,
+            updateTypeName,
+            updateFormatName
         }}>
             {children}
         </DataContext.Provider>

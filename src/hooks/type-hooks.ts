@@ -18,9 +18,9 @@ export default function useTypes() {
         });
     }
 
-    function addType(type: string, callback: () => void) {
-        api.addType(type).then((id) => {
-            setTypes([...types, { id: id, type: type }]);
+    function addType(name: string, callback: () => void) {
+        api.addType(name).then((id) => {
+            setTypes([...types, { id: id, name: name }]);
             callback();
         }).catch(async (reason) => {
             getTypes();
@@ -40,11 +40,20 @@ export default function useTypes() {
         });
     }
 
+    function updateTypeName(id: number, typeName: string) {
+        setTypes(types.map((type) => {
+            if (type.id === id) {
+                return { ...type, name: typeName };
+            }
+            return type;
+        }));
+    }
+
 
     useEffect(() => {
         getTypes();
     }, []);
 
 
-    return { types, addType, removeType };
+    return { types, getTypes, addType, removeType, updateTypeName };
 }

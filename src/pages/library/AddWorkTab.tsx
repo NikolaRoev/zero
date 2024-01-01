@@ -93,9 +93,9 @@ export default function AddWorkTab() {
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        const status = dataContext.statuses[addWorkFormData.statusIndex]?.status;
-        const type = dataContext.types[addWorkFormData.typeIndex]?.type;
-        const format = dataContext.formats[addWorkFormData.formatIndex]?.format;
+        const status = dataContext.statuses[addWorkFormData.statusIndex]?.name;
+        const type = dataContext.types[addWorkFormData.typeIndex]?.name;
+        const format = dataContext.formats[addWorkFormData.formatIndex]?.name;
 
         if (status && type && format) {
             const timestamp = Date.now();
@@ -162,9 +162,9 @@ export default function AddWorkTab() {
                     >
                         {dataContext.statuses.map((status, index) => (
                             <Option
-                                key={status.status}
+                                key={status.name}
                                 value={index}
-                            >{status.status}</Option>
+                            >{status.name}</Option>
                         ))}
                     </Select>
                     <label htmlFor="type-select">Type:</label>
@@ -177,7 +177,7 @@ export default function AddWorkTab() {
                         errorMsg="No Types"
                     >
                         {dataContext.types.map((type, index) => (
-                            <Option key={type.type} value={index}>{type.type}</Option>
+                            <Option key={type.name} value={index}>{type.name}</Option>
                         ))}
                     </Select>
                     <label htmlFor="format-select">Format:</label>
@@ -190,7 +190,7 @@ export default function AddWorkTab() {
                         errorMsg="No Formats"
                     >
                         {dataContext.formats.map((format, index) => (
-                            <Option key={format.format} value={index}>{format.format}</Option>
+                            <Option key={format.name} value={index}>{format.name}</Option>
                         ))}
                     </Select>
                 </div>

@@ -18,9 +18,9 @@ export default function useFormats() {
         });
     }
 
-    function addFormat(format: string, callback: () => void) {
-        api.addFormat(format).then((id) => {
-            setFormats([...formats, { id: id, format: format }]);
+    function addFormat(name: string, callback: () => void) {
+        api.addFormat(name).then((id) => {
+            setFormats([...formats, { id: id, name: name }]);
             callback();
         }).catch(async (reason) => {
             getFormats();
@@ -40,11 +40,20 @@ export default function useFormats() {
         });
     }
 
+    function updateFormatName(id: number, formatName: string) {
+        setFormats(formats.map((format) => {
+            if (format.id === id) {
+                return { ...format, name: formatName };
+            }
+            return format;
+        }));
+    }
+
     
     useEffect(() => {
         getFormats();
     }, []);
   
 
-    return { formats, addFormat, removeFormat };
+    return { formats, getFormats, addFormat, removeFormat, updateFormatName };
 }

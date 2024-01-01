@@ -13,9 +13,9 @@ CREATE TABLE IF NOT EXISTS works (
     format   TEXT NOT NULL,
     updated  INTEGER NOT NULL,
     added    INTEGER NOT NULL,
-    FOREIGN KEY (status) REFERENCES statuses (status),
-    FOREIGN KEY (type)   REFERENCES types    (type),
-    FOREIGN KEY (format) REFERENCES formats  (format)
+    FOREIGN KEY (status) REFERENCES statuses (name) ON UPDATE CASCADE,
+    FOREIGN KEY (type)   REFERENCES types    (name) ON UPDATE CASCADE,
+    FOREIGN KEY (format) REFERENCES formats  (name) ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS creators (
@@ -33,18 +33,18 @@ CREATE TABLE IF NOT EXISTS work_creator (
 
 CREATE TABLE IF NOT EXISTS statuses (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    status    TEXT NOT NULL UNIQUE,
+    name      TEXT NOT NULL UNIQUE,
     is_update INTEGER NOT NULL CHECK (is_update IN (0, 1)) DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS types (
     id   INTEGER PRIMARY KEY AUTOINCREMENT,
-    type TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS formats (
-    id     INTEGER PRIMARY KEY AUTOINCREMENT,
-    format TEXT NOT NULL UNIQUE
+    id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
 );
 ";
 
@@ -72,20 +72,20 @@ pub struct Creator {
 #[serde(rename_all = "camelCase")]
 pub struct Status {
     pub id: i64,
-    pub status: String,
+    pub name: String,
     pub is_update: bool
 }
 
 #[derive(serde::Serialize, Debug)]
 pub struct Type {
     id: i64,
-    r#type: String
+    name: String
 }
 
 #[derive(serde::Serialize, Debug)]
 pub struct Format {
     id: i64,
-    format: String
+    name: String
 }
 
 
@@ -103,7 +103,7 @@ impl Database {
 
     pub fn open(&mut self, path: &PathBuf) -> DatabaseResult<()> {
         let mut conn = rusqlite::Connection::open(path)?;
-        conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
+        //conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
         conn.backup(rusqlite::DatabaseName::Main, path.with_extension("backup.db"), Some(|progress| {
             log::info!("Backing up: {}/{}.", progress.pagecount - progress.remaining, progress.pagecount);
         }))?;
@@ -242,7 +242,7 @@ impl Database {
         let rows = stmt.query_map([], |row| {
             Ok(Status {
                 id: row.get(0)?,
-                status: row.get(1)?,
+                name: row.get(1)?,
                 is_update: row.get(2)?
             })
         })?;
@@ -255,7 +255,7 @@ impl Database {
         let rows = stmt.query_map([], |row| {
             Ok(Type {
                 id: row.get(0)?,
-                r#type: row.get(1)?
+                name: row.get(1)?
             })
         })?;
 
@@ -267,7 +267,7 @@ impl Database {
         let rows = stmt.query_map([], |row| {
             Ok(Format {
                 id: row.get(0)?,
-                format: row.get(1)?
+                name: row.get(1)?
             })
         })?;
 
@@ -348,12 +348,19 @@ mod tests {
 
         let test = database.get_statuses().unwrap();
         for t in test {
-            println!("{} {} {}", t.id, t.status, t.is_update);
+            println!("{} {} {}", t.id, t.name, t.is_update);
         }
         //let id = database.add_work("name", "progress", "status", "r#type", "format", &[]).unwrap();
         //std::thread::sleep(std::time::Duration::from_secs(4));
         //database.update("works", "progress", id, "12");
 
         //creators.iter().try_for_each(|creator_id| self.attach(work_id, *creator_id))?;
+
+        //for i in 0..100_000 {
+        //    let name = format!("name {i}");
+        //    let progress = format!("progress {i}");
+        //    let test: Vec<(&str, &dyn rusqlite::ToSql)> = vec![("name", &name), ("progress", &progress), ("status", &"status"), ("type", &"type"), ("format", &"format"), ("updated", &0i64), ("added", &0i64)];
+        //    db_guard.add("works", test).unwrap();
+        //}
     }
 }

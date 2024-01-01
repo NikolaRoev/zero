@@ -9,7 +9,7 @@ import useSafeContext from "../../hooks/safe-context-hook";
 
 
 function StatusesList() {
-    const { statuses, removeStatus, updateStatus } = useSafeContext(DataContext);
+    const { statuses, removeStatus, updateStatusName, updateStatusIsUpdate } = useSafeContext(DataContext);
 
     return (
         <div className="grow border border-neutral-700 rounded">
@@ -19,20 +19,27 @@ function StatusesList() {
                 itemContent={(_, status) => ({
                     contents: (
                         <>
-                            <p className={clsx("grow p-[5px]", { "underline": status.isUpdate })}>{status.status}</p>
+                            <input
+                                className={clsx("grow p-[5px] bg-transparent focus:outline-none rounded", { "underline": status.isUpdate })}
+                                value={status.name}
+                                spellCheck={false}
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                    updateStatusName(status.id, status.name, event.target.value);
+                                }}
+                            />
                             <input
                                 name={`status-${status.id}-is-update-checkbox`}
                                 className="mx-[10px]"
                                 type="checkbox"
                                 checked={status.isUpdate}
                                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                                    updateStatus(status.id, event.target.checked);
+                                    updateStatusIsUpdate(status.id, event.target.checked);
                                 }}
                                 title="Is Update."
                             />
                         </>
                     ),
-                    buttonTitle: `Remove status "${status.status}".`,
+                    buttonTitle: `Remove status "${status.name}".`,
                     onButtonClick: () => { removeStatus(status.id); }
                 })}
             />

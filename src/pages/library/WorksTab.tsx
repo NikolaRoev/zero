@@ -185,12 +185,12 @@ export default function WorksTab() {
                             items={statuses}
                             checkboxContent={(status) => ({
                                 key: status.id,
-                                checked: filter.statuses.includes(status.status),
+                                checked: filter.statuses.includes(status.name),
                                 onChange: (event) => {
-                                    if (event.target.checked) { filterDispatch({ action: "AddStatus", status: status.status}); }
-                                    else { filterDispatch({ action: "RemoveStatus", status: status.status}); }
+                                    if (event.target.checked) { filterDispatch({ action: "AddStatus", status: status.name}); }
+                                    else { filterDispatch({ action: "RemoveStatus", status: status.name}); }
                                 },
-                                labelContents: status.status,
+                                labelContents: status.name,
                                 labelClassName: clsx({ "underline": status.isUpdate }),
                                 labelTitle: status.isUpdate ? "Update status." : undefined
                             })}
@@ -201,12 +201,12 @@ export default function WorksTab() {
                             items={types}
                             checkboxContent={(type) => ({
                                 key: type.id,
-                                checked: filter.types.includes(type.type),
+                                checked: filter.types.includes(type.name),
                                 onChange: (event) => {
-                                    if (event.target.checked) { filterDispatch({ action: "AddType", type: type.type}); }
-                                    else { filterDispatch({ action: "RemoveType", type: type.type}); }
+                                    if (event.target.checked) { filterDispatch({ action: "AddType", type: type.name}); }
+                                    else { filterDispatch({ action: "RemoveType", type: type.name}); }
                                 },
-                                labelContents: type.type
+                                labelContents: type.name
                             })}
                         />
                         <CheckboxGroup
@@ -215,12 +215,12 @@ export default function WorksTab() {
                             items={formats}
                             checkboxContent={(format) => ({
                                 key: format.id,
-                                checked: filter.formats.includes(format.format),
+                                checked: filter.formats.includes(format.name),
                                 onChange: (event) => {
-                                    if (event.target.checked) { filterDispatch({ action: "AddFormat", format: format.format}); }
-                                    else { filterDispatch({ action: "RemoveFormat", format: format.format}); }
+                                    if (event.target.checked) { filterDispatch({ action: "AddFormat", format: format.name}); }
+                                    else { filterDispatch({ action: "RemoveFormat", format: format.name}); }
                                 },
-                                labelContents: format.format
+                                labelContents: format.name
                             })}
                         />
                     </div>

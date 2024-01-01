@@ -330,12 +330,12 @@ pub fn add_creator(database: tauri::State<Mutex<Database>>, creator: Creator) ->
 }
 
 #[tauri::command]
-pub fn add_status(database: tauri::State<Mutex<Database>>, status: String) -> Result<i64, String> {
-    log::info!("Adding status: {status}.");
+pub fn add_status(database: tauri::State<Mutex<Database>>, name: String) -> Result<i64, String> {
+    log::info!("Adding status: {name}.");
 
     let inner = || -> Result<i64, Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        guard.add("statuses", vec![("status", &status)])
+        guard.add("statuses", vec![("name", &name)])
     };
 
     match inner() {
@@ -373,7 +373,28 @@ pub fn get_statuses(database: tauri::State<Mutex<Database>>) -> Result<Vec<Statu
 }
 
 #[tauri::command]
-pub fn update_status(database: tauri::State<Mutex<Database>>, id: i64, is_update: bool) -> Result<(), String> {
+pub fn update_status_name(database: tauri::State<Mutex<Database>>, id: i64, name: String) -> Result<(), String> {
+    log::info!("Updating status [{id}]: NAME - {name}.");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let guard = database.lock().unwrap();
+        guard.update("statuses", &id, vec![("name", &name)])
+    };
+
+    match inner() {
+        Ok(()) => {
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to update status [{id}] name: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
+pub fn update_status_is_update(database: tauri::State<Mutex<Database>>, id: i64, is_update: bool) -> Result<(), String> {
     log::info!("Updating status [{id}]: IS_UPDATE - {is_update}.");
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
@@ -457,12 +478,12 @@ pub fn remove_status(database: tauri::State<Mutex<Database>>, id: i64) -> Result
 }
 
 #[tauri::command]
-pub fn add_type(database: tauri::State<Mutex<Database>>, r#type: String) -> Result<i64, String> {
-    log::info!("Adding type: {}.", r#type);
+pub fn add_type(database: tauri::State<Mutex<Database>>, name: String) -> Result<i64, String> {
+    log::info!("Adding type: {name}.");
 
     let inner = || -> Result<i64, Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        guard.add("types", vec![("type", &r#type)])
+        guard.add("types", vec![("name", &name)])
     };
 
     match inner() {
@@ -521,12 +542,33 @@ pub fn remove_type(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(
 }
 
 #[tauri::command]
-pub fn add_format(database: tauri::State<Mutex<Database>>, format: String) -> Result<i64, String> {
-    log::info!("Adding format: {format}.");
+pub fn update_type_name(database: tauri::State<Mutex<Database>>, id: i64, name: String) -> Result<(), String> {
+    log::info!("Updating type [{id}]: NAME - {name}.");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let guard = database.lock().unwrap();
+        guard.update("types", &id, vec![("name", &name)])
+    };
+
+    match inner() {
+        Ok(()) => {
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to update type [{id}] name: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
+pub fn add_format(database: tauri::State<Mutex<Database>>, name: String) -> Result<i64, String> {
+    log::info!("Adding format: {name}.");
 
     let inner = || -> Result<i64, Box<dyn std::error::Error>>  {
         let guard = database.lock().unwrap();
-        guard.add("formats", vec![("format", &format)])
+        guard.add("formats", vec![("name", &name)])
     };
 
     match inner() {
@@ -578,6 +620,27 @@ pub fn remove_format(database: tauri::State<Mutex<Database>>, id: i64) -> Result
         },
         Err(err) => {
             let message = format!("Failed to remove format [{id}]: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
+pub fn update_format_name(database: tauri::State<Mutex<Database>>, id: i64, name: String) -> Result<(), String> {
+    log::info!("Updating format [{id}]: NAME - {name}.");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let guard = database.lock().unwrap();
+        guard.update("formats", &id, vec![("name", &name)])
+    };
+
+    match inner() {
+        Ok(()) => {
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to update format [{id}] name: {err}.");
             log::error!("{message}");
             Err(message)
         }

@@ -61,16 +61,20 @@ export function addCreator(creator: Creator): Promise<number> {
     return invoke("add_creator", { creator });
 }
 
-export function addStatus(status: string): Promise<number> {
-    return invoke("add_status", { status });
+export function addStatus(name: string): Promise<number> {
+    return invoke("add_status", { name });
 }
 
 export function getStatuses(): Promise<Status[]> {
     return invoke("get_statuses");
 }
 
-export function updateStatus(id: number, isUpdate: boolean): Promise<void> {
-    return invoke("update_status", { id, isUpdate });
+export function updateStatusName(id: number, name: string): Promise<void> {
+    return invoke("update_status_name", { id, name });
+}
+
+export function updateStatusIsUpdate(id: number, isUpdate: boolean): Promise<void> {
+    return invoke("update_status_is_update", { id, isUpdate });
 }
 
 export function removeWork(id: number): Promise<void> {
@@ -85,8 +89,8 @@ export function removeStatus(id: number): Promise<void> {
     return invoke("remove_status", { id });
 }
 
-export function addType(type: string): Promise<number> {
-    return invoke("add_type", { type });
+export function addType(name: string): Promise<number> {
+    return invoke("add_type", { name });
 }
 
 export function getTypes(): Promise<Type[]> {
@@ -97,8 +101,12 @@ export function removeType(id: number): Promise<void> {
     return invoke("remove_type", { id });
 }
 
-export function addFormat(format: string): Promise<number> {
-    return invoke("add_format", { format });
+export function updateTypeName(id: number, name: string): Promise<void> {
+    return invoke("update_type_name", { id, name });
+}
+
+export function addFormat(name: string): Promise<number> {
+    return invoke("add_format", { name });
 }
 
 export function getFormats(): Promise<Format[]> {
@@ -107,6 +115,10 @@ export function getFormats(): Promise<Format[]> {
 
 export function removeFormat(id: number): Promise<void> {
     return invoke("remove_format", { id });
+}
+
+export function updateFormatName(id: number, name: string): Promise<void> {
+    return invoke("update_format_name", { id, name });
 }
 
 export function attach(workId: number, creatorId: number): Promise<void> {

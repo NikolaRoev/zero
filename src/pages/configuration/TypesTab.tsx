@@ -1,4 +1,4 @@
-import { type FormEvent, useRef, useState } from "react";
+import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
 import Input from "../../components/Input";
@@ -8,7 +8,7 @@ import useSafeContext from "../../hooks/safe-context-hook";
 
 
 function TypesList() {
-    const { types, removeType } = useSafeContext(DataContext);
+    const { types, removeType, updateTypeName } = useSafeContext(DataContext);
 
     return (
         <div className="grow border border-neutral-700 rounded">
@@ -16,8 +16,17 @@ function TypesList() {
                 data={types}
                 computeItemKey={(_, type) => type.id }
                 itemContent={(_, type) => ({
-                    contents: <p className="grow p-[5px]">{type.type}</p>,
-                    buttonTitle: `Remove format "${type.type}".`,
+                    contents: (
+                        <input
+                            className="grow p-[5px] bg-transparent focus:outline-none rounded"
+                            value={type.name}
+                            spellCheck={false}
+                            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                updateTypeName(type.id, type.name, event.target.value);
+                            }}
+                        />
+                    ),
+                    buttonTitle: `Remove format "${type.name}".`,
                     onButtonClick: () => { removeType(type.id); }
                 })}
             />

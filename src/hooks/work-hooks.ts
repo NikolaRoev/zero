@@ -117,6 +117,7 @@ export function useWorks() {
 
     return {
         works,
+        setWorks,
         getWork,
         getWorks,
         updateWorkName,

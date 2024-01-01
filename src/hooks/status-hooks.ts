@@ -18,9 +18,9 @@ export function useStatuses() {
         });
     }
 
-    function addStatus(status: string, callback: () => void) {
-        api.addStatus(status).then((id) => {
-            setStatuses([...statuses, { id: id, status: status, isUpdate: false }]);
+    function addStatus(name: string, callback: () => void) {
+        api.addStatus(name).then((id) => {
+            setStatuses([...statuses, { id: id, name: name, isUpdate: false }]);
             callback();
         }).catch(async (reason) => {
             getStatuses();
@@ -40,7 +40,16 @@ export function useStatuses() {
         });
     }
 
-    function updateStatus(id: number, isUpdate: boolean) {
+    function updateStatusName(id: number, statusName: string) {
+        setStatuses(statuses.map((status) => {
+            if (status.id === id) {
+                return { ...status, name: statusName };
+            }
+            return status;
+        }));
+    }
+
+    function updateStatusIsUpdate(id: number, isUpdate: boolean) {
         setStatuses(statuses.map((status) => {
             if (status.id === id) {
                 return { ...status, isUpdate: isUpdate };
@@ -48,9 +57,9 @@ export function useStatuses() {
             return status;
         }));
 
-        api.updateStatus(id, isUpdate).catch(async (reason) => {
+        api.updateStatusIsUpdate(id, isUpdate).catch(async (reason) => {
             getStatuses();
-            await message(`${reason}`, { title: "Failed to update Status.", type: "error" });
+            await message(`${reason}`, { title: "Failed to update Status is update.", type: "error" });
         });
     }
 
@@ -60,5 +69,5 @@ export function useStatuses() {
     }, []);
 
 
-    return { statuses, addStatus, removeStatus, updateStatus };
+    return { statuses, getStatuses, addStatus, removeStatus, updateStatusName, updateStatusIsUpdate };
 }
