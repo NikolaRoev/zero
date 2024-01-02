@@ -12,6 +12,7 @@ fn main() {
     log::init().unwrap_or_else(|err| panic!("Failed to initialize log: {err}."));
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
             tauri::Manager::get_window(app, "main").map(|window| window.set_focus());
         }))
@@ -53,7 +54,6 @@ fn main() {
             api::remove_recent_database
         ])
         .on_menu_event(menu::event_handler)
-        .on_window_event(application::window_event_handler)
         .build(tauri::generate_context!()).unwrap_or_else(|err| panic!("Failed to build application: {err}."))
         .run(application::callback);
 }

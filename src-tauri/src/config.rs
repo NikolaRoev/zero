@@ -3,37 +3,10 @@ use serde::{Serialize, Deserialize};
 
 
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-pub enum WindowState {
-    Center,
-    None,
-    Maximized
-}
-
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Default, Debug)]
 pub struct Config {
-    pub window_width: f64,
-    pub window_height: f64,
-    pub window_x: f64,
-    pub window_y: f64,
-    pub window_state: WindowState,
     pub last_database: Option<PathBuf>,
     pub recent_databases: Vec<PathBuf>
-}
-
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            window_width: 1024.0,
-            window_height: 576.0,
-            window_x: 0.0,
-            window_y: 0.0,
-            window_state: WindowState::Center,
-            last_database: Default::default(),
-            recent_databases: Default::default()
-        }
-    }
 }
 
 impl Config {
@@ -80,12 +53,13 @@ mod tests {
     fn can_save_and_load_config() -> Result<(), Box<dyn std::error::Error>> {
         let mut config = Config::default();
         let path = format!("{}.json", Uuid::new_v4());
+        let last_database = PathBuf::from("path");
 
-        config.window_width = 1000.0;
+        config.last_database = Some(last_database.clone());
         config.save(&path)?;
         config.load(&path)?;
 
-        assert_eq!(config.window_width, 1000.0);
+        assert_eq!(config.last_database, Some(last_database));
 
         Ok(std::fs::remove_file(path)?)
     }
