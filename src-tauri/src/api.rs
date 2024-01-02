@@ -27,13 +27,13 @@ pub fn open_database(
         db_guard.open(&path)?;
 
         let mut config_guard = config.lock().unwrap();
-        config_guard.set_last_database(Some(path.clone()));
+        config_guard.last_database = Some(path.to_path_buf());
         config_guard.add_recent_database(path.clone());
 
         window.emit(crate::event::CHANGE_RECENT_DATABASES_EVENT, ()).unwrap();
 
         let menu_handle = window.menu_handle();
-        set_recent_menu(&menu_handle, config_guard.get_recent_databases())?;
+        set_recent_menu(&menu_handle, &config_guard.recent_databases)?;
         set_menu_state(&menu_handle, true)?;
 
         Ok(window.emit(crate::event::OPENED_DATABASE_EVENT, path)?)
@@ -64,7 +64,7 @@ pub fn close_database(
         db_guard.close()?;
 
         let mut config_guard = config.lock().unwrap();
-        config_guard.set_last_database(None);
+        config_guard.last_database = None;
 
         set_menu_state(&window.menu_handle(), false)?;
 
@@ -694,7 +694,7 @@ pub fn get_recent_databases(config: tauri::State<Mutex<Config>>) -> Vec<PathBuf>
     log::info!("Getting recent databases.");
 
     let guard = config.lock().unwrap();
-    guard.get_recent_databases().to_vec()
+    guard.recent_databases.to_vec()
 }
 
 #[tauri::command]
@@ -708,7 +708,7 @@ pub fn remove_recent_database(window: tauri::Window, config: tauri::State<Mutex<
         window.emit(crate::event::CHANGE_RECENT_DATABASES_EVENT, ())?;
 
         let menu_handle = window.menu_handle();
-        set_recent_menu(&menu_handle, guard.get_recent_databases())
+        set_recent_menu(&menu_handle, &guard.recent_databases)
     };
 
     match inner() {

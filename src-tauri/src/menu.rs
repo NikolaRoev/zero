@@ -131,7 +131,7 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
             let index = RECENT_MENU_ITEMS.iter().position(|&item| item == label).unwrap();
             let config = window.state::<Mutex<Config>>();
             let guard = config.lock().unwrap();
-            let recent = guard.get_recent_databases().get(index).unwrap().clone();
+            let recent = guard.recent_databases.get(index).unwrap().clone();
             drop(guard);
 
             let _ = api::open_database(
@@ -149,10 +149,10 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
             let window = event.window();
             let state = window.state::<Mutex<Config>>();
             let mut config = state.lock().unwrap();
-            config.clear_recent_databases();
+            config.recent_databases.clear();
             window.emit(crate::event::CHANGE_RECENT_DATABASES_EVENT, ()).unwrap();
 
-            if let Err(err) = set_recent_menu(&window.menu_handle(), config.get_recent_databases()) {
+            if let Err(err) = set_recent_menu(&window.menu_handle(), &config.recent_databases) {
                 log::error!("Failed to set recent menu after clearing: {err}.");
             }
         },
