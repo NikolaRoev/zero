@@ -1,4 +1,3 @@
-import * as api from "../../data/api";
 import * as data from "../../data/data";
 import { Option, Select } from "../../components/Select";
 import { Table, TableCell, TableRow } from "../../components/Table";
@@ -11,6 +10,7 @@ import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import clsx from "clsx";
 import { confirm } from "@tauri-apps/api/dialog";
+import { error } from "tauri-plugin-log-api";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
 
@@ -47,7 +47,7 @@ export default function WorkPage({ id }: { id: number }) {
                                 navigationDispatch({ action: "Remove", page: { type: "Work", id: id } });
                             });
                         }
-                    }).catch((reason: string) => { api.error(reason); });
+                    }).catch((reason: string) => { error(reason); });
                 }}>Delete</Button>
                 <label htmlFor="name-input">Name:</label>
                 <Input

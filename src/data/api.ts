@@ -3,16 +3,6 @@ import { invoke } from "@tauri-apps/api/tauri";
 
 
 
-export function info(message: string) {
-    console.log(message);
-    invoke("info", { message }).catch((reason) => { console.error(reason); });
-}
-
-export function error(message: string) {
-    console.error(message);
-    invoke("error", { message }).catch((reason) => { console.error(reason); });
-}
-
 export function openDatabase(path: string): Promise<void> {
     return invoke("open_database", { path });
 }

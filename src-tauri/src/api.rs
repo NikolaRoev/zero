@@ -4,16 +4,6 @@ use crate::{database::{Database, Status, Type, Format, Work, Creator}, menu::{se
 
 
 #[tauri::command]
-pub fn info(message: String) {
-    log::info!("[UI] {}", message);
-}
-
-#[tauri::command]
-pub fn error(message: String) {
-    log::error!("[UI] {}", message);
-}
-
-#[tauri::command]
 pub fn open_database(
     window: tauri::Window,
     config: tauri::State<Mutex<Config>>,

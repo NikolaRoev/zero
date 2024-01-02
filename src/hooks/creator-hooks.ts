@@ -1,8 +1,8 @@
 import * as api from "../data/api";
 import { useEffect, useState } from "react";
 import type { Creator } from "../data/data";
+import { error } from "tauri-plugin-log-api";
 import { message } from "@tauri-apps/api/dialog";
-
 
 
 export function useCreators() {
@@ -13,7 +13,7 @@ export function useCreators() {
         const creator = creators.get(id);
         if (!creator) {
             const message = `Missing Creator [${id}].`;
-            api.error(message);
+            error(message);
             throw new Error(message);
         }
         return creator;
@@ -46,7 +46,7 @@ export function useCreators() {
     function removeCreator(id: number) {
         const result = creators.delete(id);
         if (!result) {
-            api.error(`Missing Creator to remove [${id}].`);
+            error(`Missing Creator to remove [${id}].`);
         }
         setCreators(new Map(creators));
     }
