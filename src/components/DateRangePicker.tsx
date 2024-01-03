@@ -30,7 +30,7 @@ import {
     useDateRangePickerState,
     useRangeCalendarState
 } from "react-stately";
-import {createCalendar, getWeeksInMonth, isSameDay} from "@internationalized/date";
+import { createCalendar, getLocalTimeZone, getWeeksInMonth, isSameDay, isToday } from "@internationalized/date";
 import clsx from "clsx";
 import { useRef } from "react";
 
@@ -93,6 +93,7 @@ function CalendarCell(props: AriaCalendarCellProps & { state: RangeCalendarState
     
     const isSelectionStart = isSelected && isSameDay(props.date, props.state.highlightedRange.start);
     const isSelectionEnd = isSelected && isSameDay(props.date, props.state.highlightedRange.end);
+    const isCellToday = isToday(props.date, getLocalTimeZone());
 
     return (
         <td {...cellProps}>
@@ -105,7 +106,8 @@ function CalendarCell(props: AriaCalendarCellProps & { state: RangeCalendarState
                     { "rounded": isSelected },
                     { "hover:bg-blue-200": !isSelectionStart && !isSelectionEnd },
                     { "bg-neutral-300": isSelected && !isSelectionStart && !isSelectionEnd },
-                    { "text-neutral-50 bg-blue-400 hover:bg-blue-500 ": isSelectionStart || isSelectionEnd }
+                    { "text-neutral-50 bg-blue-400 hover:bg-blue-500 ": isSelectionStart || isSelectionEnd },
+                    { "border border-neutral-700": isCellToday }
                 )}
             ><span className="flex justify-center">{formattedDate}</span></div>
         </td>
