@@ -103,7 +103,7 @@ impl Database {
 
     pub fn open(&mut self, path: &PathBuf) -> DatabaseResult<()> {
         let mut conn = rusqlite::Connection::open(path)?;
-        //conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
+        conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
         conn.backup(rusqlite::DatabaseName::Main, path.with_extension("backup.db"), Some(|progress| {
             log::info!("Backing up: {}/{}.", progress.pagecount - progress.remaining, progress.pagecount);
         }))?;
@@ -293,7 +293,7 @@ impl Database {
         
         if rows != 1 {
             return Err(format!(
-                "Expected to detach 1 item not {rows}"
+                "Expected to detach 1 pair not {rows}"
             ))?;
         }
 
@@ -303,64 +303,402 @@ impl Database {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use super::*;
     use uuid::Uuid;
 
 
     struct Context {
-        name: PathBuf,
+        id: Uuid,
         database: Database
     }
 
     impl Context {
         pub fn new() -> Self {
-            let name = PathBuf::from(&format!("{}.db", Uuid::new_v4()));
+            let id = Uuid::new_v4();
             let mut database = Database::default();
-            database.open(&name).unwrap_or_else(|err| panic!("Failed to open database: {err}."));
-            Context { name, database }
+            database.open(&std::path::PathBuf::from(format!("{id}.db"))).unwrap();
+            Context { id, database }
         }
     }
 
     impl Drop for Context {
         fn drop(&mut self) {
-            self.database.close().unwrap_or_else(|err| panic!("Failed to close {err}."));
-
-            //std::fs::remove_file(format!("{}.db", &self.name))
-            //    .unwrap_or_else(|err| panic!("Failed to delete database: {err}."))
+            self.database.close().unwrap();
+            std::fs::remove_file(std::path::PathBuf::from(format!("{}.db", self.id))).unwrap();
+            std::fs::remove_file(std::path::PathBuf::from(format!("{}.backup.db", self.id))).unwrap();
         }
     }
 
+
     #[test]
-    fn test() {
+    fn can_modify_work() -> Result<(), Box<dyn std::error::Error>> {
+        let database = &Context::new().database;
+        
+        // Add.
+        database.add("statuses", vec![("name", &"status")])?;
+        database.add("types", vec![("name", &"type")])?;
+        database.add("formats", vec![("name", &"format")])?;
+        let id = database.add("works", vec![
+            ("name", &"name"),
+            ("progress", &"progress"),
+            ("status", &"status"),
+            ("type", &"type"),
+            ("format", &"format"),
+            ("updated", &44i64),
+            ("added", &44i64)
+        ])?;
+        let works = database.get_works()?;
+        let added_work = works.get(0).unwrap();
+
+        assert_eq!(works.len(), 1);
+        assert_eq!(added_work.id, id);
+        assert_eq!(added_work.name, "name");
+        assert_eq!(added_work.progress, "progress");
+        assert_eq!(added_work.status, "status");
+        assert_eq!(added_work.r#type, "type");
+        assert_eq!(added_work.format, "format");
+        assert_eq!(added_work.updated, 44i64);
+        assert_eq!(added_work.added, 44i64);
+
+        // Update.
+        database.update("works", &id, vec![
+            ("name", &"new_name"),
+            ("progress", &"new_progress")
+        ])?;
+        let works = database.get_works()?;
+        let added_work = works.get(0).unwrap();
+
+        assert_eq!(works.len(), 1);
+        assert_eq!(added_work.id, id);
+        assert_eq!(added_work.name, "new_name");
+        assert_eq!(added_work.progress, "new_progress");
+
+        // Remove.
+        database.remove("works", id)?;
+
+        let works = database.get_works()?;
+        assert_eq!(works.len(), 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn catches_adding_work_with_invalid_status_type_or_format() {
         let database = &Context::new().database;
 
-        let test: Vec<(&str, &dyn rusqlite::ToSql)> = vec![("name", &"name"), ("progress", &"progress"), ("status", &"status"), ("type", &"type"), ("format", &"format")];
-        //database.add_creator("test", &[]);
-        database.add("statuses", vec![("status", &"status")]).unwrap();
-        database.add("types", vec![("type", &"type")]).unwrap();
-        database.add("formats", vec![("format", &"format")]).unwrap();
-        database.add("works",
-        test).unwrap();
+        let error_message = database.add("works", vec![
+            ("name", &"name"),
+            ("progress", &"progress"),
+            ("status", &"status"),
+            ("type", &"type"),
+            ("format", &"format"),
+            ("updated", &44i64),
+            ("added", &44i64)
+        ]).unwrap_err().to_string();
 
-        //database.update("statuses", "is_update", 1, &true).unwrap();
+        assert_eq!(error_message, "FOREIGN KEY constraint failed");
+    }
 
-        let test = database.get_statuses().unwrap();
-        for t in test {
-            println!("{} {} {}", t.id, t.name, t.is_update);
-        }
-        //let id = database.add_work("name", "progress", "status", "r#type", "format", &[]).unwrap();
-        //std::thread::sleep(std::time::Duration::from_secs(4));
-        //database.update("works", "progress", id, "12");
+    #[test]
+    fn can_modify_creator() -> Result<(), Box<dyn std::error::Error>> {
+        let database = &Context::new().database;
+        
+        // Add.
+        let id = database.add("creators", vec![
+            ("name", &"name")
+        ])?;
+        let creators = database.get_creators()?;
+        let added_creator = creators.get(0).unwrap();
 
-        //creators.iter().try_for_each(|creator_id| self.attach(work_id, *creator_id))?;
+        assert_eq!(creators.len(), 1);
+        assert_eq!(added_creator.id, id);
+        assert_eq!(added_creator.name, "name");
 
-        //for i in 0..100_000 {
-        //    let name = format!("name {i}");
-        //    let progress = format!("progress {i}");
-        //    let test: Vec<(&str, &dyn rusqlite::ToSql)> = vec![("name", &name), ("progress", &progress), ("status", &"status"), ("type", &"type"), ("format", &"format"), ("updated", &0i64), ("added", &0i64)];
-        //    db_guard.add("works", test).unwrap();
-        //}
+        // Update.
+        database.update("creators", &id, vec![
+            ("name", &"new_name")
+        ])?;
+        let creators = database.get_creators()?;
+        let added_creator = creators.get(0).unwrap();
+
+        assert_eq!(creators.len(), 1);
+        assert_eq!(added_creator.id, id);
+        assert_eq!(added_creator.name, "new_name");
+
+        // Remove.
+        database.remove("creators", id)?;
+
+        let creators = database.get_creators()?;
+        assert_eq!(creators.len(), 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn can_modify_status() -> Result<(), Box<dyn std::error::Error>> {
+        let database = &Context::new().database;
+        
+        // Add.
+        let id = database.add("statuses", vec![("name", &"status")])?;
+        let statuses = database.get_statuses()?;
+        let added_status = statuses.get(0).unwrap();
+
+        assert_eq!(statuses.len(), 1);
+        assert_eq!(added_status.id, id);
+        assert_eq!(added_status.name, "status");
+
+        // Update.
+        database.update("statuses", &id, vec![
+            ("name", &"new_name")
+        ])?;
+        let statuses = database.get_statuses()?;
+        let added_status = statuses.get(0).unwrap();
+
+        assert_eq!(statuses.len(), 1);
+        assert_eq!(added_status.id, id);
+        assert_eq!(added_status.name, "new_name");
+
+        // Remove.
+        database.remove("statuses", id)?;
+
+        let statuses = database.get_statuses()?;
+        assert_eq!(statuses.len(), 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn can_modify_type() -> Result<(), Box<dyn std::error::Error>> {
+        let database = &Context::new().database;
+        
+        // Add.
+        let id = database.add("types", vec![("name", &"type")])?;
+        let types = database.get_types()?;
+        let added_type = types.get(0).unwrap();
+
+        assert_eq!(types.len(), 1);
+        assert_eq!(added_type.id, id);
+        assert_eq!(added_type.name, "type");
+
+        // Update.
+        database.update("types", &id, vec![
+            ("name", &"new_name")
+        ])?;
+        let types = database.get_types()?;
+        let added_type = types.get(0).unwrap();
+
+        assert_eq!(types.len(), 1);
+        assert_eq!(added_type.id, id);
+        assert_eq!(added_type.name, "new_name");
+
+        // Remove.
+        database.remove("types", id)?;
+
+        let types = database.get_types()?;
+        assert_eq!(types.len(), 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn can_modify_format() -> Result<(), Box<dyn std::error::Error>> {
+        let database = &Context::new().database;
+        
+        // Add.
+        let id = database.add("formats", vec![("name", &"format")])?;
+        let formats = database.get_formats()?;
+        let added_format = formats.get(0).unwrap();
+
+        assert_eq!(formats.len(), 1);
+        assert_eq!(added_format.id, id);
+        assert_eq!(added_format.name, "format");
+
+        // Update.
+        database.update("formats", &id, vec![
+            ("name", &"new_name")
+        ])?;
+        let formats = database.get_formats()?;
+        let added_format = formats.get(0).unwrap();
+
+        assert_eq!(formats.len(), 1);
+        assert_eq!(added_format.id, id);
+        assert_eq!(added_format.name, "new_name");
+
+        // Remove.
+        database.remove("formats", id)?;
+
+        let formats = database.get_formats()?;
+        assert_eq!(formats.len(), 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn updating_status_type_or_format_cascades_to_work() -> Result<(), Box<dyn std::error::Error>> {
+        let database = &Context::new().database;
+        
+        let status_id = database.add("statuses", vec![("name", &"status")])?;
+        let type_id = database.add("types", vec![("name", &"type")])?;
+        let format_id = database.add("formats", vec![("name", &"format")])?;
+        database.add("works", vec![
+            ("name", &"name"),
+            ("progress", &"progress"),
+            ("status", &"status"),
+            ("type", &"type"),
+            ("format", &"format"),
+            ("updated", &44i64),
+            ("added", &44i64)
+        ])?;
+        database.update("statuses", &status_id, vec![("name", &"new_status_name")])?;
+        database.update("types", &type_id, vec![("name", &"new_type_name")])?;
+        database.update("formats", &format_id, vec![("name", &"new_format_name")])?;
+        let works = database.get_works()?;
+        let added_work = works.get(0).unwrap();
+
+        assert_eq!(added_work.status, "new_status_name");
+        assert_eq!(added_work.r#type, "new_type_name");
+        assert_eq!(added_work.format, "new_format_name");
+
+        Ok(())
+    }
+
+    #[test]
+    fn catches_removing_status_type_or_format_currently_in_use() -> Result<(), Box<dyn std::error::Error>> {
+        let database = &Context::new().database;
+
+        let status_id = database.add("statuses", vec![("name", &"status")])?;
+        let type_id = database.add("types", vec![("name", &"type")])?;
+        let format_id = database.add("formats", vec![("name", &"format")])?;
+        database.add("works", vec![
+            ("name", &"name"),
+            ("progress", &"progress"),
+            ("status", &"status"),
+            ("type", &"type"),
+            ("format", &"format"),
+            ("updated", &44i64),
+            ("added", &44i64)
+        ])?;
+        let status_error_message = database.remove("statuses", status_id).unwrap_err().to_string();
+        let type_error_message = database.remove("types", type_id).unwrap_err().to_string();
+        let format_error_message = database.remove("formats", format_id).unwrap_err().to_string();
+        
+        assert_eq!(status_error_message, "FOREIGN KEY constraint failed");
+        assert_eq!(type_error_message, "FOREIGN KEY constraint failed");
+        assert_eq!(format_error_message, "FOREIGN KEY constraint failed");
+
+        Ok(())
+    }
+
+    #[test]
+    fn can_attach_and_detach() -> Result<(), Box<dyn std::error::Error>> {
+        let database = &Context::new().database;
+
+        database.add("statuses", vec![("name", &"status")])?;
+        database.add("types", vec![("name", &"type")])?;
+        database.add("formats", vec![("name", &"format")])?;
+        let work_id = database.add("works", vec![
+            ("name", &"name"),
+            ("progress", &"progress"),
+            ("status", &"status"),
+            ("type", &"type"),
+            ("format", &"format"),
+            ("updated", &44i64),
+            ("added", &44i64)
+        ])?;
+        let creator_id = database.add("creators", vec![
+            ("name", &"name")
+        ])?;
+        database.attach(work_id, creator_id)?;
+        let works = database.get_works()?;
+        let added_work = works.get(0).unwrap();
+        let creators = database.get_creators()?;
+        let added_creator = creators.get(0).unwrap();
+
+        assert_eq!(added_work.creators.len(), 1);
+        assert_eq!(added_creator.works.len(), 1);
+        assert_eq!(*added_work.creators.first().unwrap(), creator_id);
+        assert_eq!(*added_creator.works.first().unwrap(), work_id);
+
+        database.detach(work_id, creator_id)?;
+        let works = database.get_works()?;
+        let added_work = works.get(0).unwrap();
+        let creators = database.get_creators()?;
+        let added_creator = creators.get(0).unwrap();
+
+        assert_eq!(added_work.creators.len(), 0);
+        assert_eq!(added_creator.works.len(), 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn catches_invalid_attach_and_detach() {
+        let database = &Context::new().database;
+
+        let error_message = database.attach(1, 1).unwrap_err().to_string();
+
+        assert_eq!(error_message, "FOREIGN KEY constraint failed");
+
+        let error_message = database.detach(1, 1).unwrap_err().to_string();
+
+        assert_eq!(error_message, "Expected to detach 1 pair not 0");
+    }
+
+    #[test]
+    fn removing_work_detaches() -> Result<(), Box<dyn std::error::Error>> {
+        let database = &Context::new().database;
+
+        database.add("statuses", vec![("name", &"status")])?;
+        database.add("types", vec![("name", &"type")])?;
+        database.add("formats", vec![("name", &"format")])?;
+        let work_id = database.add("works", vec![
+            ("name", &"name"),
+            ("progress", &"progress"),
+            ("status", &"status"),
+            ("type", &"type"),
+            ("format", &"format"),
+            ("updated", &44i64),
+            ("added", &44i64)
+        ])?;
+        let creator_id = database.add("creators", vec![
+            ("name", &"name")
+        ])?;
+        database.attach(work_id, creator_id)?;
+        database.remove("works", work_id)?;
+        let creators = database.get_creators()?;
+        let added_creator = creators.get(0).unwrap();
+
+        assert_eq!(added_creator.works.len(), 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn removing_creator_detaches() -> Result<(), Box<dyn std::error::Error>> {
+        let database = &Context::new().database;
+
+        database.add("statuses", vec![("name", &"status")])?;
+        database.add("types", vec![("name", &"type")])?;
+        database.add("formats", vec![("name", &"format")])?;
+        let work_id = database.add("works", vec![
+            ("name", &"name"),
+            ("progress", &"progress"),
+            ("status", &"status"),
+            ("type", &"type"),
+            ("format", &"format"),
+            ("updated", &44i64),
+            ("added", &44i64)
+        ])?;
+        let creator_id = database.add("creators", vec![
+            ("name", &"name")
+        ])?;
+        database.attach(work_id, creator_id)?;
+        database.remove("creators", creator_id)?;
+        let works = database.get_works()?;
+        let added_work = works.get(0).unwrap();
+
+        assert_eq!(added_work.creators.len(), 0);
+
+        Ok(())
     }
 }

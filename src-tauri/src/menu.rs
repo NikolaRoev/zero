@@ -165,14 +165,12 @@ pub fn event_handler(event: tauri::WindowMenuEvent) {
             );
         },
         "exit" => {
-            //FIXME: Does not trigger closerequested, will be fixed in 2.0.
             event.window().close().unwrap();            
         },
         "repository" => {
             if let Err(err) = shell::open(&event.window().shell_scope(), "https://github.com/NikolaRoev/zero", None) {
                 log::error!("Failed to open repository: {err}.");
             }
-            event.window().close_devtools();
         },
         "dev_tools" => event.window().open_devtools(),
         "check_for_updates" => {
