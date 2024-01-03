@@ -1,2 +1,2 @@
-- clean-up / fix up the errors when removing a status,etc. that are currently in use by a work
-- testing
+- clean-up
+- e2e tests
