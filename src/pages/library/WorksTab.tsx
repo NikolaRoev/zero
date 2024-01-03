@@ -131,22 +131,18 @@ export default function WorksTab() {
         }
 
         if (filter.updatedRange) {
-            if (filter.updatedRange.start <= filter.updatedRange.end) {
-                if ((!isSameDay(work.updated, filter.updatedRange.start) &&
+            if ((!isSameDay(work.updated, filter.updatedRange.start) &&
                 !isSameDay(work.updated, filter.updatedRange.end)) &&
                 !isWithinInterval(work.updated, filter.updatedRange)) {
-                    return false;
-                }
+                return false;
             }
         }
 
         if (filter.addedRange) {
-            if (filter.addedRange.start <= filter.addedRange.end) {
-                if ((!isSameDay(work.added, filter.addedRange.start) &&
-                    !isSameDay(work.added, filter.addedRange.end)) &&
-                    !isWithinInterval(work.added, filter.addedRange)) {
-                    return false;
-                }
+            if ((!isSameDay(work.added, filter.addedRange.start) &&
+                 !isSameDay(work.added, filter.addedRange.end)) &&
+                 !isWithinInterval(work.added, filter.addedRange)) {
+                return false;
             }
         }
         
