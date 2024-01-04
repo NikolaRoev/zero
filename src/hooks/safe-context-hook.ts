@@ -1,4 +1,4 @@
-import { error } from "tauri-plugin-log-api";
+import * as api from "../data/api";
 import { useContext } from "react";
 
 export default function useSafeContext<T>(context: React.Context<T>) {
@@ -6,7 +6,7 @@ export default function useSafeContext<T>(context: React.Context<T>) {
 
     if (!contextObject) {
         const message = "Missing Context.";
-        error(message);
+        api.error(message);
         throw new Error(message);
     }
 

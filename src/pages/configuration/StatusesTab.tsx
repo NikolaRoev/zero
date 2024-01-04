@@ -20,7 +20,11 @@ function StatusesList() {
                     contents: (
                         <>
                             <input
-                                className={clsx("grow p-[5px] bg-transparent focus:outline-none rounded", { "underline": status.isUpdate })}
+                                name={`update-status-input-${status.id}`}
+                                className={clsx(
+                                    "grow p-[5px] bg-transparent focus:outline-none rounded",
+                                    { "underline": status.isUpdate }
+                                )}
                                 value={status.name}
                                 spellCheck={false}
                                 onChange={(event: ChangeEvent<HTMLInputElement>) => {

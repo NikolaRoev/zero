@@ -18,6 +18,7 @@ function FormatsList() {
                 itemContent={(_, format) => ({
                     contents: (
                         <input
+                            name={`update-format-input-${format.id}`}
                             className="grow p-[5px] bg-transparent focus:outline-none rounded"
                             value={format.name}
                             spellCheck={false}

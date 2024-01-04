@@ -1,6 +1,12 @@
 import type { Creator, Format, Status, Type, Work } from "./data";
+import { type LogOptions, error as tauriError } from "tauri-plugin-log-api";
 import { invoke } from "@tauri-apps/api/tauri";
 
+
+
+export function error(message: string, options?: LogOptions) {
+    tauriError(message, options).catch((reason) => { console.error(`Failed to log: ${reason}.`); });
+}
 
 
 export function openDatabase(path: string): Promise<void> {

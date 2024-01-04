@@ -1,3 +1,4 @@
+import * as api from "../../data/api";
 import * as data from "../../data/data";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { formatDistanceToNowStrict, formatISO9075 } from "date-fns";
@@ -9,7 +10,6 @@ import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import clsx from "clsx";
 import { confirm } from "@tauri-apps/api/dialog";
-import { error } from "tauri-plugin-log-api";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
 
@@ -46,7 +46,7 @@ export default function CreatorPage({ id }: { id: number }) {
                                 navigationDispatch({ action: "Remove", page: { type: "Creator", id: id } });
                             });
                         }
-                    }).catch((reason: string) => { error(reason); });
+                    }).catch((reason: string) => { api.error(reason); });
                 }}>Delete</Button>
                 <label htmlFor="name-input">Name:</label>
                 <Input

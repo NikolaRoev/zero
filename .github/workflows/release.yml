@@ -3,6 +3,8 @@ name: Release
 on: workflow_dispatch
 
 jobs:
+  test:
+    uses: ./.github/workflows/test.yml
   release:
     permissions:
       contents: write
@@ -11,6 +13,8 @@ jobs:
       matrix:
         platform: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
+    needs: test
+    if: ${{ needs.test.result }} == success
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,7 +26,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
-
       - run: npm ci
       - uses: tauri-apps/tauri-action@dev
         env:

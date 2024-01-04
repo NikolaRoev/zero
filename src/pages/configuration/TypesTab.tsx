@@ -18,6 +18,7 @@ function TypesList() {
                 itemContent={(_, type) => ({
                     contents: (
                         <input
+                            name={`update-type-input-${type.id}`}
                             className="grow p-[5px] bg-transparent focus:outline-none rounded"
                             value={type.name}
                             spellCheck={false}

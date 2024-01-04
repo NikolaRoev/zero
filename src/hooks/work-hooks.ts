@@ -1,7 +1,6 @@
 import * as api from "../data/api";
 import { useEffect, useState } from "react";
 import type { Work } from "../data/data";
-import { error } from "tauri-plugin-log-api";
 import { message } from "@tauri-apps/api/dialog";
 
 
@@ -14,7 +13,7 @@ export function useWorks() {
         const work = works.get(id);
         if (!work) {
             const message = `Missing Work [${id}].`;
-            error(message);
+            api.error(message);
             throw new Error(message);
         }
         return work;
@@ -93,7 +92,7 @@ export function useWorks() {
     function removeWork(id: number) {
         const result = works.delete(id);
         if (!result) {
-            error(`Missing Work to remove [${id}].`);
+            api.error(`Missing Work to remove [${id}].`);
         }
         setWorks(new Map(works));
     }
