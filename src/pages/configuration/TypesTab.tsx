@@ -22,6 +22,7 @@ function TypesList() {
                             className="grow p-[5px] bg-transparent focus:outline-none rounded"
                             value={type.name}
                             spellCheck={false}
+                            autoComplete="off"
                             onChange={(event: ChangeEvent<HTMLInputElement>) => {
                                 updateTypeName(type.id, type.name, event.target.value);
                             }}

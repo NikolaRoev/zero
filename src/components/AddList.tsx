@@ -1,8 +1,9 @@
+import { type ComparatorType, SearchInput } from "./SearchInput";
 import { BsPlus } from "react-icons/bs";
-import Input from "./Input";
 import { Virtuoso } from "react-virtuoso";
 import clsx from "clsx";
 import useSessionState from "../hooks/session-state-hook";
+import { useState } from "react";
 
 
 
@@ -16,27 +17,32 @@ type AddListProps<T> = {
     inputName?: string,
     storageKey: string,
     data: T[],
-    filterFn: (data: T[], filter: string) => T[],
+    filterFn: (data: T[], comparator: (value: string) => boolean) => T[],
     findFn: (item: T) => boolean,
     computeItemKey: (index: number, item: T) => React.Key,
     itemContent: (item: T) => AddListItemData
 }
 
 export default function AddList<T>(props: AddListProps<T>) {
-    const [filter, setFilter] = useSessionState(props.storageKey, "");
+    const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType }>(
+        props.storageKey, { value: "", comparatorType: "None" }
+    );
+    const [comparator, setComparator] = useState<(value: string) => boolean>(() => () => false);
 
     return (
         <>
-            <Input
+            <SearchInput
+                setComparator={setComparator}
+                filter={filter.value}
+                comparatorType={filter.comparatorType}
+                setComparatorType={(newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); }}
                 name={props.inputName}
-                value={filter}
-                placeholder="Find"
-                type="search"
-                onChange={(event) => { setFilter(event.target.value); }}
+                onChange={(event) => { setFilter({ ...filter, value: event.target.value }); }}
+                className="grow"
             />
             <Virtuoso
                 className="border border-neutral-700 rounded"
-                data={props.filterFn(props.data, filter)}
+                data={props.filterFn(props.data, comparator)}
                 computeItemKey={props.computeItemKey}
                 itemContent={(index, item) => {
                     const itemData = props.itemContent(item);

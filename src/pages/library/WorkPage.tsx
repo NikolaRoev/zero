@@ -159,9 +159,7 @@ export default function WorkPage({ id }: { id: number }) {
                         inputName="work-add-creators-list-search-input"
                         storageKey={`ADD-CREATORS-${id}-KEY`}
                         data={Array.from(dataContext.creators.values())}
-                        filterFn={(creators, filter) => creators.filter((creator) => (
-                            creator.name.toLowerCase().includes(filter.toLowerCase()))
-                        )}
+                        filterFn={(creators, comparator) => creators.filter((creator) => comparator(creator.name))}
                         findFn={(creator) => (
                             workCreators.find((workCreator) => workCreator.id === creator.id) !== undefined
                         )}

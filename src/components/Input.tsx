@@ -8,7 +8,7 @@ type InputProps = {
     className?: string,
     name?: string | undefined,
     value?: string | number | readonly string[],
-    onChange?: React.ChangeEventHandler<HTMLInputElement>,
+    onChange: React.ChangeEventHandler<HTMLInputElement>,
     placeholder?: string,
     type?: string
     required?: boolean
@@ -31,6 +31,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(props, ref
             type={props.type}
             required={props.required}
             spellCheck={false}
+            autoComplete="off"
         />
     );
 });

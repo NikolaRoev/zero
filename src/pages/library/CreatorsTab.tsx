@@ -1,32 +1,36 @@
 import * as data from "../../data/data";
+import { type ComparatorType, SearchInput } from "../../components/SearchInput";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { DataContext } from "../../contexts/data-context";
-import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
 import clsx from "clsx";
 import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionState from "../../hooks/session-state-hook";
+import { useState } from "react";
 
 
 
 export default function CreatorsTab() {
     const { creators } = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
-    const [filter, setFilter] = useSessionState(StorageKey.LibraryCreatorsFilter, "");
+    const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType }>(
+        StorageKey.LibraryCreatorsFilter, { value: "", comparatorType: "None" }
+    );
+    const [comparator, setComparator] = useState<(value: string) => boolean>(() => () => false);
 
-
-    const creatorsItems = Array.from(creators.values()).filter((creator) => creator.name.toLowerCase().includes(filter.toLowerCase()));
+    const creatorsItems = Array.from(creators.values()).filter((creator) => comparator(creator.name));
     
     return (
         <div className="px-[5px] py-[10px] grow flex flex-col gap-y-[10px]">
             <div className="flex flex-col">
-                <Input
+                <SearchInput
+                    setComparator={setComparator}
+                    filter={filter.value}
+                    comparatorType={filter.comparatorType}
+                    setComparatorType={(newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); } }
                     name="creators-search-input"
-                    value={filter}
-                    placeholder="Find"
-                    type="search"
-                    onChange={(event) => { setFilter(event.target.value); }}
+                    onChange={(event) => { setFilter({ ...filter, value: event.target.value }); }}
                 />
             </div>
 

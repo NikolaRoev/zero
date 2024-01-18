@@ -27,6 +27,7 @@ function StatusesList() {
                                 )}
                                 value={status.name}
                                 spellCheck={false}
+                                autoComplete="off"
                                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                                     updateStatusName(status.id, status.name, event.target.value);
                                 }}

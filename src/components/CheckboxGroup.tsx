@@ -22,6 +22,7 @@ function Checkbox(props: CheckboxProps) {
                 type="checkbox"
                 checked={props.checked}
                 onChange={props.onChange}
+                autoComplete="off"
             />
             <label
                 htmlFor={id}

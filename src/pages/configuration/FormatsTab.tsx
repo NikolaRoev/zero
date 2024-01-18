@@ -22,6 +22,7 @@ function FormatsList() {
                             className="grow p-[5px] bg-transparent focus:outline-none rounded"
                             value={format.name}
                             spellCheck={false}
+                            autoComplete="off"
                             onChange={(event: ChangeEvent<HTMLInputElement>) => {
                                 updateFormatName(format.id, format.name, event.target.value);
                             }}

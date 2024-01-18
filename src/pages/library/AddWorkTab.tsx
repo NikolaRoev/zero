@@ -240,9 +240,7 @@ export default function AddWorkTab() {
                             inputName="add-work-add-creators-list-search-input"
                             storageKey={StorageKey.AddWorkCreatorsFilter}
                             data={Array.from(dataContext.creators.values())}
-                            filterFn={(creators, filter) => creators.filter((creator) => (
-                                creator.name.toLowerCase().includes(filter.toLowerCase()))
-                            )}
+                            filterFn={(creators, comparator) => creators.filter((creator) => comparator(creator.name))}
                             findFn={(creator) => (
                                 workCreators.find((workCreator) => workCreator.id === creator.id) !== undefined
                             )}

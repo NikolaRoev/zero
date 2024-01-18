@@ -1,6 +1,6 @@
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
+import { type ComparatorType, SearchInput } from "../../components/SearchInput";
 import { DataContext } from "../../contexts/data-context";
-import Input from "../../components/Input";
 import { StorageKey } from "../../data/storage";
 import { Virtuoso } from "react-virtuoso";
 import type { Work } from "../../data/data";
@@ -22,19 +22,21 @@ function UpdateWorkRow(props: UpdateWorkRowProps) {
                 name={`update-name-input-${props.updateWork.id}`}
                 className="text-[14px] grow focus:outline-none overflow-ellipsis bg-neutral-50"
                 value={props.updateWork.name}
+                spellCheck={false}
+                autoComplete="off"
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                     props.onNameChange(props.updateWork.id, event.target.value);
                 }}
-                spellCheck={false}
             />
             <input
                 name={`update-progress-input-${props.updateWork.id}`}
                 className="text-[14px] grow focus:outline-none overflow-ellipsis bg-neutral-50"
                 value={props.updateWork.progress}
+                spellCheck={false}
+                autoComplete="off"
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                     props.onProgressChange(props.updateWork.id, event.target.value);
                 }}
-                spellCheck={false}
             />
         </div>
     );
@@ -44,7 +46,10 @@ function UpdateWorkRow(props: UpdateWorkRowProps) {
 export default function UpdateTab() {
     const { works, statuses, updateWorkName, updateWorkProgress } = useSafeContext(DataContext);
     const filterInput = useRef<HTMLInputElement>(null);
-    const [filter, setFilter] = useSessionState(StorageKey.UpdateFilter, "");
+    const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType }>(
+        StorageKey.UpdateFilter, { value: "", comparatorType: "None" }
+    );
+    const [comparator, setComparator] = useState<(value: string) => boolean>(() => () => false);
     const [editingIds, setEditingIds] = useState<number[]>([]);
 
 
@@ -66,25 +71,23 @@ export default function UpdateTab() {
 
     const updateStatuses = statuses.filter((status) => status.isUpdate);
     const updateWorks = Array.from(works.values()).filter((work) => updateStatuses.find((status) => status.name === work.status));
-    const updateWorksItems = updateWorks.filter((work) => (
-        work.name.toLowerCase().includes(filter.toLowerCase()) || editingIds.includes(work.id)
-    ));
+    const updateWorksItems = updateWorks.filter((work) => comparator(work.name) || editingIds.includes(work.id));
 
     return (
         <div className="grow flex flex-col gap-y-[10px] bg-neutral-50">
-            <Input
+            <SearchInput
                 ref={filterInput}
-                className="mx-[5px] mt-[10px]"
-                name="update-search-input"
-                value={filter}
-                placeholder="Find"
-                type="search"
+                setComparator={setComparator}
+                filter={filter.value}
+                comparatorType={filter.comparatorType}
+                setComparatorType={(newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); } }
+                name={"update-search-input"}
                 onChange={(event) => {
-                    setFilter(event.target.value);
+                    setFilter({ ...filter, value: event.target.value });
                     setEditingIds([]);
                 }}
+                className="mx-[5px] mt-[10px]"
             />
-
             <Virtuoso
                 data={updateWorksItems}
                 computeItemKey={(_, updateWork) => updateWork.id }

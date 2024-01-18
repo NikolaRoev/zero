@@ -1,4 +1,5 @@
 import * as data from "../../data/data";
+import { type ComparatorType, SearchInput } from "../../components/SearchInput";
 import { Option, Select } from "../../components/Select";
 import { Table, TableCell, TableRow } from "../../components/Table";
 import { formatDistanceToNowStrict, formatISO9075, isSameDay, isWithinInterval } from "date-fns";
@@ -8,18 +9,19 @@ import CheckboxGroup from "../../components/CheckboxGroup";
 import { DataContext } from "../../contexts/data-context";
 import type { DateRange } from "react-aria";
 import { DateRangePicker } from "../../components/DateRangePicker";
-import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
 import clsx from "clsx";
 import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer-hook";
+import { useState } from "react";
 
 
 
 type By = "name" | "progress";
 type Filter = {
     value: string,
+    comparatorType: ComparatorType,
     by: By,
     statuses: string[],
     types: string[],
@@ -30,6 +32,7 @@ type Filter = {
 
 const emptyFilter: Filter = {
     value: "",
+    comparatorType: "None",
     by: "name",
     statuses: [],
     types: [],
@@ -41,6 +44,7 @@ const emptyFilter: Filter = {
 type FilterAction =
     { action: "Clear" } |
     { action: "ChangeValue", value: string } |
+    { action: "ChangeComparatorType", comparatorType: ComparatorType } |
     { action: "ChangeBy", by: By } |
     { action: "AddStatus", status: string } |
     { action: "RemoveStatus", status: string } |
@@ -57,6 +61,8 @@ function filterReducer(filter: Filter, action: FilterAction): Filter {
             return emptyFilter;
         case "ChangeValue":
             return { ...filter, value: action.value };
+        case "ChangeComparatorType":
+            return { ...filter, comparatorType: action.comparatorType };
         case "ChangeBy":
             return { ...filter, by: action.by };
         case "AddStatus":
@@ -96,18 +102,19 @@ export default function WorksTab() {
     const { works, statuses, types, formats } = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
     const [filter, filterDispatch] = useSessionReducer(StorageKey.LibraryWorksFilter, filterReducer, emptyFilter);
+    const [comparator, setComparator] = useState<(value: string) => boolean>(() => () => false);
 
 
     const worksItems = Array.from(works.values()).filter((work) => {
         switch (filter.by) {
             case "name": {
-                if (!work.name.toLowerCase().includes(filter.value.toLowerCase())) {
+                if (!comparator(work.name)) {
                     return false;
                 }
                 break;
             }
             case "progress": {
-                if (!work.progress.toLowerCase().includes(filter.value.toLowerCase())) {
+                if (!comparator(work.progress)) {
                     return false;
                 }
                 break;
@@ -154,13 +161,16 @@ export default function WorksTab() {
         <div className="px-[5px] py-[10px] grow flex flex-col gap-y-[10px]">
             <div className="flex flex-col gap-y-[5px]">
                 <div className="flex gap-x-[3px]">
-                    <Input
-                        name="works-search-input"
-                        className="grow"
-                        value={filter.value}
-                        placeholder="Find"
-                        type="search"
+                    <SearchInput
+                        setComparator={setComparator}
+                        filter={filter.value}
+                        comparatorType={filter.comparatorType}
+                        setComparatorType={(newComparatorType) => {
+                            filterDispatch({ action: "ChangeComparatorType", comparatorType: newComparatorType });
+                        }}
+                        name={"works-search-input"}
                         onChange={(event) => { filterDispatch({ action: "ChangeValue", value: event.target.value }); }}
+                        className="grow"
                     />
                     <Select
                         name="works-search-select"
