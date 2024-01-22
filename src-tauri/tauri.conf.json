@@ -28,7 +28,7 @@
     "updater": {
       "active": true,
       "endpoints": ["https://github.com/NikolaRoev/zero/releases/latest/download/latest.json"],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEUzOUFCRTA4NzM3OTlERApSV1RkbVRlSDRLczVEcWtGajJlRlpGclZrSkMreGFjVmJJc0VUTDNwZUo5RjNTcllMVFBPQ0JHcQo=",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEZEMEQ1NDFEQzBCRDVFQkYKUldTL1hyM0FIVlFOL2ZoamJ2YnpPQkdoUFgxeWVMNmVmVWNmYktNWk53cmlsTVp4WmFOOWY5RisK",
       "windows": {
         "installMode": "basicUi"
       }

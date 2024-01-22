@@ -1,2 +1,3 @@
+- fix flash on startup
 - clean-up
 - e2e tests

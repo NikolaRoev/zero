@@ -5,7 +5,7 @@
     "lint": "tsc && eslint .",
     "tauri": "tauri",
     "dev": "tauri dev",
-    "build": "tauri build",
+    "build": "env-cmd -f .env.build tauri build",
     "unit-tests": "cd src-tauri && cargo test",
     "integration-tests": "vitest run"
   },
@@ -21,6 +21,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
     "better-sqlite3": "^9.2.2",
+    "env-cmd": "^10.1.0",
     "eslint": "^8.56.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
