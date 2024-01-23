@@ -119,11 +119,11 @@ function MainScreen() {
 
 
 export default function App() {
-    const { path } = useDatabase();
+    const { path, isLoaded } = useDatabase();
 
     return (
         <>
-            {path === null ? <StartScreen /> : <MainScreen key={path} />}
+            {isLoaded && path === null ? <StartScreen /> : <MainScreen key={path} />}
             <MoreRecentDatabasesDialog />
         </>
     );

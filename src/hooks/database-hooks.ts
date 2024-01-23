@@ -8,6 +8,7 @@ import useTauriEvent from "./tauri-event-hook";
 
 export function useDatabase() {
     const [path, setPath] = useState<string | null>(null);
+    const [isLoaded, setIsLoaded] = useState(false);
 
 
     useEffect(() => {
@@ -15,7 +16,7 @@ export function useDatabase() {
             setPath(value);
         }).catch(async (reason: string) => {
             await message(reason, { title: "Failed to get database path.", type: "error" });
-        });
+        }).finally(() => { setIsLoaded(true); });
     }, []);
 
     useTauriEvent(event.CLOSED_DATABASE_EVENT, () => {
@@ -28,7 +29,7 @@ export function useDatabase() {
     });
 
 
-    return { path };
+    return { path, isLoaded };
 }
 
 
