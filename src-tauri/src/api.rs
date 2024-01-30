@@ -174,7 +174,7 @@ pub fn update_work_progress(
 pub fn update_work_status(
     database: tauri::State<Mutex<Database>>,
     id: i64,
-    status: String,
+    status: i64,
     timestamp: i64
 ) -> Result<(), String> {
     log::info!("Updating work [{id}]: STATUS - {status}, TIMESTAMP - {timestamp}.");
@@ -198,7 +198,7 @@ pub fn update_work_status(
 }
 
 #[tauri::command]
-pub fn update_work_type(database: tauri::State<Mutex<Database>>, id: i64, r#type: String) -> Result<(), String> {
+pub fn update_work_type(database: tauri::State<Mutex<Database>>, id: i64, r#type: i64) -> Result<(), String> {
     log::info!("Updating work [{id}]: TYPE - {}.", r#type);
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {
@@ -219,7 +219,7 @@ pub fn update_work_type(database: tauri::State<Mutex<Database>>, id: i64, r#type
 }
 
 #[tauri::command]
-pub fn update_work_format(database: tauri::State<Mutex<Database>>, id: i64, format: String) -> Result<(), String> {
+pub fn update_work_format(database: tauri::State<Mutex<Database>>, id: i64, format: i64) -> Result<(), String> {
     log::info!("Updating work [{id}]: FORMAT - {}.", format);
 
     let inner = || -> Result<(), Box<dyn std::error::Error>>  {

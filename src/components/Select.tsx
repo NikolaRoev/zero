@@ -7,7 +7,7 @@ type OptionProps<T> = {
     value: T
 }
 
-export function Option<T extends string | number | readonly string[]>(props: OptionProps<T>) {
+export function Option<T extends string>(props: OptionProps<T>) {
     return <option value={props.value}>{props.children}</option>;
 }
 
@@ -22,7 +22,7 @@ type SelectProps<T> = {
     errorMsg?: string
 }
 
-export function Select<T extends string | number | readonly string[]>(props: SelectProps<T>) {
+export function Select<T extends string>(props: SelectProps<T>) {
     return (
         <select
             id={props.id}

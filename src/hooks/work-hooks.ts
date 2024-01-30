@@ -50,7 +50,7 @@ export function useWorks() {
         });
     }
     
-    function updateWorkStatus(id: number, status: string) {
+    function updateWorkStatus(id: number, status: number) {
         const work = getWork(id);
         const timestamp = Date.now();
         works.set(id, { ...work, status: status, updated: timestamp });
@@ -62,7 +62,7 @@ export function useWorks() {
         });
     }
 
-    function updateWorkType(id: number, type: string) {
+    function updateWorkType(id: number, type: number) {
         const work = getWork(id);
         works.set(id, { ...work, type: type });
         setWorks(new Map(works));
@@ -73,7 +73,7 @@ export function useWorks() {
         });
     }
 
-    function updateWorkFormat(id: number, format: string) {
+    function updateWorkFormat(id: number, format: number) {
         const work = getWork(id);
         works.set(id, { ...work, format: format });
         setWorks(new Map(works));

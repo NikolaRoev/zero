@@ -39,8 +39,18 @@ export default function CreatorsTab() {
                 data={creatorsItems}
                 header={{ rows: [
                     { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
-                    { contents: "Name", sort: { action: "Sort", sortFnGen: data.creatorNameSortFnGen } },
-                    { contents: "Works", sort: { action: "Sort", sortFnGen: data.creatorWorksSortFnGen } }
+                    { contents: "Name", sort: {
+                        action: "Sort",
+                        sortFnGen: (ascending: boolean) => ascending ?
+                            (a: data.Creator, b: data.Creator) => a.name.localeCompare(b.name) :
+                            (a: data.Creator, b: data.Creator) => b.name.localeCompare(a.name)
+                    } },
+                    { contents: "Works", sort: {
+                        action: "Sort",
+                        sortFnGen: (ascending: boolean) => ascending ?
+                            (a: data.Creator, b: data.Creator) => a.works.length - b.works.length :
+                            (a: data.Creator, b: data.Creator) => b.works.length - a.works.length
+                    } }
                 ] }}
                 computeItemKey={(_, creator) => creator.id}
                 itemContent={(index, creator) => (

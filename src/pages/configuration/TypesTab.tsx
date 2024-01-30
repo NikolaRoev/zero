@@ -13,7 +13,7 @@ function TypesList() {
     return (
         <div className="grow border border-neutral-700 rounded">
             <RemoveList
-                data={types}
+                data={Array.from(types.values())}
                 computeItemKey={(_, type) => type.id }
                 itemContent={(_, type) => ({
                     contents: (
@@ -24,7 +24,7 @@ function TypesList() {
                             spellCheck={false}
                             autoComplete="off"
                             onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                                updateTypeName(type.id, type.name, event.target.value);
+                                updateTypeName(type.id, event.target.value);
                             }}
                         />
                     ),

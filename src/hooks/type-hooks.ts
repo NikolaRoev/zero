@@ -7,12 +7,22 @@ import { message } from "@tauri-apps/api/dialog";
 
 
 export default function useTypes() {
-    const [types, setTypes] = useState<Type[]>([]);
+    const [types, setTypes] = useState<Map<number, Type>>(new Map());
 
+
+    function getType(id: number) {
+        const type = types.get(id);
+        if (!type) {
+            const message = `Missing Type [${id}].`;
+            api.error(message);
+            throw new Error(message);
+        }
+        return type;
+    }
 
     function getTypes() {
         api.getTypes().then((value) => {
-            setTypes(value);
+            setTypes(new Map(value.map((v) => [v.id, v])));
         }).catch(async (reason: string) => {
             await message(reason, { title: "Failed to get Types.", type: "error" });
         });
@@ -20,7 +30,8 @@ export default function useTypes() {
 
     function addType(name: string, callback: () => void) {
         api.addType(name).then((id) => {
-            setTypes([...types, { id: id, name: name }]);
+            types.set(id, { id: id, name: name });
+            setTypes(new Map(types));
             callback();
         }).catch(async (reason) => {
             getTypes();
@@ -29,7 +40,11 @@ export default function useTypes() {
     }
 
     function removeType(id: number) {
-        setTypes(types.filter((type) => type.id !== id));
+        const result = types.delete(id);
+        if (!result) {
+            api.error(`Missing Type to remove [${id}].`);
+        }
+        setTypes(new Map(types));
 
         api.removeType(id).then(() => {
             sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
@@ -40,13 +55,15 @@ export default function useTypes() {
         });
     }
 
-    function updateTypeName(id: number, typeName: string) {
-        setTypes(types.map((type) => {
-            if (type.id === id) {
-                return { ...type, name: typeName };
-            }
-            return type;
-        }));
+    function updateTypeName(id: number, name: string) {
+        const type = getType(id);
+        types.set(id, { ...type, name: name });
+        setTypes(new Map(types));
+
+        api.updateTypeName(id, name).catch(async (reason) => {
+            getTypes();
+            await message(`${reason}`, { title: "Failed to update Type name.", type: "error" });
+        });
     }
 
 
@@ -55,5 +72,5 @@ export default function useTypes() {
     }, []);
 
 
-    return { types, getTypes, addType, removeType, updateTypeName };
+    return { types, getType, getTypes, addType, removeType, updateTypeName };
 }

@@ -13,7 +13,7 @@ function FormatsList() {
     return (
         <div className="grow border border-neutral-700 rounded">
             <RemoveList
-                data={formats}
+                data={Array.from(formats.values())}
                 computeItemKey={(_, format) => format.id }
                 itemContent={(_, format) => ({
                     contents: (
@@ -24,7 +24,7 @@ function FormatsList() {
                             spellCheck={false}
                             autoComplete="off"
                             onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                                updateFormatName(format.id, format.name, event.target.value);
+                                updateFormatName(format.id, event.target.value);
                             }}
                         />
                     ),

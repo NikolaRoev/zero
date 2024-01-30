@@ -7,12 +7,22 @@ import { message } from "@tauri-apps/api/dialog";
 
 
 export default function useFormats() {
-    const [formats, setFormats] = useState<Format[]>([]);
+    const [formats, setFormats] = useState<Map<number, Format>>(new Map());
   
+    
+    function getFormat(id: number) {
+        const format = formats.get(id);
+        if (!format) {
+            const message = `Missing Format [${id}].`;
+            api.error(message);
+            throw new Error(message);
+        }
+        return format;
+    }
 
     function getFormats() {
         api.getFormats().then((value) => {
-            setFormats(value);
+            setFormats(new Map(value.map((v) => [v.id, v])));
         }).catch(async (reason: string) => {
             await message(reason, { title: "Failed to get Formats.", type: "error" });
         });
@@ -20,7 +30,8 @@ export default function useFormats() {
 
     function addFormat(name: string, callback: () => void) {
         api.addFormat(name).then((id) => {
-            setFormats([...formats, { id: id, name: name }]);
+            formats.set(id, { id: id, name: name });
+            setFormats(new Map(formats));
             callback();
         }).catch(async (reason) => {
             getFormats();
@@ -29,7 +40,11 @@ export default function useFormats() {
     }
 
     function removeFormat(id: number) {
-        setFormats(formats.filter((format) => format.id !== id));
+        const result = formats.delete(id);
+        if (!result) {
+            api.error(`Missing Format to remove [${id}].`);
+        }
+        setFormats(new Map(formats));
 
         api.removeFormat(id).then(() => {
             sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
@@ -40,13 +55,15 @@ export default function useFormats() {
         });
     }
 
-    function updateFormatName(id: number, formatName: string) {
-        setFormats(formats.map((format) => {
-            if (format.id === id) {
-                return { ...format, name: formatName };
-            }
-            return format;
-        }));
+    function updateFormatName(id: number, name: string) {
+        const format = getFormat(id);
+        formats.set(id, { ...format, name: name });
+        setFormats(new Map(formats));
+
+        api.updateFormatName(id, name).catch(async (reason) => {
+            getFormats();
+            await message(`${reason}`, { title: "Failed to update Format name.", type: "error" });
+        });
     }
 
     
@@ -55,5 +72,5 @@ export default function useFormats() {
     }, []);
   
 
-    return { formats, getFormats, addFormat, removeFormat, updateFormatName };
+    return { formats, getFormat, getFormats, addFormat, removeFormat, updateFormatName };
 }

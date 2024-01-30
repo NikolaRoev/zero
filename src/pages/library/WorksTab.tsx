@@ -23,9 +23,9 @@ type Filter = {
     value: string,
     comparatorType: ComparatorType,
     by: By,
-    statuses: string[],
-    types: string[],
-    formats: string[],
+    statuses: number[],
+    types: number[],
+    formats: number[],
     updatedRange: { start: number, end: number } | null,
     addedRange: { start: number, end: number } | null
 }
@@ -46,12 +46,12 @@ type FilterAction =
     { action: "ChangeValue", value: string } |
     { action: "ChangeComparatorType", comparatorType: ComparatorType } |
     { action: "ChangeBy", by: By } |
-    { action: "AddStatus", status: string } |
-    { action: "RemoveStatus", status: string } |
-    { action: "AddType", type: string } |
-    { action: "RemoveType", type: string } |
-    { action: "AddFormat", format: string } |
-    { action: "RemoveFormat", format: string } |
+    { action: "AddStatus", status: number } |
+    { action: "RemoveStatus", status: number } |
+    { action: "AddType", type: number } |
+    { action: "RemoveType", type: number } |
+    { action: "AddFormat", format: number } |
+    { action: "RemoveFormat", format: number } |
     { action: "ChangeUpdatedRange", range: DateRange | null } |
     { action: "ChangeAddedRange", range: DateRange | null }
 
@@ -188,13 +188,13 @@ export default function WorksTab() {
                         <CheckboxGroup
                             className="w-[25vw]"
                             legend="Statuses"
-                            items={statuses}
+                            items={Array.from(statuses.values())}
                             checkboxContent={(status) => ({
                                 key: status.id,
-                                checked: filter.statuses.includes(status.name),
+                                checked: filter.statuses.includes(status.id),
                                 onChange: (event) => {
-                                    if (event.target.checked) { filterDispatch({ action: "AddStatus", status: status.name}); }
-                                    else { filterDispatch({ action: "RemoveStatus", status: status.name}); }
+                                    if (event.target.checked) { filterDispatch({ action: "AddStatus", status: status.id}); }
+                                    else { filterDispatch({ action: "RemoveStatus", status: status.id}); }
                                 },
                                 labelContents: status.name,
                                 labelClassName: clsx({ "underline": status.isUpdate }),
@@ -204,13 +204,13 @@ export default function WorksTab() {
                         <CheckboxGroup
                             className="w-[25vw]"
                             legend="Types"
-                            items={types}
+                            items={Array.from(types.values())}
                             checkboxContent={(type) => ({
                                 key: type.id,
-                                checked: filter.types.includes(type.name),
+                                checked: filter.types.includes(type.id),
                                 onChange: (event) => {
-                                    if (event.target.checked) { filterDispatch({ action: "AddType", type: type.name}); }
-                                    else { filterDispatch({ action: "RemoveType", type: type.name}); }
+                                    if (event.target.checked) { filterDispatch({ action: "AddType", type: type.id}); }
+                                    else { filterDispatch({ action: "RemoveType", type: type.id}); }
                                 },
                                 labelContents: type.name
                             })}
@@ -218,13 +218,13 @@ export default function WorksTab() {
                         <CheckboxGroup
                             className="w-[25vw]"
                             legend="Formats"
-                            items={formats}
+                            items={Array.from(formats.values())}
                             checkboxContent={(format) => ({
                                 key: format.id,
-                                checked: filter.formats.includes(format.name),
+                                checked: filter.formats.includes(format.id),
                                 onChange: (event) => {
-                                    if (event.target.checked) { filterDispatch({ action: "AddFormat", format: format.name}); }
-                                    else { filterDispatch({ action: "RemoveFormat", format: format.name}); }
+                                    if (event.target.checked) { filterDispatch({ action: "AddFormat", format: format.id}); }
+                                    else { filterDispatch({ action: "RemoveFormat", format: format.id}); }
                                 },
                                 labelContents: format.name
                             })}
@@ -258,10 +258,38 @@ export default function WorksTab() {
                 data={worksItems}
                 header={{ rows: [
                     { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
-                    { contents: "Name", sort: { action: "Sort", sortFnGen: data.workNameSortFnGen } },
-                    { contents: "Progress", sort: { action: "Sort", sortFnGen: data.workProgressSortFnGen } },
-                    { contents: "Updated", sort: { action: "Sort", sortFnGen: data.workUpdatedSortFnGen } },
-                    { contents: "Added", sort: { action: "Sort", sortFnGen: data.workAddedSortFnGen } }
+                    { contents: "Name", sort: {
+                        action: "Sort",
+                        sortFnGen: (ascending: boolean) => ascending ?
+                            (a: data.Work, b: data.Work) => a.name.localeCompare(b.name) :
+                            (a: data.Work, b: data.Work) => b.name.localeCompare(a.name)
+                    } },
+                    { contents: "Progress", sort: {
+                        action: "Sort",
+                        sortFnGen: (ascending: boolean) => ascending ?
+                            (a: data.Work, b: data.Work) => {
+                                const numA = Number(a.progress) || Number.POSITIVE_INFINITY;
+                                const numB = Number(b.progress) || Number.POSITIVE_INFINITY;
+                                return numA - numB;
+                            } :
+                            (a: data.Work, b: data.Work) => {
+                                const numA = Number(a.progress) || Number.NEGATIVE_INFINITY;
+                                const numB = Number(b.progress) || Number.NEGATIVE_INFINITY;
+                                return numB - numA;
+                            }
+                    } },
+                    { contents: "Updated", sort: {
+                        action: "Sort",
+                        sortFnGen: (ascending: boolean) => ascending ?
+                            (a: data.Work, b: data.Work) => b.updated - a.updated :
+                            (a: data.Work, b: data.Work) => a.updated - b.updated
+                    } },
+                    { contents: "Added", sort: {
+                        action: "Sort",
+                        sortFnGen: (ascending: boolean) => ascending ?
+                            (a: data.Work, b: data.Work) => b.added - a.added :
+                            (a: data.Work, b: data.Work) => a.added - b.added
+                    } }
                 ] }}
                 computeItemKey={(_, work) => work.id}
                 itemContent={(index, work) => (

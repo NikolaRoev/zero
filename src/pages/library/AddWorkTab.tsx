@@ -93,9 +93,9 @@ export default function AddWorkTab() {
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        const status = dataContext.statuses[addWorkFormData.statusIndex]?.name;
-        const type = dataContext.types[addWorkFormData.typeIndex]?.name;
-        const format = dataContext.formats[addWorkFormData.formatIndex]?.name;
+        const status = Array.from(dataContext.statuses.values())[addWorkFormData.statusIndex];
+        const type = Array.from(dataContext.types.values())[addWorkFormData.typeIndex];
+        const format = Array.from(dataContext.formats.values())[addWorkFormData.formatIndex];
 
         if (status && type && format) {
             const timestamp = Date.now();
@@ -103,9 +103,9 @@ export default function AddWorkTab() {
                 id: 0,
                 name: addWorkFormData.name,
                 progress: addWorkFormData.progress,
-                status: status,
-                type: type,
-                format: format,
+                status: status.id,
+                type: type.id,
+                format: format.id,
                 updated: timestamp,
                 added: timestamp,
                 creators: addWorkFormData.creators
@@ -155,42 +155,39 @@ export default function AddWorkTab() {
                     <Select
                         id="status-select"
                         className="col-span-2"
-                        value={addWorkFormData.statusIndex}
-                        onChange={(value) => { addWorkFormDispatch({ action: "ChangeStatus", statusIndex: value}); }}
+                        value={addWorkFormData.statusIndex.toString()}
+                        onChange={(value) => { addWorkFormDispatch({ action: "ChangeStatus", statusIndex: parseInt(value) }); }}
                         selectMsg="Select Status"
                         errorMsg="No Statuses"
                     >
-                        {dataContext.statuses.map((status, index) => (
-                            <Option
-                                key={status.name}
-                                value={index}
-                            >{status.name}</Option>
+                        {Array.from(dataContext.statuses.values()).map((status, index) => (
+                            <Option key={status.id} value={index.toString()}>{status.name}</Option>
                         ))}
                     </Select>
                     <label htmlFor="type-select">Type:</label>
                     <Select
                         id="type-select"
                         className="col-span-2"
-                        value={addWorkFormData.typeIndex}
-                        onChange={(value) => { addWorkFormDispatch({ action: "ChangeType", typeIndex: value}); }}
+                        value={addWorkFormData.typeIndex.toString()}
+                        onChange={(value) => { addWorkFormDispatch({ action: "ChangeType", typeIndex: parseInt(value) }); }}
                         selectMsg="Select Type"
                         errorMsg="No Types"
                     >
-                        {dataContext.types.map((type, index) => (
-                            <Option key={type.name} value={index}>{type.name}</Option>
+                        {Array.from(dataContext.types.values()).map((type, index) => (
+                            <Option key={type.id} value={index.toString()}>{type.name}</Option>
                         ))}
                     </Select>
                     <label htmlFor="format-select">Format:</label>
                     <Select
                         id="format-select"
                         className="col-span-2"
-                        value={addWorkFormData.formatIndex}
-                        onChange={(value) => { addWorkFormDispatch({ action: "ChangeFormat", formatIndex: value}); }}
+                        value={addWorkFormData.formatIndex.toString()}
+                        onChange={(value) => { addWorkFormDispatch({ action: "ChangeFormat", formatIndex: parseInt(value) }); }}
                         selectMsg="Select Format"
                         errorMsg="No Formats"
                     >
-                        {dataContext.formats.map((format, index) => (
-                            <Option key={format.name} value={index}>{format.name}</Option>
+                        {Array.from(dataContext.formats.values()).map((format, index) => (
+                            <Option key={format.id} value={index.toString()}>{format.name}</Option>
                         ))}
                     </Select>
                 </div>
@@ -202,8 +199,18 @@ export default function AddWorkTab() {
                             data={workCreators}
                             header={{ rows: [
                                 { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
-                                { contents: "Name", sort: { action: "Sort", sortFnGen: data.creatorNameSortFnGen } },
-                                { contents: "Works", sort: { action: "Sort", sortFnGen: data.creatorWorksSortFnGen } },
+                                { contents: "Name", sort: {
+                                    action: "Sort",
+                                    sortFnGen: (ascending: boolean) => ascending ?
+                                        (a: data.Creator, b: data.Creator) => a.name.localeCompare(b.name) :
+                                        (a: data.Creator, b: data.Creator) => b.name.localeCompare(a.name)
+                                } },
+                                { contents: "Works", sort: {
+                                    action: "Sort",
+                                    sortFnGen: (ascending: boolean) => ascending ?
+                                        (a: data.Creator, b: data.Creator) => a.works.length - b.works.length :
+                                        (a: data.Creator, b: data.Creator) => b.works.length - a.works.length
+                                } },
                                 { contents: "" }
                             ] }}
                             computeItemKey={(_, creator) => creator.id}

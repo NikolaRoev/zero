@@ -14,7 +14,7 @@ function StatusesList() {
     return (
         <div className="grow border border-neutral-700 rounded">
             <RemoveList
-                data={statuses}
+                data={Array.from(statuses.values())}
                 computeItemKey={(_, status) => status.id }
                 itemContent={(_, status) => ({
                     contents: (
@@ -29,7 +29,7 @@ function StatusesList() {
                                 spellCheck={false}
                                 autoComplete="off"
                                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                                    updateStatusName(status.id, status.name, event.target.value);
+                                    updateStatusName(status.id, event.target.value);
                                 }}
                             />
                             <input

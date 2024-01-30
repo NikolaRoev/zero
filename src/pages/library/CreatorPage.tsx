@@ -68,13 +68,80 @@ export default function CreatorPage({ id }: { id: number }) {
                         data={creatorWorks}
                         header={{ className: clsx("text-sm"), rows: [
                             { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
-                            { contents: "Name", sort: { action: "Sort", sortFnGen: data.workNameSortFnGen } },
-                            { contents: "Progress", sort: { action: "Sort", sortFnGen: data.workProgressSortFnGen } },
-                            { contents: "Status", sort: { action: "Sort", sortFnGen: data.workStatusSortFnGen } },
-                            { contents: "Type", sort: { action: "Sort", sortFnGen: data.workTypeSortFnGen } },
-                            { contents: "Format", sort: { action: "Sort", sortFnGen: data.workFormatSortFnGen } },
-                            { contents: "Updated", sort: { action: "Sort", sortFnGen: data.workUpdatedSortFnGen } },
-                            { contents: "Added", sort: { action: "Sort", sortFnGen: data.workAddedSortFnGen } },
+                            { contents: "Name", sort: {
+                                action: "Sort",
+                                sortFnGen: (ascending: boolean) => ascending ?
+                                    (a: data.Work, b: data.Work) => a.name.localeCompare(b.name) :
+                                    (a: data.Work, b: data.Work) => b.name.localeCompare(a.name)
+                            } },
+                            { contents: "Progress", sort: {
+                                action: "Sort",
+                                sortFnGen: (ascending: boolean) => ascending ?
+                                    (a: data.Work, b: data.Work) => {
+                                        const numA = Number(a.progress) || Number.POSITIVE_INFINITY;
+                                        const numB = Number(b.progress) || Number.POSITIVE_INFINITY;
+                                        return numA - numB;
+                                    } :
+                                    (a: data.Work, b: data.Work) => {
+                                        const numA = Number(a.progress) || Number.NEGATIVE_INFINITY;
+                                        const numB = Number(b.progress) || Number.NEGATIVE_INFINITY;
+                                        return numB - numA;
+                                    }
+                            } },
+                            { contents: "Status", sort: {
+                                action: "Sort",
+                                sortFnGen: (ascending: boolean) => ascending ?
+                                    (a: data.Work, b: data.Work) => {
+                                        const statusA = dataContext.getStatus(a.status);
+                                        const statusB = dataContext.getStatus(b.status);
+                                        return statusA.name.localeCompare(statusB.name);
+                                    } :
+                                    (a: data.Work, b: data.Work) => {
+                                        const statusA = dataContext.getStatus(a.status);
+                                        const statusB = dataContext.getStatus(b.status);
+                                        return statusB.name.localeCompare(statusA.name);
+                                    }
+                            } },
+                            { contents: "Type", sort: {
+                                action: "Sort",
+                                sortFnGen: (ascending: boolean) => ascending ?
+                                    (a: data.Work, b: data.Work) => {
+                                        const typeA = dataContext.getType(a.type);
+                                        const typeB = dataContext.getType(b.type);
+                                        return typeA.name.localeCompare(typeB.name);
+                                    } :
+                                    (a: data.Work, b: data.Work) => {
+                                        const typeA = dataContext.getType(a.type);
+                                        const typeB = dataContext.getType(b.type);
+                                        return typeB.name.localeCompare(typeA.name);
+                                    }
+                            } },
+                            { contents: "Format", sort: {
+                                action: "Sort",
+                                sortFnGen: (ascending: boolean) => ascending ?
+                                    (a: data.Work, b: data.Work) => {
+                                        const formatA = dataContext.getFormat(a.format);
+                                        const formatB = dataContext.getFormat(b.format);
+                                        return formatA.name.localeCompare(formatB.name);
+                                    } :
+                                    (a: data.Work, b: data.Work) => {
+                                        const formatA = dataContext.getFormat(a.format);
+                                        const formatB = dataContext.getFormat(b.format);
+                                        return formatB.name.localeCompare(formatA.name);
+                                    }
+                            } },
+                            { contents: "Updated", sort: {
+                                action: "Sort",
+                                sortFnGen: (ascending: boolean) => ascending ?
+                                    (a: data.Work, b: data.Work) => b.updated - a.updated :
+                                    (a: data.Work, b: data.Work) => a.updated - b.updated
+                            } },
+                            { contents: "Added", sort: {
+                                action: "Sort",
+                                sortFnGen: (ascending: boolean) => ascending ?
+                                    (a: data.Work, b: data.Work) => b.added - a.added :
+                                    (a: data.Work, b: data.Work) => a.added - b.added
+                            } },
                             { contents: "" }
                         ] }}
                         computeItemKey={(_, work) => work.id}
@@ -95,9 +162,9 @@ export default function CreatorPage({ id }: { id: number }) {
                                     className="w-[1%] p-[5px] text-xs"
                                     title={work.progress}
                                 >{work.progress}</TableCell>
-                                <TableCell className="w-[1%] p-[5px] text-xs">{work.status}</TableCell>
-                                <TableCell className="w-[1%] p-[5px] text-xs">{work.type}</TableCell>
-                                <TableCell className="w-[1%] p-[5px] text-xs">{work.format}</TableCell>
+                                <TableCell className="w-[1%] p-[5px] text-xs">{dataContext.statuses.get(work.status)?.name}</TableCell>
+                                <TableCell className="w-[1%] p-[5px] text-xs">{dataContext.types.get(work.type)?.name}</TableCell>
+                                <TableCell className="w-[1%] p-[5px] text-xs">{dataContext.formats.get(work.format)?.name}</TableCell>
                                 <TableCell
                                     className="w-[1%] p-[5px] text-xs"
                                     title={formatISO9075(work.updated)}

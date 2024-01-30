@@ -69,39 +69,36 @@ export default function WorkPage({ id }: { id: number }) {
                 <Select
                     id="status-select"
                     className="col-span-2"
-                    value={work.status}
-                    onChange={(value) => { dataContext.updateWorkStatus(work.id, value); }}
+                    value={work.status.toString()}
+                    onChange={(value) => { dataContext.updateWorkStatus(work.id, parseInt(value)); }}
                     selectMsg="Change Status"
                 >
-                    {dataContext.statuses.map((status) => (
-                        <Option
-                            key={status.name}
-                            value={status.name}
-                        >{status.name}</Option>
+                    {Array.from(dataContext.statuses.values()).map((status) => (
+                        <Option key={status.id} value={status.id.toString()}>{status.name}</Option>
                     ))}
                 </Select>
                 <label htmlFor="type-select">Type:</label>
                 <Select
                     id="type-select"
                     className="col-span-2"
-                    value={work.type}
-                    onChange={(value) => { dataContext.updateWorkType(work.id, value); }}
+                    value={work.type.toString()}
+                    onChange={(value) => { dataContext.updateWorkType(work.id, parseInt(value)); }}
                     selectMsg="Change Type"
                 >
-                    {dataContext.types.map((type) => (
-                        <Option key={type.name} value={type.name}>{type.name}</Option>
+                    {Array.from(dataContext.types.values()).map((type) => (
+                        <Option key={type.id} value={type.id.toString()}>{type.name}</Option>
                     ))}
                 </Select>
                 <label htmlFor="format-select">Format:</label>
                 <Select
                     id="format-select"
                     className="col-span-2"
-                    value={work.format}
-                    onChange={(value) => { dataContext.updateWorkFormat(work.id, value); }}
+                    value={work.format.toString()}
+                    onChange={(value) => { dataContext.updateWorkFormat(work.id, parseInt(value)); }}
                     selectMsg="Change Format"
                 >
-                    {dataContext.formats.map((format) => (
-                        <Option key={format.name} value={format.name}>{format.name}</Option>
+                    {Array.from(dataContext.formats.values()).map((format) => (
+                        <Option key={format.id} value={format.id.toString()}>{format.name}</Option>
                     ))}
                 </Select>
 
@@ -123,8 +120,18 @@ export default function WorkPage({ id }: { id: number }) {
                         data={workCreators}
                         header={{ rows: [
                             { contents: "", title: "Clear Sort", sort: { action: "Clear" } },
-                            { contents: "Name", sort: { action: "Sort", sortFnGen: data.creatorNameSortFnGen } },
-                            { contents: "Works", sort: { action: "Sort", sortFnGen: data.creatorWorksSortFnGen } },
+                            { contents: "Name", sort: {
+                                action: "Sort",
+                                sortFnGen: (ascending: boolean) => ascending ?
+                                    (a: data.Creator, b: data.Creator) => a.name.localeCompare(b.name) :
+                                    (a: data.Creator, b: data.Creator) => b.name.localeCompare(a.name)
+                            } },
+                            { contents: "Works", sort: {
+                                action: "Sort",
+                                sortFnGen: (ascending: boolean) => ascending ?
+                                    (a: data.Creator, b: data.Creator) => a.works.length - b.works.length :
+                                    (a: data.Creator, b: data.Creator) => b.works.length - a.works.length
+                            } },
                             { contents: "" }
                         ] }}
                         computeItemKey={(_, creator) => creator.id}

@@ -13,9 +13,13 @@ import { useWorks } from "../hooks/work-hooks";
 type DataContextContents = {
     works: Map<number, Work>,
     creators: Map<number, Creator>,
-    statuses: Status[],
-    types: Type[],
-    formats: Format[],
+    statuses: Map<number, Status>,
+    types: Map<number, Type>,
+    formats: Map<number, Format>,
+
+    getStatus: (id: number) => Status,
+    getType: (id: number) => Type,
+    getFormat: (id: number) => Format,
 
     addWork: (work: Work, callback: (id: number) => void) => void,
     addCreator: (creator: Creator, callback: (id: number) => void) => void,
@@ -31,19 +35,19 @@ type DataContextContents = {
 
     updateWorkName: (id: number, name: string) => void,
     updateWorkProgress: (id: number, progress: string) => void,
-    updateWorkStatus: (id: number, status: string) => void,
-    updateWorkType: (id: number, type: string) => void,
-    updateWorkFormat: (id: number, format: string) => void,
+    updateWorkStatus: (id: number, status: number) => void,
+    updateWorkType: (id: number, type: number) => void,
+    updateWorkFormat: (id: number, format: number) => void,
 
     updateCreatorName: (id: number, name: string) => void,
 
     attach: (workId: number, creatorId: number) => void,
     detach: (workId: number, creatorId: number) => void,
 
-    updateStatusName: (id: number, oldName: string, newName: string) => void,
+    updateStatusName: (id: number, name: string) => void,
     updateStatusIsUpdate: (id: number, isUpdate: boolean) => void,
-    updateTypeName: (id: number, oldName: string, newName: string) => void,
-    updateFormatName: (id: number, oldName: string, newName: string) => void
+    updateTypeName: (id: number, name: string) => void,
+    updateFormatName: (id: number, name: string) => void
 }
 
 export const DataContext = createContext<DataContextContents | null>(null);
@@ -121,54 +125,6 @@ export default function DataContextProvider({ children }: { children: React.Reac
         });
     }
 
-    function updateStatusName(id: number, oldName: string, newName: string) {
-        statuses.updateStatusName(id, newName);
-        works.works.forEach((work) => {
-            if (work.status === oldName) {
-                work.status = newName;
-            }
-        });
-        works.setWorks(new Map(works.works));
-        
-        api.updateStatusName(id, newName).catch(async (reason) => {
-            statuses.getStatuses();
-            works.getWorks();
-            await message(`${reason}`, { title: "Failed to update Status name.", type: "error" });
-        });
-    }
-
-    function updateTypeName(id: number, oldName: string, newName: string) {
-        types.updateTypeName(id, newName);
-        works.works.forEach((work) => {
-            if (work.type === oldName) {
-                work.type = newName;
-            }
-        });
-        works.setWorks(new Map(works.works));
-        
-        api.updateTypeName(id, newName).catch(async (reason) => {
-            types.getTypes();
-            works.getWorks();
-            await message(`${reason}`, { title: "Failed to update Type name.", type: "error" });
-        });
-    }
-
-    function updateFormatName(id: number, oldName: string, newName: string) {
-        formats.updateFormatName(id, newName);
-        works.works.forEach((work) => {
-            if (work.format === oldName) {
-                work.format = newName;
-            }
-        });
-        works.setWorks(new Map(works.works));
-        
-        api.updateFormatName(id, newName).catch(async (reason) => {
-            formats.getFormats();
-            works.getWorks();
-            await message(`${reason}`, { title: "Failed to update Format name.", type: "error" });
-        });
-    }
-
 
     return (
         <DataContext.Provider value={{
@@ -177,6 +133,10 @@ export default function DataContextProvider({ children }: { children: React.Reac
             statuses: statuses.statuses,
             types: types.types,
             formats: formats.formats,
+
+            getStatus: statuses.getStatus,
+            getType: types.getType,
+            getFormat: formats.getFormat,
 
             addWork,
             addCreator,
@@ -201,12 +161,10 @@ export default function DataContextProvider({ children }: { children: React.Reac
             attach,
             detach,
 
-            updateStatusName,
+            updateStatusName: statuses.updateStatusName,
             updateStatusIsUpdate: statuses.updateStatusIsUpdate,
-            updateTypeName,
-            updateFormatName
-        }}>
-            {children}
-        </DataContext.Provider>
+            updateTypeName: types.updateTypeName,
+            updateFormatName: formats.updateFormatName
+        }}>{children}</DataContext.Provider>
     );
 }

@@ -33,15 +33,15 @@ export function updateWorkProgress(id: number, progress: string, timestamp: numb
     return invoke("update_work_progress", { id, progress, timestamp });
 }
 
-export function updateWorkStatus(id: number, status: string, timestamp: number): Promise<void> {
+export function updateWorkStatus(id: number, status: number, timestamp: number): Promise<void> {
     return invoke("update_work_status", { id, status, timestamp });
 }
 
-export function updateWorkType(id: number, type: string): Promise<void> {
+export function updateWorkType(id: number, type: number): Promise<void> {
     return invoke("update_work_type", { id, type });
 }
 
-export function updateWorkFormat(id: number, format: string): Promise<void> {
+export function updateWorkFormat(id: number, format: number): Promise<void> {
     return invoke("update_work_format", { id, format });
 }
 

@@ -8,14 +8,14 @@ CREATE TABLE IF NOT EXISTS works (
     id       INTEGER PRIMARY KEY AUTOINCREMENT,
     name     TEXT NOT NULL,
     progress TEXT NOT NULL,
-    status   TEXT NOT NULL,
-    type     TEXT NOT NULL,
-    format   TEXT NOT NULL,
+    status   INTEGER NOT NULL,
+    type     INTEGER NOT NULL,
+    format   INTEGER NOT NULL,
     updated  INTEGER NOT NULL,
     added    INTEGER NOT NULL,
-    FOREIGN KEY (status) REFERENCES statuses (name) ON UPDATE CASCADE,
-    FOREIGN KEY (type)   REFERENCES types    (name) ON UPDATE CASCADE,
-    FOREIGN KEY (format) REFERENCES formats  (name) ON UPDATE CASCADE
+    FOREIGN KEY (status) REFERENCES statuses (id),
+    FOREIGN KEY (type)   REFERENCES types    (id),
+    FOREIGN KEY (format) REFERENCES formats  (id)
 );
 
 CREATE TABLE IF NOT EXISTS creators (
@@ -53,9 +53,9 @@ pub struct Work {
     pub id: i64,
     pub name: String,
     pub progress: String,
-    pub status: String,
-    pub r#type: String,
-    pub format: String,
+    pub status: i64,
+    pub r#type: i64,
+    pub format: i64,
     pub updated: i64,
     pub added: i64,
     pub creators: Vec<i64>
@@ -335,15 +335,15 @@ mod tests {
         let database = &Context::new().database;
         
         // Add.
-        database.add("statuses", vec![("name", &"status")])?;
-        database.add("types", vec![("name", &"type")])?;
-        database.add("formats", vec![("name", &"format")])?;
+        let status_id = database.add("statuses", vec![("name", &"status")])?;
+        let type_id = database.add("types", vec![("name", &"type")])?;
+        let format_id = database.add("formats", vec![("name", &"format")])?;
         let id = database.add("works", vec![
             ("name", &"name"),
             ("progress", &"progress"),
-            ("status", &"status"),
-            ("type", &"type"),
-            ("format", &"format"),
+            ("status", &status_id),
+            ("type", &format_id),
+            ("format", &format_id),
             ("updated", &44i64),
             ("added", &44i64)
         ])?;
@@ -354,9 +354,9 @@ mod tests {
         assert_eq!(added_work.id, id);
         assert_eq!(added_work.name, "name");
         assert_eq!(added_work.progress, "progress");
-        assert_eq!(added_work.status, "status");
-        assert_eq!(added_work.r#type, "type");
-        assert_eq!(added_work.format, "format");
+        assert_eq!(added_work.status, status_id);
+        assert_eq!(added_work.r#type, type_id);
+        assert_eq!(added_work.format, format_id);
         assert_eq!(added_work.updated, 44i64);
         assert_eq!(added_work.added, 44i64);
 
@@ -389,9 +389,9 @@ mod tests {
         let error_message = database.add("works", vec![
             ("name", &"name"),
             ("progress", &"progress"),
-            ("status", &"status"),
-            ("type", &"type"),
-            ("format", &"format"),
+            ("status", &1i64),
+            ("type", &1i64),
+            ("format", &1i64),
             ("updated", &44i64),
             ("added", &44i64)
         ]).unwrap_err().to_string();
@@ -534,35 +534,6 @@ mod tests {
     }
 
     #[test]
-    fn updating_status_type_or_format_cascades_to_work() -> Result<(), Box<dyn std::error::Error>> {
-        let database = &Context::new().database;
-        
-        let status_id = database.add("statuses", vec![("name", &"status")])?;
-        let type_id = database.add("types", vec![("name", &"type")])?;
-        let format_id = database.add("formats", vec![("name", &"format")])?;
-        database.add("works", vec![
-            ("name", &"name"),
-            ("progress", &"progress"),
-            ("status", &"status"),
-            ("type", &"type"),
-            ("format", &"format"),
-            ("updated", &44i64),
-            ("added", &44i64)
-        ])?;
-        database.update("statuses", &status_id, vec![("name", &"new_status_name")])?;
-        database.update("types", &type_id, vec![("name", &"new_type_name")])?;
-        database.update("formats", &format_id, vec![("name", &"new_format_name")])?;
-        let works = database.get_works()?;
-        let added_work = works.get(0).unwrap();
-
-        assert_eq!(added_work.status, "new_status_name");
-        assert_eq!(added_work.r#type, "new_type_name");
-        assert_eq!(added_work.format, "new_format_name");
-
-        Ok(())
-    }
-
-    #[test]
     fn catches_removing_status_type_or_format_currently_in_use() -> Result<(), Box<dyn std::error::Error>> {
         let database = &Context::new().database;
 
@@ -572,9 +543,9 @@ mod tests {
         database.add("works", vec![
             ("name", &"name"),
             ("progress", &"progress"),
-            ("status", &"status"),
-            ("type", &"type"),
-            ("format", &"format"),
+            ("status", &status_id),
+            ("type", &type_id),
+            ("format", &format_id),
             ("updated", &44i64),
             ("added", &44i64)
         ])?;
@@ -593,15 +564,15 @@ mod tests {
     fn can_attach_and_detach() -> Result<(), Box<dyn std::error::Error>> {
         let database = &Context::new().database;
 
-        database.add("statuses", vec![("name", &"status")])?;
-        database.add("types", vec![("name", &"type")])?;
-        database.add("formats", vec![("name", &"format")])?;
+        let status_id = database.add("statuses", vec![("name", &"status")])?;
+        let type_id = database.add("types", vec![("name", &"type")])?;
+        let format_id = database.add("formats", vec![("name", &"format")])?;
         let work_id = database.add("works", vec![
             ("name", &"name"),
             ("progress", &"progress"),
-            ("status", &"status"),
-            ("type", &"type"),
-            ("format", &"format"),
+            ("status", &status_id),
+            ("type", &type_id),
+            ("format", &format_id),
             ("updated", &44i64),
             ("added", &44i64)
         ])?;
@@ -648,15 +619,15 @@ mod tests {
     fn removing_work_detaches() -> Result<(), Box<dyn std::error::Error>> {
         let database = &Context::new().database;
 
-        database.add("statuses", vec![("name", &"status")])?;
-        database.add("types", vec![("name", &"type")])?;
-        database.add("formats", vec![("name", &"format")])?;
+        let status_id = database.add("statuses", vec![("name", &"status")])?;
+        let type_id = database.add("types", vec![("name", &"type")])?;
+        let format_id = database.add("formats", vec![("name", &"format")])?;
         let work_id = database.add("works", vec![
             ("name", &"name"),
             ("progress", &"progress"),
-            ("status", &"status"),
-            ("type", &"type"),
-            ("format", &"format"),
+            ("status", &status_id),
+            ("type", &type_id),
+            ("format", &format_id),
             ("updated", &44i64),
             ("added", &44i64)
         ])?;
@@ -677,15 +648,15 @@ mod tests {
     fn removing_creator_detaches() -> Result<(), Box<dyn std::error::Error>> {
         let database = &Context::new().database;
 
-        database.add("statuses", vec![("name", &"status")])?;
-        database.add("types", vec![("name", &"type")])?;
-        database.add("formats", vec![("name", &"format")])?;
+        let status_id = database.add("statuses", vec![("name", &"status")])?;
+        let type_id = database.add("types", vec![("name", &"type")])?;
+        let format_id = database.add("formats", vec![("name", &"format")])?;
         let work_id = database.add("works", vec![
             ("name", &"name"),
             ("progress", &"progress"),
-            ("status", &"status"),
-            ("type", &"type"),
-            ("format", &"format"),
+            ("status", &status_id),
+            ("type", &type_id),
+            ("format", &format_id),
             ("updated", &44i64),
             ("added", &44i64)
         ])?;
