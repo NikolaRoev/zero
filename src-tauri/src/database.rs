@@ -156,7 +156,7 @@ pub struct Database {
 
 impl Database {
     fn conn(&self) -> DatabaseResult<&rusqlite::Connection> {
-        self.conn.as_ref().ok_or("No connection to database.".into())
+        self.conn.as_ref().ok_or("No connection to database".into())
     }
 
     pub fn open(&mut self, path: &PathBuf) -> DatabaseResult<()> {

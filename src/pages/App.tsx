@@ -123,7 +123,7 @@ export default function App() {
 
     return (
         <>
-            {isLoaded && path === null ? <StartScreen /> : <MainScreen key={path} />}
+            {isLoaded && (path === null ? <StartScreen /> : <MainScreen key={path} />)}
             <MoreRecentDatabasesDialog />
         </>
     );
