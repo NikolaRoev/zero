@@ -93,9 +93,9 @@ export default function AddWorkTab() {
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        const status = Array.from(dataContext.statuses.values())[addWorkFormData.statusIndex];
-        const type = Array.from(dataContext.types.values())[addWorkFormData.typeIndex];
-        const format = Array.from(dataContext.formats.values())[addWorkFormData.formatIndex];
+        const status = dataContext.statuses[addWorkFormData.statusIndex];
+        const type = dataContext.types[addWorkFormData.typeIndex];
+        const format = dataContext.formats[addWorkFormData.formatIndex];
 
         if (status && type && format) {
             const timestamp = Date.now();
@@ -160,7 +160,7 @@ export default function AddWorkTab() {
                         selectMsg="Select Status"
                         errorMsg="No Statuses"
                     >
-                        {Array.from(dataContext.statuses.values()).map((status, index) => (
+                        {dataContext.statuses.map((status, index) => (
                             <Option key={status.id} value={index.toString()}>{status.name}</Option>
                         ))}
                     </Select>
@@ -173,7 +173,7 @@ export default function AddWorkTab() {
                         selectMsg="Select Type"
                         errorMsg="No Types"
                     >
-                        {Array.from(dataContext.types.values()).map((type, index) => (
+                        {dataContext.types.map((type, index) => (
                             <Option key={type.id} value={index.toString()}>{type.name}</Option>
                         ))}
                     </Select>
@@ -186,7 +186,7 @@ export default function AddWorkTab() {
                         selectMsg="Select Format"
                         errorMsg="No Formats"
                     >
-                        {Array.from(dataContext.formats.values()).map((format, index) => (
+                        {dataContext.formats.map((format, index) => (
                             <Option key={format.id} value={index.toString()}>{format.name}</Option>
                         ))}
                     </Select>

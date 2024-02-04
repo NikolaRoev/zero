@@ -1,25 +1,39 @@
 import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
+import { SortableItem, SortableList } from "../../components/SortableList";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
+import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
-import RemoveList from "../../components/RemoveList";
+import clsx from "clsx";
 import useSafeContext from "../../hooks/safe-context-hook";
 
 
 
 function TypesList() {
-    const { types, removeType, updateTypeName } = useSafeContext(DataContext);
+    const { types, removeType, updateTypeName, reorderTypes } = useSafeContext(DataContext);
 
     return (
-        <div className="grow border border-neutral-700 rounded">
-            <RemoveList
-                data={Array.from(types.values())}
-                computeItemKey={(_, type) => type.id }
-                itemContent={(_, type) => ({
-                    contents: (
+        <SortableList
+            data={types}
+            onDragEnd={(event) => {
+                if (event.over && event.active.id !== event.over.id) {
+                    reorderTypes(event.active.id as number, event.over.id as number);
+                }
+            }}
+            generateDragContent={(id) => {
+                const type = types.find((type) => type.id === id);
+                return (
+                    <span className="p-[5px]">{type?.name}</span>
+                );
+            }}
+            itemContent={(index, type) => (
+                <SortableItem key={type.id} id={type.id} className={clsx({ "bg-neutral-100": index % 2 })}>
+                    <>
                         <input
                             name={`update-type-input-${type.id}`}
-                            className="grow p-[5px] bg-transparent focus:outline-none rounded"
+                            className={clsx(
+                                "grow p-[5px] bg-transparent focus:outline-none rounded"
+                            )}
                             value={type.name}
                             spellCheck={false}
                             autoComplete="off"
@@ -27,12 +41,14 @@ function TypesList() {
                                 updateTypeName(type.id, event.target.value);
                             }}
                         />
-                    ),
-                    buttonTitle: `Remove format "${type.name}".`,
-                    onButtonClick: () => { removeType(type.id); }
-                })}
-            />
-        </div>
+                        <DeleteButton
+                            title={`Remove type "${type.name}".`}
+                            onClick={() => { removeType(type.id); }}
+                        />
+                    </>
+                </SortableItem>
+            )}
+        />
     );
 }
 

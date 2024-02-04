@@ -34,18 +34,76 @@ CREATE TABLE IF NOT EXISTS work_creator (
 CREATE TABLE IF NOT EXISTS statuses (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
     name      TEXT NOT NULL UNIQUE,
-    is_update INTEGER NOT NULL CHECK (is_update IN (0, 1)) DEFAULT 0
+    is_update INTEGER NOT NULL CHECK (is_update IN (0, 1)) DEFAULT 0,
+    sort      INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS types (
     id   INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    sort INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS formats (
     id   INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    sort INTEGER NOT NULL DEFAULT 0
 );
+
+
+
+CREATE TRIGGER IF NOT EXISTS status_add
+    AFTER INSERT
+    ON statuses
+    WHEN (SELECT COUNT(*) FROM statuses) > 1
+BEGIN
+    UPDATE statuses SET sort = (SELECT MAX(sort) FROM statuses) + 1
+    WHERE id == NEW.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS status_delete
+    AFTER DELETE
+    ON statuses
+BEGIN
+    UPDATE statuses SET sort = sort - 1
+    WHERE sort > OLD.sort;
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS type_add
+    AFTER INSERT
+    ON types
+    WHEN (SELECT COUNT(*) FROM types) > 1
+BEGIN
+    UPDATE types SET sort = (SELECT MAX(sort) FROM types) + 1
+    WHERE id == NEW.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS type_delete
+    AFTER DELETE
+    ON types
+BEGIN
+    UPDATE types SET sort = sort - 1
+    WHERE sort > OLD.sort;
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS format_add
+    AFTER INSERT
+    ON formats
+    WHEN (SELECT COUNT(*) FROM formats) > 1
+BEGIN
+    UPDATE formats SET sort = (SELECT MAX(sort) FROM formats) + 1
+    WHERE id == NEW.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS format_delete
+    AFTER DELETE
+    ON formats
+BEGIN
+    UPDATE formats SET sort = sort - 1
+    WHERE sort > OLD.sort;
+END;
 ";
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
@@ -238,7 +296,7 @@ impl Database {
     }
 
     pub fn get_statuses(&self) -> DatabaseResult<Vec<Status>> {
-        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM statuses")?;
+        let mut stmt = self.conn()?.prepare_cached("SELECT id, name, is_update FROM statuses ORDER BY sort")?;
         let rows = stmt.query_map([], |row| {
             Ok(Status {
                 id: row.get(0)?,
@@ -251,7 +309,7 @@ impl Database {
     }
 
     pub fn get_types(&self) -> DatabaseResult<Vec<Type>> {
-        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM types")?;
+        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM types ORDER BY sort")?;
         let rows = stmt.query_map([], |row| {
             Ok(Type {
                 id: row.get(0)?,
@@ -263,7 +321,7 @@ impl Database {
     }
 
     pub fn get_formats(&self) -> DatabaseResult<Vec<Format>> {
-        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM formats")?;
+        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM formats ORDER BY sort")?;
         let rows = stmt.query_map([], |row| {
             Ok(Format {
                 id: row.get(0)?,
@@ -292,9 +350,53 @@ impl Database {
         let rows = stmt.execute(named_params! {":work_id": work_id, ":creator_id": creator_id})?;
         
         if rows != 1 {
-            return Err(format!(
-                "Expected to detach 1 pair not {rows}"
+            return Err(format!("Expected to detach 1 pair not {rows}"))?;
+        }
+
+        Ok(())
+    }
+
+    pub fn reorder(&self, table: &str, active_id: &i64, over_id: &i64) -> DatabaseResult<()> {
+        let mut stmt = self.conn()?.prepare_cached(&format!(
+            "SELECT sort FROM {table} WHERE id = :active_id"
+        ))?;
+        let rows = stmt.query_map(named_params! {":active_id": active_id}, |row| {
+            row.get::<usize, i64>(0)
+        })?;
+        let sort_active = rows.map(|row| Ok(row?)).collect::<DatabaseResult<Vec<i64>>>()?;
+        let sort_active = sort_active.first().ok_or("Missing active item sort")?;
+
+        let mut stmt = self.conn()?.prepare_cached(&format!(
+            "SELECT sort FROM {table} WHERE id = :over_id"
+        ))?;
+        let rows = stmt.query_map(named_params! {":over_id": over_id}, |row| {
+            row.get::<usize, i64>(0)
+        })?;
+        let sort_over = rows.map(|row| Ok(row?)).collect::<DatabaseResult<Vec<i64>>>()?;
+        let sort_over = sort_over.first().ok_or("Missing over item sort")?;
+
+
+        let mut stmt = self.conn()?.prepare_cached(&format!(
+            "UPDATE {table} SET sort = :sort_over WHERE id = :active_id"
+        ))?;
+        let rows = stmt.execute(named_params! {":sort_over": sort_over, ":active_id": active_id})?;
+        if rows != 1 {
+            return Err(format!("Expected to update 1 row not {rows}"))?;
+        }
+
+        // Move item up.
+        if sort_active > sort_over {
+            let mut stmt = self.conn()?.prepare_cached(&format!(
+                "UPDATE {table} SET sort = sort + 1 WHERE sort >= :sort_over AND sort < :sort_active AND id != :active_id"
             ))?;
+            stmt.execute(named_params! {":sort_over": sort_over, ":sort_active": sort_active, ":active_id": active_id})?;
+        }
+        // Move item down.
+        else {
+            let mut stmt = self.conn()?.prepare_cached(&format!(
+                "UPDATE {table} SET sort = sort - 1 WHERE sort <= :sort_over AND sort > :sort_active AND id != :active_id"
+            ))?;
+            stmt.execute(named_params! {":sort_over": sort_over, ":sort_active": sort_active, ":active_id": active_id})?;
         }
 
         Ok(())

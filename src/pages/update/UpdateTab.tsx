@@ -69,7 +69,7 @@ export default function UpdateTab() {
     }, []);
 
 
-    const updateStatuses = Array.from(statuses.values()).filter((status) => status.isUpdate);
+    const updateStatuses = statuses.filter((status) => status.isUpdate);
     const updateWorks = Array.from(works.values()).filter((work) => updateStatuses.find((status) => status.id === work.status));
     const updateWorksItems = updateWorks.filter((work) => comparator(work.name) || editingIds.includes(work.id));
 

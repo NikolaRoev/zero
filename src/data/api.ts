@@ -73,6 +73,10 @@ export function updateStatusIsUpdate(id: number, isUpdate: boolean): Promise<voi
     return invoke("update_status_is_update", { id, isUpdate });
 }
 
+export function reorderStatuses(activeId: number, overId: number): Promise<void> {
+    return invoke("reorder_statuses", { activeId, overId });
+}
+
 export function removeWork(id: number): Promise<void> {
     return invoke("remove_work", { id });
 }
@@ -101,6 +105,10 @@ export function updateTypeName(id: number, name: string): Promise<void> {
     return invoke("update_type_name", { id, name });
 }
 
+export function reorderTypes(activeId: number, overId: number): Promise<void> {
+    return invoke("reorder_types", { activeId, overId });
+}
+
 export function addFormat(name: string): Promise<number> {
     return invoke("add_format", { name });
 }
@@ -115,6 +123,10 @@ export function removeFormat(id: number): Promise<void> {
 
 export function updateFormatName(id: number, name: string): Promise<void> {
     return invoke("update_format_name", { id, name });
+}
+
+export function reorderFormats(activeId: number, overId: number): Promise<void> {
+    return invoke("reorder_formats", { activeId, overId });
 }
 
 export function attach(workId: number, creatorId: number): Promise<void> {

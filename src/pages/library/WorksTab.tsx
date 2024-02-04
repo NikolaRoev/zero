@@ -188,7 +188,7 @@ export default function WorksTab() {
                         <CheckboxGroup
                             className="w-[25vw]"
                             legend="Statuses"
-                            items={Array.from(statuses.values())}
+                            items={statuses}
                             checkboxContent={(status) => ({
                                 key: status.id,
                                 checked: filter.statuses.includes(status.id),
@@ -204,7 +204,7 @@ export default function WorksTab() {
                         <CheckboxGroup
                             className="w-[25vw]"
                             legend="Types"
-                            items={Array.from(types.values())}
+                            items={types}
                             checkboxContent={(type) => ({
                                 key: type.id,
                                 checked: filter.types.includes(type.id),
@@ -218,7 +218,7 @@ export default function WorksTab() {
                         <CheckboxGroup
                             className="w-[25vw]"
                             legend="Formats"
-                            items={Array.from(formats.values())}
+                            items={formats}
                             checkboxContent={(format) => ({
                                 key: format.id,
                                 checked: filter.formats.includes(format.id),

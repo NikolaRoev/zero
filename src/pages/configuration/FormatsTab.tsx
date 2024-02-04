@@ -1,25 +1,39 @@
 import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
+import { SortableItem, SortableList } from "../../components/SortableList";
 import Button from "../../components/Button";
 import { DataContext } from "../../contexts/data-context";
+import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
-import RemoveList from "../../components/RemoveList";
+import clsx from "clsx";
 import useSafeContext from "../../hooks/safe-context-hook";
 
 
 
 function FormatsList() {
-    const { formats, removeFormat, updateFormatName } = useSafeContext(DataContext);
+    const { formats, removeFormat, updateFormatName, reorderFormats } = useSafeContext(DataContext);
 
     return (
-        <div className="grow border border-neutral-700 rounded">
-            <RemoveList
-                data={Array.from(formats.values())}
-                computeItemKey={(_, format) => format.id }
-                itemContent={(_, format) => ({
-                    contents: (
+        <SortableList
+            data={formats}
+            onDragEnd={(event) => {
+                if (event.over && event.active.id !== event.over.id) {
+                    reorderFormats(event.active.id as number, event.over.id as number);
+                }
+            }}
+            generateDragContent={(id) => {
+                const format = formats.find((format) => format.id === id);
+                return (
+                    <span className="p-[5px]">{format?.name}</span>
+                );
+            }}
+            itemContent={(index, format) => (
+                <SortableItem key={format.id} id={format.id} className={clsx({ "bg-neutral-100": index % 2 })}>
+                    <>
                         <input
                             name={`update-format-input-${format.id}`}
-                            className="grow p-[5px] bg-transparent focus:outline-none rounded"
+                            className={clsx(
+                                "grow p-[5px] bg-transparent focus:outline-none rounded"
+                            )}
                             value={format.name}
                             spellCheck={false}
                             autoComplete="off"
@@ -27,12 +41,14 @@ function FormatsList() {
                                 updateFormatName(format.id, event.target.value);
                             }}
                         />
-                    ),
-                    buttonTitle: `Remove format "${format.name}".`,
-                    onButtonClick: () => { removeFormat(format.id); }
-                })}
-            />
-        </div>
+                        <DeleteButton
+                            title={`Remove format "${format.name}".`}
+                            onClick={() => { removeFormat(format.id); }}
+                        />
+                    </>
+                </SortableItem>
+            )}
+        />
     );
 }
 

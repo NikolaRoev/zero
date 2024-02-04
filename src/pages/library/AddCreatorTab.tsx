@@ -209,9 +209,15 @@ export default function AddCreatorTab() {
                                         className="w-[1%] p-[5px] text-xs"
                                         title={work.progress}
                                     >{work.progress}</TableCell>
-                                    <TableCell className="w-[1%] p-[5px] text-xs">{dataContext.statuses.get(work.status)?.name}</TableCell>
-                                    <TableCell className="w-[1%] p-[5px] text-xs">{dataContext.types.get(work.type)?.name}</TableCell>
-                                    <TableCell className="w-[1%] p-[5px] text-xs">{dataContext.formats.get(work.format)?.name}</TableCell>
+                                    <TableCell className="w-[1%] p-[5px] text-xs">
+                                        {dataContext.statuses.find((status) => status.id === work.status)?.name}
+                                    </TableCell>
+                                    <TableCell className="w-[1%] p-[5px] text-xs">
+                                        {dataContext.types.find((type) => type.id === work.type)?.name}
+                                    </TableCell>
+                                    <TableCell className="w-[1%] p-[5px] text-xs">
+                                        {dataContext.formats.find((format) => format.id === work.format)?.name}
+                                    </TableCell>
                                     <TableCell
                                         className="w-[1%] p-[5px] text-xs"
                                         title={formatISO9075(work.updated)}

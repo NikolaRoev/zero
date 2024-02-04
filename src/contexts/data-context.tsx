@@ -13,9 +13,9 @@ import { useWorks } from "../hooks/work-hooks";
 type DataContextContents = {
     works: Map<number, Work>,
     creators: Map<number, Creator>,
-    statuses: Map<number, Status>,
-    types: Map<number, Type>,
-    formats: Map<number, Format>,
+    statuses: Status[],
+    types: Type[],
+    formats: Format[],
 
     getStatus: (id: number) => Status,
     getType: (id: number) => Type,
@@ -46,8 +46,13 @@ type DataContextContents = {
 
     updateStatusName: (id: number, name: string) => void,
     updateStatusIsUpdate: (id: number, isUpdate: boolean) => void,
+    reorderStatuses: (activeId: number, overId: number) => void,
+
     updateTypeName: (id: number, name: string) => void,
-    updateFormatName: (id: number, name: string) => void
+    reorderTypes: (activeId: number, overId: number) => void,
+
+    updateFormatName: (id: number, name: string) => void,
+    reorderFormats: (activeId: number, overId: number) => void,
 }
 
 export const DataContext = createContext<DataContextContents | null>(null);
@@ -163,8 +168,13 @@ export default function DataContextProvider({ children }: { children: React.Reac
 
             updateStatusName: statuses.updateStatusName,
             updateStatusIsUpdate: statuses.updateStatusIsUpdate,
+            reorderStatuses: statuses.reorderStatuses,
+
             updateTypeName: types.updateTypeName,
-            updateFormatName: formats.updateFormatName
+            reorderTypes: types.reorderTypes,
+
+            updateFormatName: formats.updateFormatName,
+            reorderFormats: formats.reorderFormats
         }}>{children}</DataContext.Provider>
     );
 }

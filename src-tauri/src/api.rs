@@ -405,6 +405,27 @@ pub fn update_status_is_update(database: tauri::State<Mutex<Database>>, id: i64,
 }
 
 #[tauri::command]
+pub fn reorder_statuses(database: tauri::State<Mutex<Database>>, active_id: i64, over_id: i64) -> Result<(), String> {
+    log::info!("Reordering statuses [{active_id} -> {over_id}].");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let guard = database.lock().unwrap();
+        guard.reorder("statuses", &active_id, &over_id)
+    };
+
+    match inner() {
+        Ok(()) => {
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to reorder statuses [{active_id} -> {over_id}]: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
 pub fn remove_work(database: tauri::State<Mutex<Database>>, id: i64) -> Result<(), String> {
     log::info!("Removing work [{id}].");
 
@@ -553,6 +574,27 @@ pub fn update_type_name(database: tauri::State<Mutex<Database>>, id: i64, name: 
 }
 
 #[tauri::command]
+pub fn reorder_types(database: tauri::State<Mutex<Database>>, active_id: i64, over_id: i64) -> Result<(), String> {
+    log::info!("Reordering types [{active_id} -> {over_id}].");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let guard = database.lock().unwrap();
+        guard.reorder("types", &active_id, &over_id)
+    };
+
+    match inner() {
+        Ok(()) => {
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to reorder types [{active_id} -> {over_id}]: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
 pub fn add_format(database: tauri::State<Mutex<Database>>, name: String) -> Result<i64, String> {
     log::info!("Adding format: {name}.");
 
@@ -631,6 +673,27 @@ pub fn update_format_name(database: tauri::State<Mutex<Database>>, id: i64, name
         },
         Err(err) => {
             let message = format!("Failed to update format [{id}] name: {err}.");
+            log::error!("{message}");
+            Err(message)
+        }
+    }
+}
+
+#[tauri::command]
+pub fn reorder_formats(database: tauri::State<Mutex<Database>>, active_id: i64, over_id: i64) -> Result<(), String> {
+    log::info!("Reordering formats [{active_id} -> {over_id}].");
+
+    let inner = || -> Result<(), Box<dyn std::error::Error>>  {
+        let guard = database.lock().unwrap();
+        guard.reorder("formats", &active_id, &over_id)
+    };
+
+    match inner() {
+        Ok(()) => {
+            Ok(())
+        },
+        Err(err) => {
+            let message = format!("Failed to reorder formats [{active_id} -> {over_id}]: {err}.");
             log::error!("{message}");
             Err(message)
         }

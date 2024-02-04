@@ -73,7 +73,7 @@ export default function WorkPage({ id }: { id: number }) {
                     onChange={(value) => { dataContext.updateWorkStatus(work.id, parseInt(value)); }}
                     selectMsg="Change Status"
                 >
-                    {Array.from(dataContext.statuses.values()).map((status) => (
+                    {dataContext.statuses.map((status) => (
                         <Option key={status.id} value={status.id.toString()}>{status.name}</Option>
                     ))}
                 </Select>
@@ -85,7 +85,7 @@ export default function WorkPage({ id }: { id: number }) {
                     onChange={(value) => { dataContext.updateWorkType(work.id, parseInt(value)); }}
                     selectMsg="Change Type"
                 >
-                    {Array.from(dataContext.types.values()).map((type) => (
+                    {dataContext.types.map((type) => (
                         <Option key={type.id} value={type.id.toString()}>{type.name}</Option>
                     ))}
                 </Select>
@@ -97,7 +97,7 @@ export default function WorkPage({ id }: { id: number }) {
                     onChange={(value) => { dataContext.updateWorkFormat(work.id, parseInt(value)); }}
                     selectMsg="Change Format"
                 >
-                    {Array.from(dataContext.formats.values()).map((format) => (
+                    {dataContext.formats.map((format) => (
                         <Option key={format.id} value={format.id.toString()}>{format.name}</Option>
                     ))}
                 </Select>
