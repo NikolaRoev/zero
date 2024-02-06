@@ -14,8 +14,8 @@ import { useState } from "react";
 export default function CreatorsTab() {
     const { creators } = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
-    const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType }>(
-        StorageKey.LibraryCreatorsFilter, { value: "", comparatorType: "None" }
+    const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType, editDistance: number }>(
+        StorageKey.LibraryCreatorsFilter, { value: "", comparatorType: "None", editDistance: 10 }
     );
     const [comparator, setComparator] = useState<(value: string) => boolean>(() => () => false);
 
@@ -28,7 +28,9 @@ export default function CreatorsTab() {
                     setComparator={setComparator}
                     filter={filter.value}
                     comparatorType={filter.comparatorType}
-                    setComparatorType={(newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); } }
+                    setComparatorType={(newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); }}
+                    editDistance={filter.editDistance}
+                    setEditDistance={(editDistance) => { setFilter({ ...filter, editDistance: editDistance }); }}
                     name="creators-search-input"
                     onChange={(event) => { setFilter({ ...filter, value: event.target.value }); }}
                 />

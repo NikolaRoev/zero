@@ -24,8 +24,8 @@ type AddListProps<T> = {
 }
 
 export default function AddList<T>(props: AddListProps<T>) {
-    const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType }>(
-        props.storageKey, { value: "", comparatorType: "None" }
+    const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType, editDistance: number }>(
+        props.storageKey, { value: "", comparatorType: "None", editDistance: 10 }
     );
     const [comparator, setComparator] = useState<(value: string) => boolean>(() => () => false);
 
@@ -36,6 +36,8 @@ export default function AddList<T>(props: AddListProps<T>) {
                 filter={filter.value}
                 comparatorType={filter.comparatorType}
                 setComparatorType={(newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); }}
+                editDistance={filter.editDistance}
+                setEditDistance={(editDistance) => { setFilter({ ...filter, editDistance: editDistance }); }}
                 name={props.inputName}
                 onChange={(event) => { setFilter({ ...filter, value: event.target.value }); }}
                 className="grow"

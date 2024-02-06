@@ -46,8 +46,8 @@ function UpdateWorkRow(props: UpdateWorkRowProps) {
 export default function UpdateTab() {
     const { works, statuses, updateWorkName, updateWorkProgress } = useSafeContext(DataContext);
     const filterInput = useRef<HTMLInputElement>(null);
-    const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType }>(
-        StorageKey.UpdateFilter, { value: "", comparatorType: "None" }
+    const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType, editDistance: number }>(
+        StorageKey.UpdateFilter, { value: "", comparatorType: "None", editDistance: 10 }
     );
     const [comparator, setComparator] = useState<(value: string) => boolean>(() => () => false);
     const [editingIds, setEditingIds] = useState<number[]>([]);
@@ -80,7 +80,9 @@ export default function UpdateTab() {
                 setComparator={setComparator}
                 filter={filter.value}
                 comparatorType={filter.comparatorType}
-                setComparatorType={(newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); } }
+                setComparatorType={(newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); }}
+                editDistance={filter.editDistance}
+                setEditDistance={(editDistance) => { setFilter({ ...filter, editDistance: editDistance }); }}
                 name={"update-search-input"}
                 onChange={(event) => {
                     setFilter({ ...filter, value: event.target.value });

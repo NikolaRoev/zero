@@ -29,7 +29,7 @@ type NavigationAction =
 type NavigationContextData = {
     navigationData: NavigationData,
     navigationDispatch: React.Dispatch<NavigationAction>
-};
+}
 
 export const NavigationContext = createContext<NavigationContextData | null>(null);
 

@@ -22,6 +22,7 @@ type By = "name" | "progress";
 type Filter = {
     value: string,
     comparatorType: ComparatorType,
+    editDistance: number,
     by: By,
     statuses: number[],
     types: number[],
@@ -33,6 +34,7 @@ type Filter = {
 const emptyFilter: Filter = {
     value: "",
     comparatorType: "None",
+    editDistance: 10,
     by: "name",
     statuses: [],
     types: [],
@@ -45,6 +47,7 @@ type FilterAction =
     { action: "Clear" } |
     { action: "ChangeValue", value: string } |
     { action: "ChangeComparatorType", comparatorType: ComparatorType } |
+    { action: "ChangeEditDistance", editDistance: number } |
     { action: "ChangeBy", by: By } |
     { action: "AddStatus", status: number } |
     { action: "RemoveStatus", status: number } |
@@ -63,6 +66,8 @@ function filterReducer(filter: Filter, action: FilterAction): Filter {
             return { ...filter, value: action.value };
         case "ChangeComparatorType":
             return { ...filter, comparatorType: action.comparatorType };
+        case "ChangeEditDistance":
+            return { ...filter, editDistance: action.editDistance };
         case "ChangeBy":
             return { ...filter, by: action.by };
         case "AddStatus":
@@ -167,6 +172,10 @@ export default function WorksTab() {
                         comparatorType={filter.comparatorType}
                         setComparatorType={(newComparatorType) => {
                             filterDispatch({ action: "ChangeComparatorType", comparatorType: newComparatorType });
+                        }}
+                        editDistance={filter.editDistance}
+                        setEditDistance={(editDistance) => {
+                            filterDispatch({ action: "ChangeEditDistance", editDistance: editDistance });
                         }}
                         name={"works-search-input"}
                         onChange={(event) => { filterDispatch({ action: "ChangeValue", value: event.target.value }); }}

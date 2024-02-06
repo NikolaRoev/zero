@@ -11,7 +11,9 @@ type InputProps = {
     onChange: React.ChangeEventHandler<HTMLInputElement>,
     placeholder?: string,
     type?: string
-    required?: boolean
+    required?: boolean,
+    min?: number | undefined,
+    max?: number | undefined
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(function Input(props, ref) {
@@ -30,6 +32,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(props, ref
             placeholder={props.placeholder}
             type={props.type}
             required={props.required}
+            min={props.min}
+            max={props.max}
             spellCheck={false}
             autoComplete="off"
         />
