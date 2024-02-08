@@ -25,9 +25,10 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let menu_handle = window.menu_handle();
     
     let mut database = crate::database::Database::default();
-    if let Some(last) = &config.last_database {
+    if let Some(ref last) = config.last_database {
         log::info!("Opening last database: {last:?}");
         database.open(last)?;
+        window.set_title(&format!("zero - {}", last.display()))?;
         config.add_recent_database(last.clone());
         set_menu_state(&menu_handle, true)?;
     }

@@ -26,6 +26,8 @@ pub fn open_database(
         set_recent_menu(&menu_handle, &config_guard.recent_databases)?;
         set_menu_state(&menu_handle, true)?;
 
+        window.set_title(&format!("zero - {}", path.display()))?;
+
         Ok(window.emit(crate::event::OPENED_DATABASE_EVENT, path)?)
     };
 
@@ -57,6 +59,8 @@ pub fn close_database(
         config_guard.last_database = None;
 
         set_menu_state(&window.menu_handle(), false)?;
+
+        window.set_title("zero")?;
 
         Ok(window.emit(crate::event::CLOSED_DATABASE_EVENT, ())?)
     };
