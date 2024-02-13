@@ -33,6 +33,7 @@ export default function CreatorsTab() {
                     setEditDistance={(editDistance) => { setFilter({ ...filter, editDistance: editDistance }); }}
                     name="creators-search-input"
                     onChange={(event) => { setFilter({ ...filter, value: event.target.value }); }}
+                    autoFocus
                 />
             </div>
 

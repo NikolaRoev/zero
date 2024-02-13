@@ -89,6 +89,7 @@ export default function UpdateTab() {
                     setEditingIds([]);
                 }}
                 className="mx-[5px] mt-[10px]"
+                autoFocus
             />
             <Virtuoso
                 data={updateWorksItems}

@@ -91,6 +91,7 @@ export default function StatusesTab() {
                     onChange={(event) => { setStatusInput(event.target.value); }}
                     placeholder="Status"
                     required={true}
+                    autoFocus
                 />
                 <Button>Add</Button>
             </form>

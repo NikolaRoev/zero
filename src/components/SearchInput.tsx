@@ -148,20 +148,17 @@ function ComparatorBar(props: ComparatorBarProps) {
 
 
 
-type SearchInputProps = {
+interface SearchInputProps extends React.ComponentPropsWithoutRef<"input"> {
     filter: string,
     comparatorType: ComparatorType,
     setComparatorType: (newComparatorType: ComparatorType) => void,
     setComparator: (newComparator: () => (value: string) => boolean) => void,
     editDistance: number,
-    setEditDistance: (editDistance: number) => void,
-    name: string | undefined,
-    onChange: React.ChangeEventHandler<HTMLInputElement>,
-    className?: string
+    setEditDistance: (editDistance: number) => void
 }
 
 export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
-    function SearchInput({ filter, comparatorType, setComparatorType, setComparator, name, onChange, className, editDistance, setEditDistance }, ref) {
+    function SearchInput({ filter, comparatorType, setComparatorType, setComparator, editDistance, setEditDistance, className, ...props }, ref) {
         const [error, setError] = useState<string | null>(null);
         
 
@@ -209,11 +206,10 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
                 <Input
                     ref={ref}
                     className={clsx("grow", { "border-red-500": error !== null })}
-                    name={name}
                     value={filter}
                     placeholder="Find"
                     type="search"
-                    onChange={onChange}
+                    {...props}
                 />
                 {error && <span
                     className="p-[3px] absolute w-[100%] top-[100%] z-50 bg-neutral-50 text-sm border border-red-500 rounded"

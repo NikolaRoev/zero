@@ -79,6 +79,7 @@ export default function FormatsTab() {
                     onChange={(event) => { setFormatInput(event.target.value); }}
                     placeholder="Format"
                     required={true}
+                    autoFocus
                 />
                 <Button>Add</Button>
             </form>

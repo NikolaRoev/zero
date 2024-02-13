@@ -180,6 +180,7 @@ export default function WorksTab() {
                         name={"works-search-input"}
                         onChange={(event) => { filterDispatch({ action: "ChangeValue", value: event.target.value }); }}
                         className="grow"
+                        autoFocus
                     />
                     <Select
                         name="works-search-select"

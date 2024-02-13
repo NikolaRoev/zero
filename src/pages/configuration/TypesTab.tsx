@@ -80,6 +80,7 @@ export default function TypesTab() {
                     onChange={(event) => { setTypeInput(event.target.value); }}
                     placeholder="Type"
                     required={true}
+                    autoFocus
                 />
                 <Button>Add</Button>
             </form>

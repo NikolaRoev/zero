@@ -1,41 +1,24 @@
+import React, { forwardRef } from "react";
 import clsx from "clsx";
-import { forwardRef } from "react";
 
 
 
-type InputProps = {
-    id?: string,
-    className?: string,
-    name?: string | undefined,
-    value?: string | number | readonly string[],
-    onChange: React.ChangeEventHandler<HTMLInputElement>,
-    placeholder?: string,
-    type?: string
-    required?: boolean,
-    min?: number | undefined,
-    max?: number | undefined
+interface InputProps extends React.ComponentPropsWithoutRef<"input"> {
+    className?: string | undefined
 }
 
-const Input = forwardRef<HTMLInputElement, InputProps>(function Input(props, ref) {
+const Input = forwardRef<HTMLInputElement, InputProps>(function Input({ className, ...props }, ref) {
     return (
         <input
-            id={props.id}
+            ref={ref}
             className={clsx(
                 "px-[5px] py-[2px] border border-neutral-700 rounded overflow-ellipsis",
                 "focus:outline-none focus:shadow-[inset_0px_-2px_2px_-2px_#404040]",
-                props.className
+                className
             )}
-            ref={ref}
-            name={props.name}
-            value={props.value}
-            onChange={props.onChange}
-            placeholder={props.placeholder}
-            type={props.type}
-            required={props.required}
-            min={props.min}
-            max={props.max}
             spellCheck={false}
             autoComplete="off"
+            {...props}
         />
     );
 });
