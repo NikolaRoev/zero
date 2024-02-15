@@ -158,7 +158,16 @@ interface SearchInputProps extends React.ComponentPropsWithoutRef<"input"> {
 }
 
 export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
-    function SearchInput({ filter, comparatorType, setComparatorType, setComparator, editDistance, setEditDistance, className, ...props }, ref) {
+    function SearchInput({
+        filter,
+        comparatorType,
+        setComparatorType,
+        setComparator,
+        editDistance,
+        setEditDistance,
+        className,
+        ...props
+    }, ref) {
         const [error, setError] = useState<string | null>(null);
         
 

@@ -60,6 +60,7 @@ export function NavButton({ children, className, title, onClick }: NavButtonProp
             className={clsx("relative", className)}
             title={title}
             type="button"
+            onContextMenu={(e) => { e.preventDefault(); setNavPanelOpen(true); }}
         >{children}</button>
     );
 }
