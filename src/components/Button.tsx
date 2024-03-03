@@ -1,16 +1,17 @@
 import clsx from "clsx";
+import { forwardRef } from "react";
 
-type ButtonProps = {
+
+
+interface ButtonProps extends React.ComponentPropsWithoutRef<"button"> {
     children: React.ReactNode,
-    className?: string,
-    type?: "submit" | "reset" | "button";
-    onClick?: React.MouseEventHandler<HTMLButtonElement>,
-    title?: string
+    className?: string | undefined
 }
 
-export default function Button({ children, className, onClick, title, type }: ButtonProps) {
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button({ children, className, ...props }, ref) {
     return (
         <button
+            ref={ref}
             className={clsx(
                 "px-[5px]",
                 "border border-neutral-800 rounded",
@@ -18,9 +19,9 @@ export default function Button({ children, className, onClick, title, type }: Bu
                 "select-none",
                 className
             )}
-            type={type}
-            onClick={onClick}
-            title={title}
+            {...props}
         >{children}</button>
     );
-}
+});
+
+export default Button;

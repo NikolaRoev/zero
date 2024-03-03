@@ -10,6 +10,7 @@ import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
 import clsx from "clsx";
 import { toast } from "react-toastify";
+import { useRef } from "react";
 import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer-hook";
 
@@ -67,10 +68,12 @@ export default function AddCreatorTab() {
         addCreatorFormReducer,
         emptyAddCreatorFormData
     );
+    const addButtonRef = useRef<HTMLButtonElement>(null);
 
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        if (addButtonRef.current) { addButtonRef.current.disabled = true; }
 
         const creator: data.Creator = {
             id: 0,
@@ -83,7 +86,7 @@ export default function AddCreatorTab() {
                 onClick={() => { navigationDispatch({ action: "New", page: { type: "Creator", id: id}}); }}
             >{`Added creator "${addCreatorFormData.name}".`}</div>);
             addCreatorFormDispatch({ action: "Clear" });
-        });
+        }, () => { if (addButtonRef.current) { addButtonRef.current.disabled = false; } });
     }
 
 
@@ -261,7 +264,7 @@ export default function AddCreatorTab() {
                     </div>
                 </div>
                 <div className="col-span-9 flex justify-between">
-                    <Button className="w-[100px]">Add</Button>
+                    <Button ref={addButtonRef} className="w-[100px]">Add</Button>
                     <Button
                         className="w-[100px]"
                         type="button"

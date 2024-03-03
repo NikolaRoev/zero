@@ -57,14 +57,17 @@ export default function FormatsTab() {
     const { addFormat } = useSafeContext(DataContext);
     const [formatInput, setFormatInput] = useState("");
     const formatInputRef = useRef<HTMLInputElement>(null);
+    const addButtonRef = useRef<HTMLButtonElement>(null);
 
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        if (addButtonRef.current) { addButtonRef.current.disabled = true; }
+
         addFormat(formatInput, () => {
             setFormatInput("");
             if (formatInputRef.current?.value) { formatInputRef.current.value = ""; }
-        });
+        }, () => { if (addButtonRef.current) { addButtonRef.current.disabled = false; } });
     }
 
 
@@ -81,7 +84,7 @@ export default function FormatsTab() {
                     required={true}
                     autoFocus
                 />
-                <Button>Add</Button>
+                <Button ref={addButtonRef}>Add</Button>
             </form>
             <FormatsList />
         </div>

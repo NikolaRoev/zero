@@ -29,14 +29,14 @@ export function useStatuses() {
         });
     }
 
-    function addStatus(name: string, callback: () => void) {
+    function addStatus(name: string, callback: () => void, cleanUp: () => void) {
         api.addStatus(name).then((id) => {
             setStatuses([...statuses, { id: id, name: name, isUpdate: false }]);
             callback();
         }).catch(async (reason) => {
             getStatuses();
             await message(`${reason}`, { title: "Failed to add Status.", type: "error" });
-        });
+        }).finally(() => { cleanUp(); });
     }
 
     function removeStatus(id: number) {

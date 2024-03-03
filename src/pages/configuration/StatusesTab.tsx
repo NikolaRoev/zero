@@ -68,15 +68,17 @@ export default function StatusesTab() {
     const { addStatus } = useSafeContext(DataContext);
     const [statusInput, setStatusInput] = useState("");
     const statusInputRef = useRef<HTMLInputElement>(null);
+    const addButtonRef = useRef<HTMLButtonElement>(null);
 
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        if (addButtonRef.current) { addButtonRef.current.disabled = true; }
+
         addStatus(statusInput, () => {
             setStatusInput("");
             if (statusInputRef.current?.value) { statusInputRef.current.value = ""; }
-        });
-        
+        }, () => { if (addButtonRef.current) { addButtonRef.current.disabled = false; } });
     }
 
 
@@ -93,7 +95,7 @@ export default function StatusesTab() {
                     required={true}
                     autoFocus
                 />
-                <Button>Add</Button>
+                <Button ref={addButtonRef}>Add</Button>
             </form>
             <StatusesList />
         </div>

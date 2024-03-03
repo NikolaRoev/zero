@@ -29,14 +29,14 @@ export default function useFormats() {
         });
     }
 
-    function addFormat(name: string, callback: () => void) {
+    function addFormat(name: string, callback: () => void, cleanUp: () => void) {
         api.addFormat(name).then((id) => {
             setFormats([...formats, { id: id, name: name }]);
             callback();
         }).catch(async (reason) => {
             getFormats();
             await message(`${reason}`, { title: "Failed to add Format.", type: "error" });
-        });
+        }).finally(() => { cleanUp(); });
     }
 
     function removeFormat(id: number) {

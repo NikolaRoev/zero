@@ -29,14 +29,14 @@ export default function useTypes() {
         });
     }
 
-    function addType(name: string, callback: () => void) {
+    function addType(name: string, callback: () => void, cleanUp: () => void) {
         api.addType(name).then((id) => {
             setTypes([...types, { id: id, name: name }]);
             callback();
         }).catch(async (reason) => {
             getTypes();
             await message(`${reason}`, { title: "Failed to add Type.", type: "error" });
-        });
+        }).finally(() => { cleanUp(); });
     }
 
     function removeType(id: number) {

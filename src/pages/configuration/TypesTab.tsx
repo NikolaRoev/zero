@@ -57,15 +57,17 @@ export default function TypesTab() {
     const { addType } = useSafeContext(DataContext);
     const [typeInput, setTypeInput] = useState("");
     const typeInputRef = useRef<HTMLInputElement>(null);
+    const addButtonRef = useRef<HTMLButtonElement>(null);
 
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        if (addButtonRef.current) { addButtonRef.current.disabled = true; }
+
         addType(typeInput, () => {
             setTypeInput("");
             if (typeInputRef.current?.value) { typeInputRef.current.value = ""; }
-        });
-        
+        }, () => { if (addButtonRef.current) { addButtonRef.current.disabled = false; } });
     }
 
 
@@ -82,7 +84,7 @@ export default function TypesTab() {
                     required={true}
                     autoFocus
                 />
-                <Button>Add</Button>
+                <Button ref={addButtonRef}>Add</Button>
             </form>
             <TypesList />
         </div>

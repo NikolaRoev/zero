@@ -10,6 +10,7 @@ import { NavigationContext } from "../../contexts/navigation-context";
 import { StorageKey } from "../../data/storage";
 import clsx from "clsx";
 import { toast } from "react-toastify";
+import { useRef } from "react";
 import useSafeContext from "../../hooks/safe-context-hook";
 import useSessionReducer from "../../hooks/session-reducer-hook";
 
@@ -88,16 +89,19 @@ export default function AddWorkTab() {
         addWorkFormReducer,
         emptyAddWorkFormData
     );
+    const addButtonRef = useRef<HTMLButtonElement>(null);
 
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-
+        
         const status = dataContext.statuses[addWorkFormData.statusIndex];
         const type = dataContext.types[addWorkFormData.typeIndex];
         const format = dataContext.formats[addWorkFormData.formatIndex];
 
         if (status && type && format) {
+            if (addButtonRef.current) { addButtonRef.current.disabled = true; }
+
             const timestamp = Date.now();
             const work: data.Work = {
                 id: 0,
@@ -116,7 +120,7 @@ export default function AddWorkTab() {
                     onClick={() => { navigationDispatch({ action: "New", page: { type: "Work", id: id}}); }}
                 >{`Added work "${addWorkFormData.name}".`}</div>);
                 addWorkFormDispatch({ action: "Clear" });
-            });
+            }, () => { if (addButtonRef.current) { addButtonRef.current.disabled = false; } });
         }
     }
 
@@ -265,7 +269,7 @@ export default function AddWorkTab() {
                     </div>
                 </div>
                 <div className="col-span-9 flex justify-between">
-                    <Button className="w-[100px]">Add</Button>
+                    <Button ref={addButtonRef} className="w-[100px]">Add</Button>
                     <Button
                         className="w-[100px]"
                         type="button"

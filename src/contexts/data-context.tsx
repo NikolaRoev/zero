@@ -21,11 +21,11 @@ type DataContextContents = {
     getType: (id: number) => Type,
     getFormat: (id: number) => Format,
 
-    addWork: (work: Work, callback: (id: number) => void) => void,
-    addCreator: (creator: Creator, callback: (id: number) => void) => void,
-    addStatus: (status: string, callback: () => void) => void,
-    addType: (type: string, callback: () => void) => void,
-    addFormat: (format: string, callback: () => void) => void,
+    addWork: (work: Work, callback: (id: number) => void, cleanUp: () => void) => void,
+    addCreator: (creator: Creator, callback: (id: number) => void, cleanUp: () => void) => void,
+    addStatus: (status: string, callback: () => void, cleanUp: () => void) => void,
+    addType: (type: string, callback: () => void, cleanUp: () => void) => void,
+    addFormat: (format: string, callback: () => void, cleanUp: () => void) => void,
 
     removeWork: (id: number, callback: () => void) => void,
     removeCreator: (id: number, callback: () => void) => void,
@@ -66,24 +66,24 @@ export default function DataContextProvider({ children }: { children: React.Reac
     const formats = useFormats();
 
 
-    function addWork(work: Work, callback: (id: number) => void) {
+    function addWork(work: Work, callback: (id: number) => void, cleanUp: () => void) {
         api.addWork(work).then((workId) => {
             works.addWork({ ...work, id: workId });
             work.creators.map((creatorId) => { creators.attach(workId, creatorId); });
             callback(workId);
         }).catch(async (reason: string) => {
             await message(reason, { title: "Failed to add Work.", type: "error" });
-        });
+        }).finally(() => { cleanUp(); });
     }
 
-    function addCreator(creator: Creator, callback: (id: number) => void) {
+    function addCreator(creator: Creator, callback: (id: number) => void, cleanUp: () => void) {
         api.addCreator(creator).then((creatorId) => {
             creators.addCreator({ ...creator, id: creatorId });
             creator.works.map((workId) => { works.attach(workId, creatorId); });
             callback(creatorId);
         }).catch(async (reason: string) => {
             await message(reason, { title: "Failed to add Creator.", type: "error" });
-        });
+        }).finally(() => { cleanUp(); });
     }
 
     function removeWork(id: number, callback: () => void) {
