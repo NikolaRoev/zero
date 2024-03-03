@@ -17,7 +17,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input({ classNam
                 className
             )}
             spellCheck={false}
-            autoComplete="off"
+            autoComplete="false"
+            aria-autocomplete="none"
             {...props}
         />
     );
