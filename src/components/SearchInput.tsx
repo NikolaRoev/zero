@@ -214,7 +214,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
             <div className={clsx("relative flex items-center", className)}>
                 <Input
                     ref={ref}
-                    className={clsx("grow", { "border-red-500": error !== null })}
+                    className={clsx("grow border-r-0 rounded-r-none", { "border-red-500": error !== null })}
                     value={filter}
                     placeholder="Find"
                     type="search"
@@ -224,7 +224,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
                     className="p-[3px] absolute w-[100%] top-[100%] z-50 bg-neutral-50 text-sm border border-red-500 rounded"
                 >{error}</span>}
                 <ComparatorBar
-                    className="absolute right-[30px]"
+                    className="px-[5px] py-[2px] border border-neutral-700 rounded-r"
                     comparatorType={comparatorType}
                     setComparatorType={(newComparatorType: ComparatorType) => {
                         setComparatorType(newComparatorType);
