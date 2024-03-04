@@ -54,6 +54,7 @@ export default function CreatorPage({ id }: { id: number }) {
                     className="col-span-8"
                     value={creator.name}
                     placeholder="Name"
+                    title={creator.name}
                     onChange={(event) => { dataContext.updateCreatorName(creator.id, event.target.value); }}
                 />
                 <span>Works:</span>

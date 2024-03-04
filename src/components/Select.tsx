@@ -18,7 +18,7 @@ type SelectProps<T> = {
     onChange: (value: T) => void,
     className?: string,
     name?: string,
-    selectMsg?: string
+    selectMsg?: string,
     errorMsg?: string
 }
 

@@ -55,6 +55,7 @@ export default function WorkPage({ id }: { id: number }) {
                     className="col-span-8"
                     value={work.name}
                     placeholder="Name"
+                    title={work.name}
                     onChange={(event) => { dataContext.updateWorkName(work.id, event.target.value); }}
                 />
                 <label htmlFor="progress-input">Progress:</label>
@@ -63,6 +64,7 @@ export default function WorkPage({ id }: { id: number }) {
                     className="col-span-8"
                     value={work.progress}
                     placeholder="Progress"
+                    title={work.progress}
                     onChange={(event) => { dataContext.updateWorkProgress(work.id, event.target.value); }}
                 />
                 <label htmlFor="status-select">Status:</label>
