@@ -450,7 +450,7 @@ mod tests {
             ("added", &44i64)
         ])?;
         let works = database.get_works()?;
-        let added_work = works.get(0).unwrap();
+        let added_work = works.first().unwrap();
 
         assert_eq!(works.len(), 1);
         assert_eq!(added_work.id, id);
@@ -468,7 +468,7 @@ mod tests {
             ("progress", &"new_progress")
         ])?;
         let works = database.get_works()?;
-        let added_work = works.get(0).unwrap();
+        let added_work = works.first().unwrap();
 
         assert_eq!(works.len(), 1);
         assert_eq!(added_work.id, id);
@@ -510,7 +510,7 @@ mod tests {
             ("name", &"name")
         ])?;
         let creators = database.get_creators()?;
-        let added_creator = creators.get(0).unwrap();
+        let added_creator = creators.first().unwrap();
 
         assert_eq!(creators.len(), 1);
         assert_eq!(added_creator.id, id);
@@ -521,7 +521,7 @@ mod tests {
             ("name", &"new_name")
         ])?;
         let creators = database.get_creators()?;
-        let added_creator = creators.get(0).unwrap();
+        let added_creator = creators.first().unwrap();
 
         assert_eq!(creators.len(), 1);
         assert_eq!(added_creator.id, id);
@@ -543,7 +543,7 @@ mod tests {
         // Add.
         let id = database.add("statuses", vec![("name", &"status")])?;
         let statuses = database.get_statuses()?;
-        let added_status = statuses.get(0).unwrap();
+        let added_status = statuses.first().unwrap();
 
         assert_eq!(statuses.len(), 1);
         assert_eq!(added_status.id, id);
@@ -554,7 +554,7 @@ mod tests {
             ("name", &"new_name")
         ])?;
         let statuses = database.get_statuses()?;
-        let added_status = statuses.get(0).unwrap();
+        let added_status = statuses.first().unwrap();
 
         assert_eq!(statuses.len(), 1);
         assert_eq!(added_status.id, id);
@@ -576,7 +576,7 @@ mod tests {
         // Add.
         let id = database.add("types", vec![("name", &"type")])?;
         let types = database.get_types()?;
-        let added_type = types.get(0).unwrap();
+        let added_type = types.first().unwrap();
 
         assert_eq!(types.len(), 1);
         assert_eq!(added_type.id, id);
@@ -587,7 +587,7 @@ mod tests {
             ("name", &"new_name")
         ])?;
         let types = database.get_types()?;
-        let added_type = types.get(0).unwrap();
+        let added_type = types.first().unwrap();
 
         assert_eq!(types.len(), 1);
         assert_eq!(added_type.id, id);
@@ -609,7 +609,7 @@ mod tests {
         // Add.
         let id = database.add("formats", vec![("name", &"format")])?;
         let formats = database.get_formats()?;
-        let added_format = formats.get(0).unwrap();
+        let added_format = formats.first().unwrap();
 
         assert_eq!(formats.len(), 1);
         assert_eq!(added_format.id, id);
@@ -620,7 +620,7 @@ mod tests {
             ("name", &"new_name")
         ])?;
         let formats = database.get_formats()?;
-        let added_format = formats.get(0).unwrap();
+        let added_format = formats.first().unwrap();
 
         assert_eq!(formats.len(), 1);
         assert_eq!(added_format.id, id);
@@ -683,9 +683,9 @@ mod tests {
         ])?;
         database.attach(work_id, creator_id)?;
         let works = database.get_works()?;
-        let added_work = works.get(0).unwrap();
+        let added_work = works.first().unwrap();
         let creators = database.get_creators()?;
-        let added_creator = creators.get(0).unwrap();
+        let added_creator = creators.first().unwrap();
 
         assert_eq!(added_work.creators.len(), 1);
         assert_eq!(added_creator.works.len(), 1);
@@ -694,9 +694,9 @@ mod tests {
 
         database.detach(work_id, creator_id)?;
         let works = database.get_works()?;
-        let added_work = works.get(0).unwrap();
+        let added_work = works.first().unwrap();
         let creators = database.get_creators()?;
-        let added_creator = creators.get(0).unwrap();
+        let added_creator = creators.first().unwrap();
 
         assert_eq!(added_work.creators.len(), 0);
         assert_eq!(added_creator.works.len(), 0);
@@ -739,7 +739,7 @@ mod tests {
         database.attach(work_id, creator_id)?;
         database.remove("works", work_id)?;
         let creators = database.get_creators()?;
-        let added_creator = creators.get(0).unwrap();
+        let added_creator = creators.first().unwrap();
 
         assert_eq!(added_creator.works.len(), 0);
 
@@ -768,7 +768,7 @@ mod tests {
         database.attach(work_id, creator_id)?;
         database.remove("creators", creator_id)?;
         let works = database.get_works()?;
-        let added_work = works.get(0).unwrap();
+        let added_work = works.first().unwrap();
 
         assert_eq!(added_work.creators.len(), 0);
 
