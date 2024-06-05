@@ -2,6 +2,7 @@ import * as api from "../data/api";
 import * as event from "../data/events";
 import { Tab, Tabs } from "../components/Tabs";
 import { useDatabase, useRecentDatabases } from "../hooks/database-hooks";
+import { useEffect, useState } from "react";
 import { BsX } from "react-icons/bs";
 import ConfigurationTab from "./configuration/ConfigurationTab";
 import DataContextProvider from "../contexts/data-context";
@@ -12,7 +13,6 @@ import { StorageKey } from "../data/storage";
 import UpdateTab from "./update/UpdateTab";
 import clsx from "clsx";
 import { message } from "@tauri-apps/api/dialog";
-import { useState } from "react";
 import useTauriEvent from "../hooks/tauri-event-hook";
 
 
@@ -120,6 +120,19 @@ function MainScreen() {
 
 export default function App() {
     const { path, isLoaded } = useDatabase();
+
+    useEffect(() => {
+        const handleFindEvent = (event: KeyboardEvent) => {
+            if (event.ctrlKey && event.key === "f") {
+                event.preventDefault();
+            }
+        };
+        window.addEventListener("keydown", handleFindEvent);
+
+        return () => {
+            window.removeEventListener("keydown", handleFindEvent);
+        };
+    }, []);
 
     return (
         <>

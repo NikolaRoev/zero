@@ -167,9 +167,10 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
         setEditDistance,
         className,
         ...props
-    }, ref) {
+    }) {
         const [error, setError] = useState<string | null>(null);
-        
+        const filterInput = useRef<HTMLInputElement>(null);
+
 
         useEffect(() => {
             switch (comparatorType) {
@@ -209,11 +210,26 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
             }
         }, [comparatorType, editDistance, filter, setComparator]);
 
+        useEffect(() => {
+            const handleFindEvent = (event: KeyboardEvent) => {
+                if (event.ctrlKey && event.key === "f") {
+                    event.preventDefault();
+                    filterInput.current?.focus();
+                    filterInput.current?.select();
+                }
+            };
+            window.addEventListener("keydown", handleFindEvent);
+    
+            return () => {
+                window.removeEventListener("keydown", handleFindEvent);
+            };
+        }, []);
+
 
         return (
             <div className={clsx("relative flex items-center", className)}>
                 <Input
-                    ref={ref}
+                    ref={filterInput}
                     className={clsx("grow border-r-0 rounded-r-none", { "border-red-500": error !== null })}
                     value={filter}
                     placeholder="Find"

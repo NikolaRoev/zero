@@ -1,4 +1,4 @@
-import { type ChangeEvent, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { type ComparatorType, SearchInput } from "../../components/SearchInput";
 import { DataContext } from "../../contexts/data-context";
 import { StorageKey } from "../../data/storage";
@@ -45,29 +45,11 @@ function UpdateWorkRow(props: UpdateWorkRowProps) {
 
 export default function UpdateTab() {
     const { works, statuses, updateWorkName, updateWorkProgress } = useSafeContext(DataContext);
-    const filterInput = useRef<HTMLInputElement>(null);
     const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType, editDistance: number }>(
         StorageKey.UpdateFilter, { value: "", comparatorType: "None", editDistance: 10 }
     );
     const [comparator, setComparator] = useState<(value: string) => boolean>(() => () => false);
     const [editingIds, setEditingIds] = useState<number[]>([]);
-
-
-    useEffect(() => {
-        const handleFindEvent = (event: KeyboardEvent) => {
-            if (event.ctrlKey && event.key === "f") {
-                event.preventDefault();
-                filterInput.current?.focus();
-                filterInput.current?.select();
-            }
-        };
-        window.addEventListener("keydown", handleFindEvent);
-
-        return () => {
-            window.removeEventListener("keydown", handleFindEvent);
-        };
-    }, []);
-
 
     const updateStatuses = statuses.filter((status) => status.isUpdate);
     const updateWorks = Array.from(works.values()).filter((work) => updateStatuses.find((status) => status.id === work.status));
@@ -76,7 +58,6 @@ export default function UpdateTab() {
     return (
         <div className="grow flex flex-col gap-y-[10px] bg-neutral-50">
             <SearchInput
-                ref={filterInput}
                 setComparator={setComparator}
                 filter={filter.value}
                 comparatorType={filter.comparatorType}

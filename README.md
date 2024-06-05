@@ -1,3 +1,4 @@
+- add functionality to go from update page to work page. will need restructuring. probably create a full navigation context
 - add sorting tests
 - go to current db file command (https://github.com/tauri-apps/tauri/issues/4062)
 - clean-up
