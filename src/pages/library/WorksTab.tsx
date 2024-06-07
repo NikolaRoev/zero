@@ -167,19 +167,21 @@ export default function WorksTab() {
             <div className="flex flex-col gap-y-[5px]">
                 <div className="flex gap-x-[3px]">
                     <SearchInput
-                        setComparator={setComparator}
-                        filter={filter.value}
-                        comparatorType={filter.comparatorType}
-                        setComparatorType={(newComparatorType) => {
-                            filterDispatch({ action: "ChangeComparatorType", comparatorType: newComparatorType });
+                        data={{
+                            filter: filter.value,
+                            comparatorType: filter.comparatorType,
+                            setComparatorType: (newComparatorType) => {
+                                filterDispatch({ action: "ChangeComparatorType", comparatorType: newComparatorType });
+                            },
+                            setComparator: setComparator,
+                            editDistance: filter.editDistance,
+                            setEditDistance: (editDistance) => {
+                                filterDispatch({ action: "ChangeEditDistance", editDistance: editDistance });
+                            }
                         }}
-                        editDistance={filter.editDistance}
-                        setEditDistance={(editDistance) => {
-                            filterDispatch({ action: "ChangeEditDistance", editDistance: editDistance });
-                        }}
-                        name={"works-search-input"}
                         onChange={(event) => { filterDispatch({ action: "ChangeValue", value: event.target.value }); }}
                         className="grow"
+                        name="works-search-input"
                         autoFocus
                     />
                     <Select

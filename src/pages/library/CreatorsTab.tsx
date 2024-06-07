@@ -25,14 +25,16 @@ export default function CreatorsTab() {
         <div className="px-[5px] py-[10px] grow flex flex-col gap-y-[10px]">
             <div className="flex flex-col">
                 <SearchInput
-                    setComparator={setComparator}
-                    filter={filter.value}
-                    comparatorType={filter.comparatorType}
-                    setComparatorType={(newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); }}
-                    editDistance={filter.editDistance}
-                    setEditDistance={(editDistance) => { setFilter({ ...filter, editDistance: editDistance }); }}
-                    name="creators-search-input"
+                    data={{
+                        filter: filter.value,
+                        comparatorType: filter.comparatorType,
+                        setComparatorType: (newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); },
+                        setComparator: setComparator,
+                        editDistance: filter.editDistance,
+                        setEditDistance: (editDistance) => { setFilter({ ...filter, editDistance: editDistance }); }
+                    }}
                     onChange={(event) => { setFilter({ ...filter, value: event.target.value }); }}
+                    name="creators-search-input"
                     autoFocus
                 />
             </div>

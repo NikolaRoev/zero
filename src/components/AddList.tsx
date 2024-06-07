@@ -32,15 +32,17 @@ export default function AddList<T>(props: AddListProps<T>) {
     return (
         <>
             <SearchInput
-                setComparator={setComparator}
-                filter={filter.value}
-                comparatorType={filter.comparatorType}
-                setComparatorType={(newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); }}
-                editDistance={filter.editDistance}
-                setEditDistance={(editDistance) => { setFilter({ ...filter, editDistance: editDistance }); }}
-                name={props.inputName}
+                data={{
+                    filter: filter.value,
+                    comparatorType: filter.comparatorType,
+                    setComparatorType: (newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); },
+                    setComparator: setComparator,
+                    editDistance: filter.editDistance,
+                    setEditDistance: (editDistance) => { setFilter({ ...filter, editDistance: editDistance }); }
+                }}
                 onChange={(event) => { setFilter({ ...filter, value: event.target.value }); }}
                 className="grow"
+                name={props.inputName}
             />
             <Virtuoso
                 className="border border-neutral-700 rounded"

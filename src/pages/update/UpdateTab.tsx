@@ -58,18 +58,20 @@ export default function UpdateTab() {
     return (
         <div className="grow flex flex-col gap-y-[10px] bg-neutral-50">
             <SearchInput
-                setComparator={setComparator}
-                filter={filter.value}
-                comparatorType={filter.comparatorType}
-                setComparatorType={(newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); }}
-                editDistance={filter.editDistance}
-                setEditDistance={(editDistance) => { setFilter({ ...filter, editDistance: editDistance }); }}
-                name={"update-search-input"}
+                data={{
+                    filter: filter.value,
+                    comparatorType: filter.comparatorType,
+                    setComparatorType: (newComparatorType) => { setFilter({ ...filter, comparatorType: newComparatorType }); },
+                    setComparator: setComparator,
+                    editDistance: filter.editDistance,
+                    setEditDistance: (editDistance) => { setFilter({ ...filter, editDistance: editDistance }); }
+                }}
                 onChange={(event) => {
                     setFilter({ ...filter, value: event.target.value });
                     setEditingIds([]);
                 }}
                 className="mx-[5px] mt-[10px]"
+                name="update-search-input"
                 autoFocus
             />
             <Virtuoso

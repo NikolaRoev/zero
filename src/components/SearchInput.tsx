@@ -149,65 +149,58 @@ function ComparatorBar(props: ComparatorBarProps) {
 
 
 interface SearchInputProps extends React.ComponentPropsWithoutRef<"input"> {
-    filter: string,
-    comparatorType: ComparatorType,
-    setComparatorType: (newComparatorType: ComparatorType) => void,
-    setComparator: (newComparator: () => (value: string) => boolean) => void,
-    editDistance: number,
-    setEditDistance: (editDistance: number) => void
+    data : {
+        filter: string,
+        comparatorType: ComparatorType,
+        setComparatorType: (newComparatorType: ComparatorType) => void,
+        setComparator: (newComparator: () => (value: string) => boolean) => void,
+        editDistance: number,
+        setEditDistance: (editDistance: number) => void
+    }
 }
 
-export function SearchInput({
-    filter,
-    comparatorType,
-    setComparatorType,
-    setComparator,
-    editDistance,
-    setEditDistance,
-    className,
-    ...props
-}: SearchInputProps) {
+export function SearchInput({ data, className, ...props }: SearchInputProps) {
     const [error, setError] = useState<string | null>(null);
     const filterInput = useRef<HTMLInputElement>(null);
 
 
     useEffect(() => {
-        switch (comparatorType) {
+        switch (data.comparatorType) {
             case "None": {
                 setError(null);
-                setComparator(() => (value: string) => value.toLowerCase().includes(filter.toLowerCase()));
+                data.setComparator(() => (value: string) => value.toLowerCase().includes(data.filter.toLowerCase()));
                 break;
             }
             case "ExactMatch": {
                 setError(null);
-                setComparator(() => (value: string) => value === filter);
+                data.setComparator(() => (value: string) => value === data.filter);
                 break;
             }
             case "RegEx": {
                 try {
-                    const regex = new RegExp(filter);
+                    const regex = new RegExp(data.filter);
                     setError(null);
-                    setComparator(() => (value: string) => regex.test(value));
+                    data.setComparator(() => (value: string) => regex.test(value));
                 }
                 catch (e) {
                     if (e instanceof SyntaxError) {
                         setError(e.message);
                     }
-                    setComparator(() => () => false);
+                    data.setComparator(() => () => false);
                 }
                 break;
             }
             case "Levenshtein": {
                 setError(null);
-                setComparator(() => (value: string) => levenshtein(value, filter) <= editDistance);
+                data.setComparator(() => (value: string) => levenshtein(value, data.filter) <= data.editDistance);
                 break;
             }
             default: {
-                const unreachable: never = comparatorType;
+                const unreachable: never = data.comparatorType;
                 throw new Error(`Invalid comparator type: ${unreachable}`);
             }
         }
-    }, [comparatorType, editDistance, filter, setComparator]);
+    }, [data]);
 
     useEffect(() => {
         const handleFindEvent = (event: KeyboardEvent) => {
@@ -230,7 +223,7 @@ export function SearchInput({
             <Input
                 ref={filterInput}
                 className={clsx("grow border-r-0 rounded-r-none", { "border-red-500": error !== null })}
-                value={filter}
+                value={data.filter}
                 placeholder="Find"
                 type="search"
                 {...props}
@@ -240,12 +233,12 @@ export function SearchInput({
             >{error}</span>}
             <ComparatorBar
                 className="px-[5px] py-[2px] border border-neutral-700 rounded-r"
-                comparatorType={comparatorType}
+                comparatorType={data.comparatorType}
                 setComparatorType={(newComparatorType: ComparatorType) => {
-                    setComparatorType(newComparatorType);
+                    data.setComparatorType(newComparatorType);
                 }}
-                editDistance={editDistance}
-                setEditDistance={setEditDistance}
+                editDistance={data.editDistance}
+                setEditDistance={data.setEditDistance}
             />
         </div>
     );
