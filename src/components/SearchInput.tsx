@@ -1,6 +1,6 @@
 import { BsGrid3X3, BsRegex } from "react-icons/bs";
-import { forwardRef, useEffect, useRef, useState } from "react";
 import { mergeProps, useLongPress, usePress } from "react-aria";
+import { useEffect, useRef, useState } from "react";
 import Input from "./Input";
 import clsx from "clsx";
 import levenshtein from "js-levenshtein";
@@ -157,98 +157,96 @@ interface SearchInputProps extends React.ComponentPropsWithoutRef<"input"> {
     setEditDistance: (editDistance: number) => void
 }
 
-export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
-    function SearchInput({
-        filter,
-        comparatorType,
-        setComparatorType,
-        setComparator,
-        editDistance,
-        setEditDistance,
-        className,
-        ...props
-    }) {
-        const [error, setError] = useState<string | null>(null);
-        const filterInput = useRef<HTMLInputElement>(null);
+export function SearchInput({
+    filter,
+    comparatorType,
+    setComparatorType,
+    setComparator,
+    editDistance,
+    setEditDistance,
+    className,
+    ...props
+}: SearchInputProps) {
+    const [error, setError] = useState<string | null>(null);
+    const filterInput = useRef<HTMLInputElement>(null);
 
 
-        useEffect(() => {
-            switch (comparatorType) {
-                case "None": {
-                    setError(null);
-                    setComparator(() => (value: string) => value.toLowerCase().includes(filter.toLowerCase()));
-                    break;
-                }
-                case "ExactMatch": {
-                    setError(null);
-                    setComparator(() => (value: string) => value === filter);
-                    break;
-                }
-                case "RegEx": {
-                    try {
-                        const regex = new RegExp(filter);
-                        setError(null);
-                        setComparator(() => (value: string) => regex.test(value));
-                    }
-                    catch (e) {
-                        if (e instanceof SyntaxError) {
-                            setError(e.message);
-                        }
-                        setComparator(() => () => false);
-                    }
-                    break;
-                }
-                case "Levenshtein": {
-                    setError(null);
-                    setComparator(() => (value: string) => levenshtein(value, filter) <= editDistance);
-                    break;
-                }
-                default: {
-                    const unreachable: never = comparatorType;
-                    throw new Error(`Invalid comparator type: ${unreachable}`);
-                }
+    useEffect(() => {
+        switch (comparatorType) {
+            case "None": {
+                setError(null);
+                setComparator(() => (value: string) => value.toLowerCase().includes(filter.toLowerCase()));
+                break;
             }
-        }, [comparatorType, editDistance, filter, setComparator]);
-
-        useEffect(() => {
-            const handleFindEvent = (event: KeyboardEvent) => {
-                if (event.ctrlKey && event.key === "f") {
-                    event.preventDefault();
-                    filterInput.current?.focus();
-                    filterInput.current?.select();
+            case "ExactMatch": {
+                setError(null);
+                setComparator(() => (value: string) => value === filter);
+                break;
+            }
+            case "RegEx": {
+                try {
+                    const regex = new RegExp(filter);
+                    setError(null);
+                    setComparator(() => (value: string) => regex.test(value));
                 }
-            };
-            window.addEventListener("keydown", handleFindEvent);
-    
-            return () => {
-                window.removeEventListener("keydown", handleFindEvent);
-            };
-        }, []);
+                catch (e) {
+                    if (e instanceof SyntaxError) {
+                        setError(e.message);
+                    }
+                    setComparator(() => () => false);
+                }
+                break;
+            }
+            case "Levenshtein": {
+                setError(null);
+                setComparator(() => (value: string) => levenshtein(value, filter) <= editDistance);
+                break;
+            }
+            default: {
+                const unreachable: never = comparatorType;
+                throw new Error(`Invalid comparator type: ${unreachable}`);
+            }
+        }
+    }, [comparatorType, editDistance, filter, setComparator]);
+
+    useEffect(() => {
+        const handleFindEvent = (event: KeyboardEvent) => {
+            if (event.ctrlKey && event.key === "f") {
+                event.preventDefault();
+                filterInput.current?.focus();
+                filterInput.current?.select();
+            }
+        };
+        window.addEventListener("keydown", handleFindEvent);
+
+        return () => {
+            window.removeEventListener("keydown", handleFindEvent);
+        };
+    }, []);
 
 
-        return (
-            <div className={clsx("relative flex items-center", className)}>
-                <Input
-                    ref={filterInput}
-                    className={clsx("grow border-r-0 rounded-r-none", { "border-red-500": error !== null })}
-                    value={filter}
-                    placeholder="Find"
-                    type="search"
-                    {...props}
-                />
-                {error && <span
-                    className="p-[3px] absolute w-[100%] top-[100%] z-50 bg-neutral-50 text-sm border border-red-500 rounded"
-                >{error}</span>}
-                <ComparatorBar
-                    className="px-[5px] py-[2px] border border-neutral-700 rounded-r"
-                    comparatorType={comparatorType}
-                    setComparatorType={(newComparatorType: ComparatorType) => {
-                        setComparatorType(newComparatorType);
-                    }}
-                    editDistance={editDistance}
-                    setEditDistance={setEditDistance}
-                />
-            </div>
-        );
-    }
-);
+    return (
+        <div className={clsx("relative flex items-center", className)}>
+            <Input
+                ref={filterInput}
+                className={clsx("grow border-r-0 rounded-r-none", { "border-red-500": error !== null })}
+                value={filter}
+                placeholder="Find"
+                type="search"
+                {...props}
+            />
+            {error && <span
+                className="p-[3px] absolute w-[100%] top-[100%] z-50 bg-neutral-50 text-sm border border-red-500 rounded"
+            >{error}</span>}
+            <ComparatorBar
+                className="px-[5px] py-[2px] border border-neutral-700 rounded-r"
+                comparatorType={comparatorType}
+                setComparatorType={(newComparatorType: ComparatorType) => {
+                    setComparatorType(newComparatorType);
+                }}
+                editDistance={editDistance}
+                setEditDistance={setEditDistance}
+            />
+        </div>
+    );
+}
