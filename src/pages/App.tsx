@@ -1,5 +1,6 @@
 import * as api from "../data/api";
 import * as event from "../data/events";
+import NavigationContextProvider, { NavigationContext } from "../contexts/navigation-context";
 import { Tab, Tabs } from "../components/Tabs";
 import { useDatabase, useRecentDatabases } from "../hooks/database-hooks";
 import { useEffect, useState } from "react";
@@ -9,10 +10,10 @@ import DataContextProvider from "../contexts/data-context";
 import Dialog from "../components/Dialog";
 import LibraryTab from "./library/LibraryTab";
 import RemoveList from "../components/RemoveList";
-import { StorageKey } from "../data/storage";
 import UpdateTab from "./update/UpdateTab";
 import clsx from "clsx";
 import { message } from "@tauri-apps/api/dialog";
+import useSafeContext from "../hooks/safe-context-hook";
 import useTauriEvent from "../hooks/tauri-event-hook";
 
 
@@ -106,14 +107,18 @@ function StartScreen() {
 
 
 function MainScreen() {
+    const { navigationData, navigationDispatch } = useSafeContext(NavigationContext);
+
     return (
-        <DataContextProvider>
-            <Tabs storageKey={StorageKey.MainScreenTabs} className="flex grow flex-col">
-                <Tab label="Update"><UpdateTab /></Tab>
-                <Tab label="Library"><LibraryTab /></Tab>
-                <Tab label="Configuration"><ConfigurationTab /></Tab>
-            </Tabs>
-        </DataContextProvider>
+        <Tabs
+            index={navigationData.tabsIndex.get("Main") ?? 0}
+            setIndex={(index) => { navigationDispatch({ action:"Tab Change", level: "Main", tabIndex: index }); }}
+            className="flex grow flex-col"
+        >
+            <Tab label="Update"><UpdateTab /></Tab>
+            <Tab label="Library"><LibraryTab /></Tab>
+            <Tab label="Configuration"><ConfigurationTab /></Tab>
+        </Tabs>
     );
 }
 
@@ -135,9 +140,11 @@ export default function App() {
     }, []);
 
     return (
-        <>
-            {isLoaded && (path === null ? <StartScreen /> : <MainScreen key={path} />)}
-            <MoreRecentDatabasesDialog />
-        </>
+        <DataContextProvider>
+            <NavigationContextProvider>
+                {isLoaded && (path === null ? <StartScreen /> : <MainScreen key={path} />)}
+                <MoreRecentDatabasesDialog />
+            </NavigationContextProvider>
+        </DataContextProvider>
     );
 }

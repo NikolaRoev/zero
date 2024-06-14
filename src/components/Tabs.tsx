@@ -1,6 +1,5 @@
 import { type ReactElement } from "react";
 import clsx from "clsx";
-import useSessionState from "../hooks/session-state-hook";
 
 
 
@@ -14,14 +13,12 @@ export const Tab = ({ children }: TabProps) => <>{children}</>;
 
 type TabsProps = {
     children: ReactElement<TabProps>[],
-    storageKey: string,
-    className?: string,
-    defaultIndex?: number
+    index: number,
+    setIndex: (index: number) => void,
+    className?: string
 }
 
-export function Tabs({ children, storageKey, className, defaultIndex = 0 }: TabsProps) {
-    const [index, setIndex] = useSessionState(storageKey, defaultIndex);
-
+export function Tabs({ children, index, setIndex, className }: TabsProps) {
     return (
         <div className={className}>
             <div className="pl-[5px] bg-neutral-300">

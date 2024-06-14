@@ -1,5 +1,8 @@
+import { BsArrowLeft, BsArrowRight, BsHouse } from "react-icons/bs";
 import { createContext, useEffect, useRef, useState } from "react";
 import { useLongPress, usePress} from "@react-aria/interactions";
+import { DataContext } from "../contexts/data-context";
+import { NavigationContext } from "../contexts/navigation-context";
 import clsx from "clsx";
 import { mergeProps } from "@react-aria/utils";
 import useSafeContext from "../hooks/safe-context-hook";
@@ -20,7 +23,7 @@ type NavLinkProps = {
     onClick: () => void
 }
 
-export function NavLink({ children, title, onClick }: NavLinkProps) {
+function NavLink({ children, title, onClick }: NavLinkProps) {
     const { setNavPanelOpen } = useSafeContext(NavContext);
 
     return (
@@ -44,7 +47,7 @@ type NavButtonProps = {
     onClick: () => void
 }
 
-export function NavButton({ children, className, title, onClick }: NavButtonProps) {
+function NavButton({ children, className, title, onClick }: NavButtonProps) {
     const { setNavPanelOpen } = useSafeContext(NavContext);
     const { longPressProps } = useLongPress({
         onLongPress: () => { setNavPanelOpen(true); }
@@ -66,7 +69,7 @@ export function NavButton({ children, className, title, onClick }: NavButtonProp
 }
 
 
-export function NavPanel({ children }: { children: React.ReactNode }) {
+function NavPanel({ children }: { children: React.ReactNode }) {
     const navPanelRef = useRef<HTMLDivElement>(null);
     const { navPanelOpen, setNavPanelOpen } = useSafeContext(NavContext);
 
@@ -98,12 +101,77 @@ export function NavPanel({ children }: { children: React.ReactNode }) {
 }
 
 
-export function NavDropDown({ children }: { children: React.ReactNode }) {
+function NavDropDown({ children }: { children: React.ReactNode }) {
     const [navPanelOpen, setNavPanelOpen] = useState(false);
 
     return (
         <NavContext.Provider value={{ navPanelOpen, setNavPanelOpen }}>
             <div>{children}</div>
         </NavContext.Provider>
+    );
+}
+
+
+export default function NavBar() {
+    const { works, creators } = useSafeContext(DataContext);
+    const { navigationData, navigationDispatch } = useSafeContext(NavigationContext);
+
+
+    const backItems: React.ReactNode[] = [];
+    const forwardItems: React.ReactNode[] = [];
+    navigationData.pages.forEach((page, index) => {
+        if (index === navigationData.index) { return; }
+        const navItem = (
+            <NavLink
+                key={`${page.type} ${page.id} ${index}`}
+                onClick={() => { navigationDispatch({action: "Go To", index: index}); }}
+            >{page.type === "Work" ? works.get(page.id)?.name : creators.get(page.id)?.name }</NavLink>
+        );
+
+        if (index < navigationData.index) { backItems.unshift(navItem); }
+        else { forwardItems.push(navItem); }
+    });
+    
+
+    return (
+        <div className="h-[30px] p-[5px] flex gap-x-[8px] bg-neutral-50">
+            <button
+                className={clsx(
+                    "p-[2px] rounded select-none",
+                    "hover:bg-neutral-200 active:bg-neutral-300",
+                    { "pointer-events-none": navigationData.index === -1 }
+                )}
+                onClick={() => { navigationDispatch({action: "Home" }); }}
+            ><BsHouse className={clsx({ "fill-neutral-400": navigationData.index === -1 })}/></button>
+                    
+            <NavDropDown>
+                <NavButton
+                    className={clsx(
+                        "p-[2px] rounded select-none",
+                        "hover:bg-neutral-200 active:bg-neutral-300",
+                        { "pointer-events-none": navigationData.index === -1 }
+                    )}
+                    onClick={() => { navigationDispatch({ action: "Back" }); }}
+                ><BsArrowLeft className={clsx({ "fill-neutral-400": navigationData.index === -1 })} /></NavButton>
+                <NavPanel>
+                    {backItems}
+                    <NavLink onClick={() => { navigationDispatch({ action: "Home" }); }}>Home</NavLink>
+                </NavPanel>
+            </NavDropDown>
+
+            <NavDropDown>
+                <NavButton
+                    className={clsx(
+                        "p-[2px] rounded select-none",
+                        "hover:bg-neutral-200 active:bg-neutral-300",
+                        { "pointer-events-none": navigationData.index >= (navigationData.pages.length - 1) }
+                    )}
+                    onClick={() => { navigationDispatch({ action: "Forward" }); }}
+                ><BsArrowRight className={clsx({ "fill-neutral-400": navigationData.index >= (navigationData.pages.length - 1) })} /></NavButton>
+                <NavPanel>
+                    {forwardItems}
+                </NavPanel>
+            </NavDropDown>
+        </div>
     );
 }

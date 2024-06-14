@@ -1,7 +1,7 @@
-import NavigationContextProvider, { NavigationContext } from "../../contexts/navigation-context";
 import CreatorPage from "./CreatorPage";
 import HomePage from "./HomePage";
-import { StorageKey } from "../../data/storage";
+import NavBar from "../../components/NavButton";
+import { NavigationContext } from "../../contexts/navigation-context";
 import WorkPage from "./WorkPage";
 import useSafeContext from "../../hooks/safe-context-hook";
 
@@ -32,8 +32,9 @@ function LibraryPage() {
 
 export default function LibraryTab() {
     return (
-        <NavigationContextProvider storageKey={StorageKey.LibraryNavigation}>
+        <div className="grow flex flex-col">
+            <NavBar />
             <LibraryPage />
-        </NavigationContextProvider>
+        </div>
     );
 }

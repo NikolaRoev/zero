@@ -1,11 +1,8 @@
 export enum StorageKey {
-    MainScreenTabs = "MAIN-SCREEN-TABS-KEY",
-    HomePageTabs = "HOME-PAGE-TABS-KEY",
-    ConfigurationTabs = "CONFIGURATION-TABS-KEY",
+    Navigation = "NAVIGATION-KEY",
 
     UpdateFilter = "UPDATE-FILTER-KEY",
 
-    LibraryNavigation = "LIBRARY-NAVIGATION-KEY",
     LibraryWorksFilter = "LIBRARY-WORKS-FILTER-KEY",
     LibraryWorksSort = "LIBRARY-WORKS-SORT-KEY",
     LibraryCreatorsFilter = "LIBRARY-CREATORS-FILTER-KEY",
