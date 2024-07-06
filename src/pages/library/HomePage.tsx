@@ -13,8 +13,8 @@ export default function HomePage() {
     
     return (
         <Tabs
-            index={navigationData.tabsIndex.get("Home") ?? 0}
-            setIndex={(index) => { navigationDispatch({ action:"Tab Change", level: "Home", tabIndex: index }); }}
+            index={navigationData.tabsIndex.home}
+            setIndex={(index) => { navigationDispatch({ action:"Tab Change", level: "home", tabIndex: index }); }}
             className="flex grow flex-col"
         >
             <Tab label="Works"><WorksTab /></Tab>

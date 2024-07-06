@@ -13,8 +13,8 @@ export default function ConfigurationTab() {
     
     return (
         <Tabs
-            index={navigationData.tabsIndex.get("Config") ?? 0}
-            setIndex={(index) => { navigationDispatch({ action:"Tab Change", level: "Config", tabIndex: index }); }}
+            index={navigationData.tabsIndex.config}
+            setIndex={(index) => { navigationDispatch({ action:"Tab Change", level: "config", tabIndex: index }); }}
             className="pt-[30px] flex grow flex-col"
         >
             <Tab label="Statuses"><StatusesTab /></Tab>

@@ -3,14 +3,18 @@ import { createContext } from "react";
 import useSessionReducer from "../hooks/session-reducer-hook";
 
 
-export type TabsLevels = "Main" | "Home" | "Config";
+export type TabsIndex = {
+    main: number,
+    home: number,
+    config: number
+}
 
 type Page =
     { type: "Work", id: number } |
     { type: "Creator", id: number }
 
 type NavigationData = {
-    tabsIndex: Map<TabsLevels, number>,
+    tabsIndex: TabsIndex,
     index: number,
     pages: Page[]
 }
@@ -23,7 +27,7 @@ type NavigationAction =
     { action: "New", page: Page } |
     { action: "Go To", index: number } |
     { action: "Jump To", page: Page } |
-    { action: "Tab Change", level: TabsLevels, tabIndex: number }
+    { action: "Tab Change", level: keyof TabsIndex, tabIndex: number }
 
 
 type NavigationContextData = {
@@ -76,12 +80,11 @@ function navigationReducer(navigationData: NavigationData, action: NavigationAct
             return { ...navigationData, index: action.index };
         }
         case "Jump To": {
-            navigationData.tabsIndex.set("Main", 1);
-            return { ...navigationData, tabsIndex: new Map(navigationData.tabsIndex), index: 0, pages: [action.page] };
+            return { ...navigationData, tabsIndex: { ...navigationData.tabsIndex, main: 1 }, index: 0, pages: [action.page] };
         }
         case "Tab Change": {
-            navigationData.tabsIndex.set(action.level, action.tabIndex);
-            return { ...navigationData, tabsIndex: new Map(navigationData.tabsIndex) };
+            navigationData.tabsIndex[action.level] = action.tabIndex;
+            return { ...navigationData, tabsIndex: navigationData.tabsIndex };
         }
         default: {
             const unreachable: never = action;
@@ -96,11 +99,11 @@ export default function NavigationContextProvider({ children }: { children: Reac
         StorageKey.Navigation,
         navigationReducer,
         {
-            tabsIndex: new Map([
-                ["Main" as TabsLevels, 0],
-                ["Home" as TabsLevels, 0],
-                ["Config" as TabsLevels, 0]
-            ]),
+            tabsIndex: {
+                main: 0,
+                home: 0,
+                config: 0
+            },
             index: -1,
             pages: []
         }

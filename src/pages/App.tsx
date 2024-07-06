@@ -111,8 +111,8 @@ function MainScreen() {
 
     return (
         <Tabs
-            index={navigationData.tabsIndex.get("Main") ?? 0}
-            setIndex={(index) => { navigationDispatch({ action:"Tab Change", level: "Main", tabIndex: index }); }}
+            index={navigationData.tabsIndex.main}
+            setIndex={(index) => { navigationDispatch({ action:"Tab Change", level: "main", tabIndex: index }); }}
             className="flex grow flex-col"
         >
             <Tab label="Update"><UpdateTab /></Tab>

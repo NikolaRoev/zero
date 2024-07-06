@@ -12,7 +12,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input({ classNam
         <input
             ref={ref}
             className={clsx(
-                "px-[5px] py-[2px] border border-neutral-700 rounded overflow-ellipsis",
+                "px-[7px] py-[2px] border border-neutral-700 rounded overflow-ellipsis",
                 "focus:outline-none focus:shadow-[inset_0px_-2px_2px_-2px_#404040]",
                 className
             )}
