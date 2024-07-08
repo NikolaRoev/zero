@@ -15,7 +15,7 @@ export default function CreatorsTab() {
     const { creators } = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
     const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType, editDistance: number }>(
-        StorageKey.LibraryCreatorsFilter, { value: "", comparatorType: "None", editDistance: 10 }
+        StorageKey.LibraryCreatorsFilter, { value: "", comparatorType: "None", editDistance: 5 }
     );
     const [comparator, setComparator] = useState<(value: string) => boolean>(() => () => false);
 

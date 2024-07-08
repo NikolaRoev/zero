@@ -34,7 +34,7 @@ type Filter = {
 const emptyFilter: Filter = {
     value: "",
     comparatorType: "None",
-    editDistance: 10,
+    editDistance: 5,
     by: "name",
     statuses: [],
     types: [],

@@ -56,7 +56,7 @@ export default function UpdateTab() {
     const { works, statuses, updateWorkName, updateWorkProgress } = useSafeContext(DataContext);
     const { navigationDispatch } = useSafeContext(NavigationContext);
     const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType, editDistance: number }>(
-        StorageKey.UpdateFilter, { value: "", comparatorType: "None", editDistance: 10 }
+        StorageKey.UpdateFilter, { value: "", comparatorType: "None", editDistance: 5 }
     );
     const [comparator, setComparator] = useState<(value: string) => boolean>(() => () => false);
     const [editingIds, setEditingIds] = useState<number[]>([]);

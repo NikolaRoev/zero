@@ -25,7 +25,7 @@ type AddListProps<T> = {
 
 export default function AddList<T>(props: AddListProps<T>) {
     const [filter, setFilter] = useSessionState<{ value: string, comparatorType: ComparatorType, editDistance: number }>(
-        props.storageKey, { value: "", comparatorType: "None", editDistance: 10 }
+        props.storageKey, { value: "", comparatorType: "None", editDistance: 5 }
     );
     const [comparator, setComparator] = useState<(value: string) => boolean>(() => () => false);
 
@@ -54,7 +54,7 @@ export default function AddList<T>(props: AddListProps<T>) {
                         <div className={clsx("flex", { "bg-neutral-100": index % 2 })}>
                             <div
                                 className={clsx(
-                                    "p-[5px] grow",
+                                    "p-[7px] grow",
                                     "overflow-hidden whitespace-nowrap overflow-ellipsis",
                                     "hover:bg-neutral-200 active:bg-neutral-300",
                                     { "text-neutral-500": added }
