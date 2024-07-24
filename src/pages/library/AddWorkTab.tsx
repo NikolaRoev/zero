@@ -145,6 +145,7 @@ export default function AddWorkTab() {
                         onChange={(event) => { addWorkFormDispatch({ action: "ChangeName", name: event.target.value }); }}
                         placeholder="Name"
                         required={true}
+                        autoFocus
                     />
                     <label htmlFor="progress-input">Progress:</label>
                     <Input

@@ -110,6 +110,7 @@ export default function AddCreatorTab() {
                         onChange={(event) => { addCreatorFormDispatch({ action: "ChangeName", name: event.target.value }); }}
                         placeholder="Name"
                         required={true}
+                        autoFocus
                     />
                 </div>
                 <div className="grow grid grid-cols-2 gap-x-[10px]">
