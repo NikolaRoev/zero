@@ -31,7 +31,7 @@ function RecentDatabasesList() {
                         <div className="p-[5px]">{index + 1}.</div>
                         <div
                             className={clsx(
-                                "grow p-[5px] overflow-hidden whitespace-nowrap overflow-ellipsis",
+                                "grow p-[5px] overflow-hidden whitespace-nowrap overflow-ellipsis select-none",
                                 "hover:bg-neutral-200 active:bg-neutral-300"
                             )}
                             title={recentDatabase}
@@ -105,8 +105,7 @@ function StartScreen() {
     );
 }
 
-
-function MainScreen() {
+function MainScreenContent() {
     const { navigationData, navigationDispatch } = useSafeContext(NavigationContext);
 
     return (
@@ -119,6 +118,17 @@ function MainScreen() {
             <Tab label="Library"><LibraryTab /></Tab>
             <Tab label="Configuration"><ConfigurationTab /></Tab>
         </Tabs>
+    );
+}
+
+
+function MainScreen() {
+    return (
+        <DataContextProvider>
+            <NavigationContextProvider>
+                <MainScreenContent />
+            </NavigationContextProvider>
+        </DataContextProvider>
     );
 }
 
@@ -140,11 +150,9 @@ export default function App() {
     }, []);
 
     return (
-        <DataContextProvider>
-            <NavigationContextProvider>
-                {isLoaded && (path === null ? <StartScreen /> : <MainScreen key={path} />)}
-                <MoreRecentDatabasesDialog />
-            </NavigationContextProvider>
-        </DataContextProvider>
+        <>
+            {isLoaded && (path === null ? <StartScreen /> : <MainScreen key={path} />)}
+            <MoreRecentDatabasesDialog />
+        </>
     );
 }
