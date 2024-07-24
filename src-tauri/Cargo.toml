@@ -22,4 +22,5 @@ tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-wo
 uuid = { version = "1.6.1", features = ["v4"] }
 
 [features]
+zero-test = []
 custom-protocol = ["tauri/custom-protocol"]

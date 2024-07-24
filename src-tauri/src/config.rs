@@ -1,5 +1,18 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use serde::{Serialize, Deserialize};
+
+
+
+pub fn get_config_path(path_resolver: tauri::PathResolver) -> PathBuf {
+    let local_path: PathBuf = PathBuf::from("config.json");
+
+    if cfg!(dev) || cfg!(feature = "zero-test") {
+        local_path
+    }
+    else {
+        path_resolver.app_local_data_dir().unwrap_or_default().join(local_path)
+    }
+}
 
 
 
@@ -10,8 +23,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load(&mut self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let path = Path::new(path);
+    pub fn load(&mut self, path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         if path.try_exists()? {
             let data = std::fs::read_to_string(path)?;
             *self = serde_json::from_str(&data)?;
@@ -19,7 +31,7 @@ impl Config {
         Ok(())
     }
     
-    pub fn save(&self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn save(&self, path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         Ok(std::fs::write(path, serde_json::to_string_pretty(self)?)?)
     }
 
@@ -52,12 +64,12 @@ mod tests {
     #[test]
     fn can_save_and_load_config() -> Result<(), Box<dyn std::error::Error>> {
         let mut config = Config::default();
-        let path = format!("{}.json", Uuid::new_v4());
+        let path = PathBuf::from(format!("{}.json", Uuid::new_v4()));
         let last_database = PathBuf::from("path");
 
         config.last_database = Some(last_database.clone());
-        config.save(&path)?;
-        config.load(&path)?;
+        config.save(path.clone())?;
+        config.load(path.clone())?;
 
         assert_eq!(config.last_database, Some(last_database));
 

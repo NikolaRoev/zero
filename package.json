@@ -6,7 +6,7 @@
     "dev": "tauri dev",
     "build": "env-cmd -f .env.build tauri build",
     "unit-tests": "cd src-tauri && cargo test",
-    "integration-tests": "vitest run"
+    "integration-tests": "env-cmd -f .env.build tauri build --features zero-test && vitest run"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.9",

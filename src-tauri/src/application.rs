@@ -1,13 +1,13 @@
 use std::sync::Mutex;
 use tauri::Manager;
 
-use crate::{config::Config, menu::{set_recent_menu, set_menu_state}};
+use crate::{config::{get_config_path, Config}, menu::{set_menu_state, set_recent_menu}};
 
 
 
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let mut config = crate::config::Config::default();
-    if let Err(err) = config.load("config.json") {
+    if let Err(err) = config.load(get_config_path(app.path_resolver())) {
         log::error!("Failed to load config: {err}.");
     }
 
@@ -50,7 +50,7 @@ pub fn callback(app: &tauri::AppHandle, event: tauri::RunEvent) {
         tauri::RunEvent::ExitRequested { .. } => {
             let config_state = app.state::<Mutex<Config>>();
             let config = config_state.lock().unwrap();
-            if let Err(err) = config.save("config.json") {
+            if let Err(err) = config.save(get_config_path(app.path_resolver())) {
                 log::error!("Failed to save config: {err}.");
             }
         },
