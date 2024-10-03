@@ -3,19 +3,6 @@ use serde::{Serialize, Deserialize};
 
 
 
-pub fn get_config_path(path_resolver: tauri::PathResolver) -> PathBuf {
-    let local_path: PathBuf = PathBuf::from("config.json");
-
-    if cfg!(dev) || cfg!(feature = "zero-test") {
-        local_path
-    }
-    else {
-        path_resolver.app_local_data_dir().unwrap_or_default().join(local_path)
-    }
-}
-
-
-
 #[derive(Serialize, Deserialize, Default, Debug)]
 pub struct Config {
     pub last_database: Option<PathBuf>,

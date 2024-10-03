@@ -11,12 +11,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::default().targets([
             tauri_plugin_log::LogTarget::Stdout,
-            if cfg!(dev) || cfg!(feature = "zero-test") {
-                tauri_plugin_log::LogTarget::Folder(std::env::current_dir().unwrap_or_default())
-            }
-            else {
-                tauri_plugin_log::LogTarget::LogDir
-            }
+            tauri_plugin_log::LogTarget::Folder(std::env::current_dir().unwrap_or_default())
         ]).format(|format, args, record| {
             let (start, end) = match record.level() {
                 log::Level::Error => ("\x1b[91m", "\x1b[0m"),
