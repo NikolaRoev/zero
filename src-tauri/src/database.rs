@@ -1,7 +1,5 @@
-use std::path::PathBuf;
 use rusqlite::named_params;
-
-
+use std::path::PathBuf;
 
 const CREATE_QUERY: &str = "
 CREATE TABLE IF NOT EXISTS works (
@@ -116,14 +114,14 @@ pub struct Work {
     pub format: i64,
     pub updated: i64,
     pub added: i64,
-    pub creators: Vec<i64>
+    pub creators: Vec<i64>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Creator {
     pub id: i64,
     pub name: String,
-    pub works: Vec<i64>
+    pub works: Vec<i64>,
 }
 
 #[derive(serde::Serialize, Debug)]
@@ -131,27 +129,26 @@ pub struct Creator {
 pub struct Status {
     pub id: i64,
     pub name: String,
-    pub is_update: bool
+    pub is_update: bool,
 }
 
 #[derive(serde::Serialize, Debug)]
 pub struct Type {
     id: i64,
-    name: String
+    name: String,
 }
 
 #[derive(serde::Serialize, Debug)]
 pub struct Format {
     id: i64,
-    name: String
+    name: String,
 }
-
 
 pub type DatabaseResult<T> = Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Default)]
 pub struct Database {
-    conn: Option<rusqlite::Connection>
+    conn: Option<rusqlite::Connection>,
 }
 
 impl Database {
@@ -162,9 +159,17 @@ impl Database {
     pub fn open(&mut self, path: &PathBuf) -> DatabaseResult<()> {
         let mut conn = rusqlite::Connection::open(path)?;
         conn.profile(Some(|val, duration| log::trace!("{val} - {:?}", duration)));
-        conn.backup(rusqlite::DatabaseName::Main, path.with_extension("backup.db"), Some(|progress| {
-            log::info!("Backing up: {}/{}.", progress.pagecount - progress.remaining, progress.pagecount);
-        }))?;
+        conn.backup(
+            rusqlite::DatabaseName::Main,
+            path.with_extension("backup.db"),
+            Some(|progress| {
+                log::info!(
+                    "Backing up: {}/{}.",
+                    progress.pagecount - progress.remaining,
+                    progress.pagecount
+                );
+            }),
+        )?;
         conn.execute_batch(CREATE_QUERY)?;
 
         self.conn = Some(conn);
@@ -177,38 +182,45 @@ impl Database {
             if let Err((conn, err)) = conn.close() {
                 self.conn = Some(conn);
                 Err(err.into())
-            }
-            else {
+            } else {
                 Ok(())
             }
-        }
-        else {
+        } else {
             Err("No connection to close.".into())
         }
     }
 
     pub fn path(&self) -> Option<std::path::PathBuf> {
-        self.conn().map(|conn| conn.path()).unwrap_or(None).map(Into::into)
+        self.conn()
+            .map(|conn| conn.path())
+            .unwrap_or(None)
+            .map(Into::into)
     }
 
-    pub fn add(&self, table: &str, params: Vec<(&str, &dyn rusqlite::ToSql)>) -> DatabaseResult<i64> {
+    pub fn add(
+        &self,
+        table: &str,
+        params: Vec<(&str, &dyn rusqlite::ToSql)>,
+    ) -> DatabaseResult<i64> {
         let (columns, values): (Vec<&str>, Vec<&dyn rusqlite::ToSql>) = params.into_iter().unzip();
-        let mut stmt = self.conn()?.prepare_cached(&format!("
+        let mut stmt = self.conn()?.prepare_cached(&format!(
+            "
             INSERT INTO {table} ({columns}) VALUES ({placeholders})
         ",
-        columns = columns.join(","),
-        placeholders = vec!["?"; values.len()].join(",")))?;
+            columns = columns.join(","),
+            placeholders = vec!["?"; values.len()].join(",")
+        ))?;
 
         Ok(stmt.insert(rusqlite::params_from_iter(values))?)
     }
 
     pub fn remove(&self, table: &str, id: i64) -> DatabaseResult<()> {
-        let mut stmt = self.conn()?.prepare_cached(&format!(
-            "DELETE FROM {table} WHERE id = :id"
-        ))?;
+        let mut stmt = self
+            .conn()?
+            .prepare_cached(&format!("DELETE FROM {table} WHERE id = :id"))?;
 
         let rows = stmt.execute(named_params! {":id": id})?;
-        
+
         if rows != 1 {
             return Err(format!(
                 "Expected to remove 1 item from table '{table}' not {rows}"
@@ -218,14 +230,24 @@ impl Database {
         Ok(())
     }
 
-    pub fn update(&self, table: &str, id: &dyn rusqlite::ToSql, params: Vec<(&str, &dyn rusqlite::ToSql)>) -> DatabaseResult<()> {
-        let (columns, mut values): (Vec<&str>, Vec<&dyn rusqlite::ToSql>) = params.into_iter().unzip();
+    pub fn update(
+        &self,
+        table: &str,
+        id: &dyn rusqlite::ToSql,
+        params: Vec<(&str, &dyn rusqlite::ToSql)>,
+    ) -> DatabaseResult<()> {
+        let (columns, mut values): (Vec<&str>, Vec<&dyn rusqlite::ToSql>) =
+            params.into_iter().unzip();
         values.push(id);
-        let placeholders = columns.iter().map(| &column | format!("{column} = ?")).collect::<Vec<_>>().join(", ");
+        let placeholders = columns
+            .iter()
+            .map(|&column| format!("{column} = ?"))
+            .collect::<Vec<_>>()
+            .join(", ");
 
-        let mut stmt = self.conn()?.prepare_cached(&format!(
-            "UPDATE {table} SET {placeholders} WHERE id = ?"
-        ))?;
+        let mut stmt = self
+            .conn()?
+            .prepare_cached(&format!("UPDATE {table} SET {placeholders} WHERE id = ?"))?;
 
         let rows = stmt.execute(rusqlite::params_from_iter(values))?;
 
@@ -236,7 +258,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn get_works(&self) -> DatabaseResult<Vec<Work>>{
+    pub fn get_works(&self) -> DatabaseResult<Vec<Work>> {
         let mut stmt = self.conn()?.prepare_cached("
             SELECT works.id, works.name, works.progress, works.status, works.type, works.format,
                    works.updated, works.added, group_concat(work_creator.creator_id ORDER BY work_creator.ROWID)
@@ -248,10 +270,13 @@ impl Database {
         let rows = stmt.query_map([], |row| {
             let id: i64 = row.get(0)?;
             let creators_row: Option<String> = row.get(8)?;
-            let creators = creators_row.map_or(
-                Ok(vec![]),
-                |data| data.split(',').map(|c| c.parse::<i64>()).collect::<Result<Vec<_>, _>>()
-            ).map_err(|err| rusqlite::Error::UserFunctionError(Box::new(err)))?;
+            let creators = creators_row
+                .map_or(Ok(vec![]), |data| {
+                    data.split(',')
+                        .map(|c| c.parse::<i64>())
+                        .collect::<Result<Vec<_>, _>>()
+                })
+                .map_err(|err| rusqlite::Error::UserFunctionError(Box::new(err)))?;
 
             Ok(Work {
                 id,
@@ -262,7 +287,7 @@ impl Database {
                 format: row.get(5)?,
                 updated: row.get(6)?,
                 added: row.get(7)?,
-                creators
+                creators,
             })
         })?;
 
@@ -280,15 +305,18 @@ impl Database {
         let rows = stmt.query_map([], |row| {
             let id: i64 = row.get(0)?;
             let works_row: Option<String> = row.get(2)?;
-            let works = works_row.map_or(
-                Ok(vec![]),
-                |data| data.split(',').map(|c| c.parse::<i64>()).collect::<Result<Vec<_>, _>>()
-            ).map_err(|err| rusqlite::Error::UserFunctionError(Box::new(err)))?;
+            let works = works_row
+                .map_or(Ok(vec![]), |data| {
+                    data.split(',')
+                        .map(|c| c.parse::<i64>())
+                        .collect::<Result<Vec<_>, _>>()
+                })
+                .map_err(|err| rusqlite::Error::UserFunctionError(Box::new(err)))?;
 
             Ok(Creator {
                 id,
                 name: row.get(1)?,
-                works
+                works,
             })
         })?;
 
@@ -296,12 +324,14 @@ impl Database {
     }
 
     pub fn get_statuses(&self) -> DatabaseResult<Vec<Status>> {
-        let mut stmt = self.conn()?.prepare_cached("SELECT id, name, is_update FROM statuses ORDER BY sort")?;
+        let mut stmt = self
+            .conn()?
+            .prepare_cached("SELECT id, name, is_update FROM statuses ORDER BY sort")?;
         let rows = stmt.query_map([], |row| {
             Ok(Status {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                is_update: row.get(2)?
+                is_update: row.get(2)?,
             })
         })?;
 
@@ -309,11 +339,13 @@ impl Database {
     }
 
     pub fn get_types(&self) -> DatabaseResult<Vec<Type>> {
-        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM types ORDER BY sort")?;
+        let mut stmt = self
+            .conn()?
+            .prepare_cached("SELECT * FROM types ORDER BY sort")?;
         let rows = stmt.query_map([], |row| {
             Ok(Type {
                 id: row.get(0)?,
-                name: row.get(1)?
+                name: row.get(1)?,
             })
         })?;
 
@@ -321,11 +353,13 @@ impl Database {
     }
 
     pub fn get_formats(&self) -> DatabaseResult<Vec<Format>> {
-        let mut stmt = self.conn()?.prepare_cached("SELECT * FROM formats ORDER BY sort")?;
+        let mut stmt = self
+            .conn()?
+            .prepare_cached("SELECT * FROM formats ORDER BY sort")?;
         let rows = stmt.query_map([], |row| {
             Ok(Format {
                 id: row.get(0)?,
-                name: row.get(1)?
+                name: row.get(1)?,
             })
         })?;
 
@@ -333,9 +367,11 @@ impl Database {
     }
 
     pub fn attach(&self, work_id: i64, creator_id: i64) -> DatabaseResult<()> {
-        let mut stmt = self.conn()?.prepare_cached("
+        let mut stmt = self.conn()?.prepare_cached(
+            "
             INSERT INTO work_creator (work_id, creator_id) VALUES (:work_id, :creator_id)
-        ")?;
+        ",
+        )?;
 
         stmt.insert(named_params! { ":work_id": work_id, ":creator_id": creator_id })?;
 
@@ -344,11 +380,11 @@ impl Database {
 
     pub fn detach(&self, work_id: i64, creator_id: i64) -> DatabaseResult<()> {
         let mut stmt = self.conn()?.prepare_cached(
-            "DELETE FROM work_creator WHERE work_id = :work_id AND creator_id = :creator_id"
+            "DELETE FROM work_creator WHERE work_id = :work_id AND creator_id = :creator_id",
         )?;
 
         let rows = stmt.execute(named_params! {":work_id": work_id, ":creator_id": creator_id})?;
-        
+
         if rows != 1 {
             return Err(format!("Expected to detach 1 pair not {rows}"))?;
         }
@@ -357,29 +393,33 @@ impl Database {
     }
 
     pub fn reorder(&self, table: &str, active_id: &i64, over_id: &i64) -> DatabaseResult<()> {
-        let mut stmt = self.conn()?.prepare_cached(&format!(
-            "SELECT sort FROM {table} WHERE id = :active_id"
-        ))?;
+        let mut stmt = self
+            .conn()?
+            .prepare_cached(&format!("SELECT sort FROM {table} WHERE id = :active_id"))?;
         let rows = stmt.query_map(named_params! {":active_id": active_id}, |row| {
             row.get::<usize, i64>(0)
         })?;
-        let sort_active = rows.map(|row| Ok(row?)).collect::<DatabaseResult<Vec<i64>>>()?;
+        let sort_active = rows
+            .map(|row| Ok(row?))
+            .collect::<DatabaseResult<Vec<i64>>>()?;
         let sort_active = sort_active.first().ok_or("Missing active item sort")?;
 
-        let mut stmt = self.conn()?.prepare_cached(&format!(
-            "SELECT sort FROM {table} WHERE id = :over_id"
-        ))?;
+        let mut stmt = self
+            .conn()?
+            .prepare_cached(&format!("SELECT sort FROM {table} WHERE id = :over_id"))?;
         let rows = stmt.query_map(named_params! {":over_id": over_id}, |row| {
             row.get::<usize, i64>(0)
         })?;
-        let sort_over = rows.map(|row| Ok(row?)).collect::<DatabaseResult<Vec<i64>>>()?;
+        let sort_over = rows
+            .map(|row| Ok(row?))
+            .collect::<DatabaseResult<Vec<i64>>>()?;
         let sort_over = sort_over.first().ok_or("Missing over item sort")?;
-
 
         let mut stmt = self.conn()?.prepare_cached(&format!(
             "UPDATE {table} SET sort = :sort_over WHERE id = :active_id"
         ))?;
-        let rows = stmt.execute(named_params! {":sort_over": sort_over, ":active_id": active_id})?;
+        let rows =
+            stmt.execute(named_params! {":sort_over": sort_over, ":active_id": active_id})?;
         if rows != 1 {
             return Err(format!("Expected to update 1 row not {rows}"))?;
         }
@@ -408,17 +448,18 @@ mod tests {
     use super::*;
     use uuid::Uuid;
 
-
     struct Context {
         id: Uuid,
-        database: Database
+        database: Database,
     }
 
     impl Context {
         pub fn new() -> Self {
             let id = Uuid::new_v4();
             let mut database = Database::default();
-            database.open(&std::path::PathBuf::from(format!("{id}.db"))).unwrap();
+            database
+                .open(&std::path::PathBuf::from(format!("{id}.db")))
+                .unwrap();
             Context { id, database }
         }
     }
@@ -427,28 +468,31 @@ mod tests {
         fn drop(&mut self) {
             self.database.close().unwrap();
             std::fs::remove_file(std::path::PathBuf::from(format!("{}.db", self.id))).unwrap();
-            std::fs::remove_file(std::path::PathBuf::from(format!("{}.backup.db", self.id))).unwrap();
+            std::fs::remove_file(std::path::PathBuf::from(format!("{}.backup.db", self.id)))
+                .unwrap();
         }
     }
-
 
     #[test]
     fn can_modify_work() -> Result<(), Box<dyn std::error::Error>> {
         let database = &Context::new().database;
-        
+
         // Add.
         let status_id = database.add("statuses", vec![("name", &"status")])?;
         let type_id = database.add("types", vec![("name", &"type")])?;
         let format_id = database.add("formats", vec![("name", &"format")])?;
-        let id = database.add("works", vec![
-            ("name", &"name"),
-            ("progress", &"progress"),
-            ("status", &status_id),
-            ("type", &format_id),
-            ("format", &format_id),
-            ("updated", &44i64),
-            ("added", &44i64)
-        ])?;
+        let id = database.add(
+            "works",
+            vec![
+                ("name", &"name"),
+                ("progress", &"progress"),
+                ("status", &status_id),
+                ("type", &format_id),
+                ("format", &format_id),
+                ("updated", &44i64),
+                ("added", &44i64),
+            ],
+        )?;
         let works = database.get_works()?;
         let added_work = works.first().unwrap();
 
@@ -463,10 +507,11 @@ mod tests {
         assert_eq!(added_work.added, 44i64);
 
         // Update.
-        database.update("works", &id, vec![
-            ("name", &"new_name"),
-            ("progress", &"new_progress")
-        ])?;
+        database.update(
+            "works",
+            &id,
+            vec![("name", &"new_name"), ("progress", &"new_progress")],
+        )?;
         let works = database.get_works()?;
         let added_work = works.first().unwrap();
 
@@ -488,15 +533,21 @@ mod tests {
     fn catches_adding_work_with_invalid_status_type_or_format() {
         let database = &Context::new().database;
 
-        let error_message = database.add("works", vec![
-            ("name", &"name"),
-            ("progress", &"progress"),
-            ("status", &1i64),
-            ("type", &1i64),
-            ("format", &1i64),
-            ("updated", &44i64),
-            ("added", &44i64)
-        ]).unwrap_err().to_string();
+        let error_message = database
+            .add(
+                "works",
+                vec![
+                    ("name", &"name"),
+                    ("progress", &"progress"),
+                    ("status", &1i64),
+                    ("type", &1i64),
+                    ("format", &1i64),
+                    ("updated", &44i64),
+                    ("added", &44i64),
+                ],
+            )
+            .unwrap_err()
+            .to_string();
 
         assert_eq!(error_message, "FOREIGN KEY constraint failed");
     }
@@ -504,11 +555,9 @@ mod tests {
     #[test]
     fn can_modify_creator() -> Result<(), Box<dyn std::error::Error>> {
         let database = &Context::new().database;
-        
+
         // Add.
-        let id = database.add("creators", vec![
-            ("name", &"name")
-        ])?;
+        let id = database.add("creators", vec![("name", &"name")])?;
         let creators = database.get_creators()?;
         let added_creator = creators.first().unwrap();
 
@@ -517,9 +566,7 @@ mod tests {
         assert_eq!(added_creator.name, "name");
 
         // Update.
-        database.update("creators", &id, vec![
-            ("name", &"new_name")
-        ])?;
+        database.update("creators", &id, vec![("name", &"new_name")])?;
         let creators = database.get_creators()?;
         let added_creator = creators.first().unwrap();
 
@@ -539,7 +586,7 @@ mod tests {
     #[test]
     fn can_modify_status() -> Result<(), Box<dyn std::error::Error>> {
         let database = &Context::new().database;
-        
+
         // Add.
         let id = database.add("statuses", vec![("name", &"status")])?;
         let statuses = database.get_statuses()?;
@@ -550,9 +597,7 @@ mod tests {
         assert_eq!(added_status.name, "status");
 
         // Update.
-        database.update("statuses", &id, vec![
-            ("name", &"new_name")
-        ])?;
+        database.update("statuses", &id, vec![("name", &"new_name")])?;
         let statuses = database.get_statuses()?;
         let added_status = statuses.first().unwrap();
 
@@ -572,7 +617,7 @@ mod tests {
     #[test]
     fn can_modify_type() -> Result<(), Box<dyn std::error::Error>> {
         let database = &Context::new().database;
-        
+
         // Add.
         let id = database.add("types", vec![("name", &"type")])?;
         let types = database.get_types()?;
@@ -583,9 +628,7 @@ mod tests {
         assert_eq!(added_type.name, "type");
 
         // Update.
-        database.update("types", &id, vec![
-            ("name", &"new_name")
-        ])?;
+        database.update("types", &id, vec![("name", &"new_name")])?;
         let types = database.get_types()?;
         let added_type = types.first().unwrap();
 
@@ -605,7 +648,7 @@ mod tests {
     #[test]
     fn can_modify_format() -> Result<(), Box<dyn std::error::Error>> {
         let database = &Context::new().database;
-        
+
         // Add.
         let id = database.add("formats", vec![("name", &"format")])?;
         let formats = database.get_formats()?;
@@ -616,9 +659,7 @@ mod tests {
         assert_eq!(added_format.name, "format");
 
         // Update.
-        database.update("formats", &id, vec![
-            ("name", &"new_name")
-        ])?;
+        database.update("formats", &id, vec![("name", &"new_name")])?;
         let formats = database.get_formats()?;
         let added_format = formats.first().unwrap();
 
@@ -636,25 +677,35 @@ mod tests {
     }
 
     #[test]
-    fn catches_removing_status_type_or_format_currently_in_use() -> Result<(), Box<dyn std::error::Error>> {
+    fn catches_removing_status_type_or_format_currently_in_use(
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let database = &Context::new().database;
 
         let status_id = database.add("statuses", vec![("name", &"status")])?;
         let type_id = database.add("types", vec![("name", &"type")])?;
         let format_id = database.add("formats", vec![("name", &"format")])?;
-        database.add("works", vec![
-            ("name", &"name"),
-            ("progress", &"progress"),
-            ("status", &status_id),
-            ("type", &type_id),
-            ("format", &format_id),
-            ("updated", &44i64),
-            ("added", &44i64)
-        ])?;
-        let status_error_message = database.remove("statuses", status_id).unwrap_err().to_string();
+        database.add(
+            "works",
+            vec![
+                ("name", &"name"),
+                ("progress", &"progress"),
+                ("status", &status_id),
+                ("type", &type_id),
+                ("format", &format_id),
+                ("updated", &44i64),
+                ("added", &44i64),
+            ],
+        )?;
+        let status_error_message = database
+            .remove("statuses", status_id)
+            .unwrap_err()
+            .to_string();
         let type_error_message = database.remove("types", type_id).unwrap_err().to_string();
-        let format_error_message = database.remove("formats", format_id).unwrap_err().to_string();
-        
+        let format_error_message = database
+            .remove("formats", format_id)
+            .unwrap_err()
+            .to_string();
+
         assert_eq!(status_error_message, "FOREIGN KEY constraint failed");
         assert_eq!(type_error_message, "FOREIGN KEY constraint failed");
         assert_eq!(format_error_message, "FOREIGN KEY constraint failed");
@@ -669,18 +720,19 @@ mod tests {
         let status_id = database.add("statuses", vec![("name", &"status")])?;
         let type_id = database.add("types", vec![("name", &"type")])?;
         let format_id = database.add("formats", vec![("name", &"format")])?;
-        let work_id = database.add("works", vec![
-            ("name", &"name"),
-            ("progress", &"progress"),
-            ("status", &status_id),
-            ("type", &type_id),
-            ("format", &format_id),
-            ("updated", &44i64),
-            ("added", &44i64)
-        ])?;
-        let creator_id = database.add("creators", vec![
-            ("name", &"name")
-        ])?;
+        let work_id = database.add(
+            "works",
+            vec![
+                ("name", &"name"),
+                ("progress", &"progress"),
+                ("status", &status_id),
+                ("type", &type_id),
+                ("format", &format_id),
+                ("updated", &44i64),
+                ("added", &44i64),
+            ],
+        )?;
+        let creator_id = database.add("creators", vec![("name", &"name")])?;
         database.attach(work_id, creator_id)?;
         let works = database.get_works()?;
         let added_work = works.first().unwrap();
@@ -724,18 +776,19 @@ mod tests {
         let status_id = database.add("statuses", vec![("name", &"status")])?;
         let type_id = database.add("types", vec![("name", &"type")])?;
         let format_id = database.add("formats", vec![("name", &"format")])?;
-        let work_id = database.add("works", vec![
-            ("name", &"name"),
-            ("progress", &"progress"),
-            ("status", &status_id),
-            ("type", &type_id),
-            ("format", &format_id),
-            ("updated", &44i64),
-            ("added", &44i64)
-        ])?;
-        let creator_id = database.add("creators", vec![
-            ("name", &"name")
-        ])?;
+        let work_id = database.add(
+            "works",
+            vec![
+                ("name", &"name"),
+                ("progress", &"progress"),
+                ("status", &status_id),
+                ("type", &type_id),
+                ("format", &format_id),
+                ("updated", &44i64),
+                ("added", &44i64),
+            ],
+        )?;
+        let creator_id = database.add("creators", vec![("name", &"name")])?;
         database.attach(work_id, creator_id)?;
         database.remove("works", work_id)?;
         let creators = database.get_creators()?;
@@ -753,18 +806,19 @@ mod tests {
         let status_id = database.add("statuses", vec![("name", &"status")])?;
         let type_id = database.add("types", vec![("name", &"type")])?;
         let format_id = database.add("formats", vec![("name", &"format")])?;
-        let work_id = database.add("works", vec![
-            ("name", &"name"),
-            ("progress", &"progress"),
-            ("status", &status_id),
-            ("type", &type_id),
-            ("format", &format_id),
-            ("updated", &44i64),
-            ("added", &44i64)
-        ])?;
-        let creator_id = database.add("creators", vec![
-            ("name", &"name")
-        ])?;
+        let work_id = database.add(
+            "works",
+            vec![
+                ("name", &"name"),
+                ("progress", &"progress"),
+                ("status", &status_id),
+                ("type", &type_id),
+                ("format", &format_id),
+                ("updated", &44i64),
+                ("added", &44i64),
+            ],
+        )?;
+        let creator_id = database.add("creators", vec![("name", &"name")])?;
         database.attach(work_id, creator_id)?;
         database.remove("creators", creator_id)?;
         let works = database.get_works()?;

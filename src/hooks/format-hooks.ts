@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { Format } from "../data/data";
 import { StorageKey } from "../data/storage";
 import { arrayMove } from "@dnd-kit/sortable";
-import { message } from "@tauri-apps/api/dialog";
+import { message } from "@tauri-apps/plugin-dialog";
 
 
 
@@ -24,8 +24,8 @@ export default function useFormats() {
     function getFormats() {
         api.getFormats().then((value) => {
             setFormats(value);
-        }).catch(async (reason: string) => {
-            await message(reason, { title: "Failed to get Formats.", type: "error" });
+        }).catch(async (reason: unknown) => {
+            await message(`${reason}`, { title: "Failed to get Formats.", kind: "error" });
         });
     }
 
@@ -33,9 +33,9 @@ export default function useFormats() {
         api.addFormat(name).then((id) => {
             setFormats([...formats, { id: id, name: name }]);
             callback();
-        }).catch(async (reason) => {
+        }).catch(async (reason: unknown) => {
             getFormats();
-            await message(`${reason}`, { title: "Failed to add Format.", type: "error" });
+            await message(`${reason}`, { title: "Failed to add Format.", kind: "error" });
         }).finally(() => { cleanUp(); });
     }
 
@@ -45,9 +45,9 @@ export default function useFormats() {
         api.removeFormat(id).then(() => {
             sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
             sessionStorage.removeItem(StorageKey.AddWorkFormData);
-        }).catch(async (reason) => {
+        }).catch(async (reason: unknown) => {
             getFormats();
-            await message(`${reason}`, { title: "Failed to remove Format.", type: "error" });
+            await message(`${reason}`, { title: "Failed to remove Format.", kind: "error" });
         });
     }
 
@@ -59,9 +59,9 @@ export default function useFormats() {
             return format;
         }));
 
-        api.updateFormatName(id, name).catch(async (reason) => {
+        api.updateFormatName(id, name).catch(async (reason: unknown) => {
             getFormats();
-            await message(`${reason}`, { title: "Failed to update Format name.", type: "error" });
+            await message(`${reason}`, { title: "Failed to update Format name.", kind: "error" });
         });
     }
 
@@ -73,9 +73,9 @@ export default function useFormats() {
             return arrayMove(formats, oldIndex, newIndex);
         });
 
-        api.reorderFormats(activeId, overId).catch(async (reason) => {
+        api.reorderFormats(activeId, overId).catch(async (reason: unknown) => {
             getFormats();
-            await message(`${reason}`, { title: "Failed to reorder formats.", type: "error" });
+            await message(`${reason}`, { title: "Failed to reorder formats.", kind: "error" });
         });
     }
 

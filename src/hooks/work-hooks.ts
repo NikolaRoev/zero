@@ -1,7 +1,7 @@
 import * as api from "../data/api";
 import { useEffect, useState } from "react";
 import type { Work } from "../data/data";
-import { message } from "@tauri-apps/api/dialog";
+import { message } from "@tauri-apps/plugin-dialog";
 
 
 
@@ -22,8 +22,8 @@ export function useWorks() {
     function getWorks() {
         api.getWorks().then((value) => {
             setWorks(new Map(value.map((v) => [v.id, v])));
-        }).catch(async (reason: string) => {
-            await message(reason, { title: "Failed to get Works.", type: "error" });
+        }).catch(async (reason: unknown) => {
+            await message(`${reason}`, { title: "Failed to get Works.", kind: "error" });
         });
     }
 
@@ -32,9 +32,9 @@ export function useWorks() {
         works.set(id, { ...work, name: name });
         setWorks(new Map(works));
 
-        api.updateWorkName(id, name).catch(async (reason: string) => {
+        api.updateWorkName(id, name).catch(async (reason: unknown) => {
             getWorks();
-            await message(reason, { title: "Failed to update Work Name.", type: "error" });
+            await message(`${reason}`, { title: "Failed to update Work Name.", kind: "error" });
         });
     }
 
@@ -44,9 +44,9 @@ export function useWorks() {
         works.set(id, { ...work, progress: progress, updated: timestamp });
         setWorks(new Map(works));
 
-        api.updateWorkProgress(id, progress, timestamp).catch(async (reason: string) => {
+        api.updateWorkProgress(id, progress, timestamp).catch(async (reason: unknown) => {
             getWorks();
-            await message(reason, { title: "Failed to update Work Progress.", type: "error" });
+            await message(`${reason}`, { title: "Failed to update Work Progress.", kind: "error" });
         });
     }
     
@@ -56,9 +56,9 @@ export function useWorks() {
         works.set(id, { ...work, status: status, updated: timestamp });
         setWorks(new Map(works));
 
-        api.updateWorkStatus(id, status, timestamp).catch(async (reason: string) => {
+        api.updateWorkStatus(id, status, timestamp).catch(async (reason: unknown) => {
             getWorks();
-            await message(reason, { title: "Failed to update Work Status.", type: "error" });
+            await message(`${reason}`, { title: "Failed to update Work Status.", kind: "error" });
         });
     }
 
@@ -67,9 +67,9 @@ export function useWorks() {
         works.set(id, { ...work, type: type });
         setWorks(new Map(works));
 
-        api.updateWorkType(id, type).catch(async (reason: string) => {
+        api.updateWorkType(id, type).catch(async (reason: unknown) => {
             getWorks();
-            await message(reason, { title: "Failed to update Work Type.", type: "error" });
+            await message(`${reason}`, { title: "Failed to update Work Type.", kind: "error" });
         });
     }
 
@@ -78,9 +78,9 @@ export function useWorks() {
         works.set(id, { ...work, format: format });
         setWorks(new Map(works));
 
-        api.updateWorkFormat(id, format).catch(async (reason: string) => {
+        api.updateWorkFormat(id, format).catch(async (reason: unknown) => {
             getWorks();
-            await message(reason, { title: "Failed to update Work Format.", type: "error" });
+            await message(`${reason}`, { title: "Failed to update Work Format.", kind: "error" });
         });
     }
 

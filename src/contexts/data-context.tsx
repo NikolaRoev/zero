@@ -1,7 +1,7 @@
 import * as api from "../data/api";
 import type { Creator, Format, Status, Type, Work } from "../data/data";
 import { createContext } from "react";
-import { message } from "@tauri-apps/api/dialog";
+import { message } from "@tauri-apps/plugin-dialog";
 import { useCreators } from "../hooks/creator-hooks";
 import useFormats from "../hooks/format-hooks";
 import { useStatuses } from "../hooks/status-hooks";
@@ -71,8 +71,8 @@ export default function DataContextProvider({ children }: { children: React.Reac
             works.addWork({ ...work, id: workId });
             work.creators.map((creatorId) => { creators.attach(workId, creatorId); });
             callback(workId);
-        }).catch(async (reason: string) => {
-            await message(reason, { title: "Failed to add Work.", type: "error" });
+        }).catch(async (reason: unknown) => {
+            await message(`${reason}`, { title: "Failed to add Work.", kind: "error" });
         }).finally(() => { cleanUp(); });
     }
 
@@ -81,8 +81,8 @@ export default function DataContextProvider({ children }: { children: React.Reac
             creators.addCreator({ ...creator, id: creatorId });
             creator.works.map((workId) => { works.attach(workId, creatorId); });
             callback(creatorId);
-        }).catch(async (reason: string) => {
-            await message(reason, { title: "Failed to add Creator.", type: "error" });
+        }).catch(async (reason: unknown) => {
+            await message(`${reason}`, { title: "Failed to add Creator.", kind: "error" });
         }).finally(() => { cleanUp(); });
     }
 
@@ -92,8 +92,8 @@ export default function DataContextProvider({ children }: { children: React.Reac
 
         api.removeWork(id).then(() => {
             callback();
-        }).catch(async (reason: string) => {
-            await message(reason, { title: "Failed to remove Work.", type: "error" });
+        }).catch(async (reason: unknown) => {
+            await message(`${reason}`, { title: "Failed to remove Work.", kind: "error" });
         });
     }
 
@@ -103,8 +103,8 @@ export default function DataContextProvider({ children }: { children: React.Reac
 
         api.removeCreator(id).then(() => {
             callback();
-        }).catch(async (reason: string) => {
-            await message(reason, { title: "Failed to remove Creator.", type: "error" });
+        }).catch(async (reason: unknown) => {
+            await message(`${reason}`, { title: "Failed to remove Creator.", kind: "error" });
         });
     }
 
@@ -112,10 +112,10 @@ export default function DataContextProvider({ children }: { children: React.Reac
         works.attach(workId, creatorId);
         creators.attach(workId, creatorId);
 
-        api.attach(workId, creatorId).catch(async (reason: string) => {
+        api.attach(workId, creatorId).catch(async (reason: unknown) => {
             works.getWorks();
             creators.getCreators();
-            await message(reason, { title: "Failed to attach.", type: "error" });
+            await message(`${reason}`, { title: "Failed to attach.", kind: "error" });
         });
     }
 
@@ -123,10 +123,10 @@ export default function DataContextProvider({ children }: { children: React.Reac
         works.detach(workId, creatorId);
         creators.detach(workId, creatorId);
 
-        api.detach(workId, creatorId).catch(async (reason: string) => {
+        api.detach(workId, creatorId).catch(async (reason: unknown) => {
             works.getWorks();
             creators.getCreators();
-            await message(reason, { title: "Failed to detach.", type: "error" });
+            await message(`${reason}`, { title: "Failed to detach.", kind: "error" });
         });
     }
 

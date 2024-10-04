@@ -1,9 +1,10 @@
 use std::{path::PathBuf, sync::Mutex};
 use tauri::Manager;
 
-use crate::{config::Config, menu::{set_menu_state, set_recent_menu}};
-
-
+use crate::{
+    config::Config,
+    menu::{self, set_menu_state},
+};
 
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let mut config = crate::config::Config::default();
@@ -11,34 +12,30 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         log::error!("Failed to load config: {err}.");
     }
 
-    let binding = app.app_handle();
-    let window = tauri::WindowBuilder::new(
-        &binding,
-        "main", tauri::WindowUrl::App("index.html".into()))
-        .title("zero")
-        .menu(crate::menu::create_main_menu())
-        .visible(false)
-        .build().unwrap();
+    let window =
+        tauri::WebviewWindowBuilder::new(
+                app,
+                "main",
+                tauri::WebviewUrl::App("index.html".into())
+            )
+            .title("zero")
+            .menu(crate::menu::create_main_menu(app)?)
+            .visible(false)
+            .build()?;
 
-    //TODO: rework the whole menu stuff when we can set a menu a to window in 2.0.
+    app.on_menu_event(menu::event_handler);
 
-    let menu_handle = window.menu_handle();
-    
+    let menu_handle = window.menu().unwrap();
     let mut database = crate::database::Database::default();
     if let Some(ref last) = config.last_database {
         log::info!("Opening last database: {last:?}");
         database.open(last)?;
         window.set_title(&format!("zero - {}", last.display()))?;
-        config.add_recent_database(last.clone());
         set_menu_state(&menu_handle, true)?;
-    }
-    else {
+    } else {
         set_menu_state(&menu_handle, false)?;
     }
 
-    set_recent_menu(&menu_handle, &config.recent_databases)?;
-
-    
     app.manage(Mutex::new(config));
     app.manage(Mutex::new(database));
 
@@ -53,10 +50,10 @@ pub fn callback(app: &tauri::AppHandle, event: tauri::RunEvent) {
             if let Err(err) = config.save(PathBuf::from("config.json")) {
                 log::error!("Failed to save config: {err}.");
             }
-        },
-        tauri::RunEvent::Updater(event) => {
-            log::debug!("{:?}", event);
-        },
+        }
+        //tauri::RunEvent::Updater(event) => {
+        //    log::debug!("{:?}", event);
+        //}
         tauri::RunEvent::Exit => log::info!("Exited zero."),
         _ => {}
     }

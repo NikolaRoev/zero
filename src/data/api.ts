@@ -1,11 +1,11 @@
 import type { Creator, Format, Status, Type, Work } from "./data";
-import { type LogOptions, error as tauriError } from "tauri-plugin-log-api";
-import { invoke } from "@tauri-apps/api/tauri";
+import { type LogOptions, error as tauriError } from "@tauri-apps/plugin-log";
+import { invoke } from "@tauri-apps/api/core";
 
 
 
 export function error(message: string, options?: LogOptions) {
-    tauriError(message, options).catch((reason) => { console.error(`Failed to log: ${reason}.`); });
+    tauriError(message, options).catch((reason: unknown) => { console.error(`Failed to log: ${reason}.`); });
 }
 
 
@@ -135,12 +135,4 @@ export function attach(workId: number, creatorId: number): Promise<void> {
 
 export function detach(workId: number, creatorId: number): Promise<void> {
     return invoke("detach", { workId, creatorId });
-}
-
-export function getRecentDatabases(): Promise<string[]> {
-    return invoke("get_recent_databases");
-}
-
-export function removeRecentDatabase(path: string): Promise<void> {
-    return invoke("remove_recent_database", { path });
 }

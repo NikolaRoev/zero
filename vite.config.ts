@@ -13,7 +13,7 @@ export default defineConfig(() => ({
         port: 1420,
         strictPort: true
     },
-    envPrefix: ["VITE_", "TAURI_"],
+    envPrefix: ["VITE_", "TAURI_ENV_*"],
     envDir: __dirname,
     root: resolve(__dirname, "src"),
     publicDir: resolve(__dirname, "public"),

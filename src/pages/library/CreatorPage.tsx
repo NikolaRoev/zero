@@ -9,7 +9,7 @@ import DeleteButton from "../../components/DeleteButton";
 import Input from "../../components/Input";
 import { NavigationContext } from "../../contexts/navigation-context";
 import clsx from "clsx";
-import { confirm } from "@tauri-apps/api/dialog";
+import { confirm } from "@tauri-apps/plugin-dialog";
 import { toast } from "react-toastify";
 import useSafeContext from "../../hooks/safe-context-hook";
 
@@ -38,7 +38,7 @@ export default function CreatorPage({ id }: { id: number }) {
                 <Button onClick={() => {
                     confirm(
                         `Delete creator "${creator.name}"?`,
-                        { title: "Delete Creator", okLabel: "Yes", cancelLabel: "No", type: "warning" }
+                        { title: "Delete Creator", okLabel: "Yes", cancelLabel: "No", kind: "warning" }
                     ).then((result) => {
                         if (result) {
                             dataContext.removeCreator(creator.id, () => {
@@ -46,7 +46,7 @@ export default function CreatorPage({ id }: { id: number }) {
                                 navigationDispatch({ action: "Remove", page: { type: "Creator", id: id } });
                             });
                         }
-                    }).catch((reason: string) => { api.error(reason); });
+                    }).catch((reason: unknown) => { api.error(`${reason}`); });
                 }}>Delete</Button>
                 <label htmlFor="name-input">Name:</label>
                 <Input

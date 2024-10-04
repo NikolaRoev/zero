@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { Status } from "../data/data";
 import { StorageKey } from "../data/storage";
 import { arrayMove } from "@dnd-kit/sortable";
-import { message } from "@tauri-apps/api/dialog";
+import { message } from "@tauri-apps/plugin-dialog";
 
 
 
@@ -24,8 +24,8 @@ export function useStatuses() {
     function getStatuses () {
         api.getStatuses().then((value) => {
             setStatuses(value);
-        }).catch(async (reason: string) => {
-            await message(reason, { title: "Failed to get Statuses.", type: "error" });
+        }).catch(async (reason: unknown) => {
+            await message(`${reason}`, { title: "Failed to get Statuses.", kind: "error" });
         });
     }
 
@@ -33,9 +33,9 @@ export function useStatuses() {
         api.addStatus(name).then((id) => {
             setStatuses([...statuses, { id: id, name: name, isUpdate: false }]);
             callback();
-        }).catch(async (reason) => {
+        }).catch(async (reason: unknown) => {
             getStatuses();
-            await message(`${reason}`, { title: "Failed to add Status.", type: "error" });
+            await message(`${reason}`, { title: "Failed to add Status.", kind: "error" });
         }).finally(() => { cleanUp(); });
     }
 
@@ -45,9 +45,9 @@ export function useStatuses() {
         api.removeStatus(id).then(() => {
             sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
             sessionStorage.removeItem(StorageKey.AddWorkFormData);
-        }).catch(async (reason) => {
+        }).catch(async (reason: unknown) => {
             getStatuses();
-            await message(`${reason}`, { title: "Failed to remove Status.", type: "error" });
+            await message(`${reason}`, { title: "Failed to remove Status.", kind: "error" });
         });
     }
 
@@ -59,9 +59,9 @@ export function useStatuses() {
             return status;
         }));
 
-        api.updateStatusName(id, name).catch(async (reason) => {
+        api.updateStatusName(id, name).catch(async (reason: unknown) => {
             getStatuses();
-            await message(`${reason}`, { title: "Failed to update Status name.", type: "error" });
+            await message(`${reason}`, { title: "Failed to update Status name.", kind: "error" });
         });
     }
 
@@ -73,9 +73,9 @@ export function useStatuses() {
             return status;
         }));
 
-        api.updateStatusIsUpdate(id, isUpdate).catch(async (reason) => {
+        api.updateStatusIsUpdate(id, isUpdate).catch(async (reason: unknown) => {
             getStatuses();
-            await message(`${reason}`, { title: "Failed to update Status is update.", type: "error" });
+            await message(`${reason}`, { title: "Failed to update Status is update.", kind: "error" });
         });
     }
 
@@ -87,9 +87,9 @@ export function useStatuses() {
             return arrayMove(statuses, oldIndex, newIndex);
         });
 
-        api.reorderStatuses(activeId, overId).catch(async (reason) => {
+        api.reorderStatuses(activeId, overId).catch(async (reason: unknown) => {
             getStatuses();
-            await message(`${reason}`, { title: "Failed to reorder statuses.", type: "error" });
+            await message(`${reason}`, { title: "Failed to reorder statuses.", kind: "error" });
         });
     }
 

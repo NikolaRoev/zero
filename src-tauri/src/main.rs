@@ -1,5 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri::Manager;
+
 mod api;
 mod application;
 mod config;
@@ -9,32 +11,48 @@ mod menu;
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_log::Builder::default().targets([
-            tauri_plugin_log::LogTarget::Stdout,
-            tauri_plugin_log::LogTarget::Folder(std::env::current_dir().unwrap_or_default())
-        ]).format(|format, args, record| {
-            let (start, end) = match record.level() {
-                log::Level::Error => ("\x1b[91m", "\x1b[0m"),
-                log::Level::Warn => ("\x1b[93m", "\x1b[0m"),
-                log::Level::Info => ("\x1b[92m", "\x1b[0m"),
-                log::Level::Debug => ("\x1b[95m", "\x1b[0m"),
-                log::Level::Trace => ("\x1b[94m", "\x1b[0m"),
-            };
-
-            format.finish(format_args!("{start}[{now}][{level}][{target}/{line}]: {args}{end}",
-                start = start,
-                now = chrono::Local::now().format("%F][%T%.9f"),
-                level = record.level(),
-                target = record.target(),
-                line = record.line().unwrap_or(0),
-                args = args,
-                end = end
-            ))
-        }).build())
-        .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
-            tauri::Manager::get_window(app, "main").map(|window| window.set_focus());
+            app.get_webview_window("main").map(|window| window.set_focus());
         }))
+        .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_window_state::Builder::new().build())
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .target(tauri_plugin_log::Target::new(
+                    tauri_plugin_log::TargetKind::Stdout,
+                ))
+                .target(tauri_plugin_log::Target::new(
+                    tauri_plugin_log::TargetKind::Folder {
+                        path: std::env::current_dir().unwrap_or_default(),
+                        file_name: Some(String::from("zero")),
+                    },
+                ))
+                .max_file_size(10 * 1024 * 1024)
+                .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepOne)
+                .format(|format, args, record| {
+                    let (start, end) = match record.level() {
+                        log::Level::Error => ("\x1b[91m", "\x1b[0m"),
+                        log::Level::Warn => ("\x1b[93m", "\x1b[0m"),
+                        log::Level::Info => ("\x1b[92m", "\x1b[0m"),
+                        log::Level::Debug => ("\x1b[95m", "\x1b[0m"),
+                        log::Level::Trace => ("\x1b[94m", "\x1b[0m"),
+                    };
+
+                    format.finish(format_args!(
+                        "{start}[{now}][{level}][{target}/{line}]: {args}{end}",
+                        start = start,
+                        now = chrono::Local::now().format("%F][%T%.9f"),
+                        level = record.level(),
+                        target = record.target(),
+                        line = record.line().unwrap_or(0),
+                        args = args,
+                        end = end
+                    ))
+                })
+                .build(),
+        )
         .setup(application::setup)
         .invoke_handler(tauri::generate_handler![
             api::open_database,
@@ -69,11 +87,9 @@ fn main() {
             api::update_format_name,
             api::reorder_formats,
             api::attach,
-            api::detach,
-            api::get_recent_databases,
-            api::remove_recent_database
+            api::detach
         ])
-        .on_menu_event(menu::event_handler)
-        .build(tauri::generate_context!()).unwrap_or_else(|err| panic!("Failed to build application: {err}."))
+        .build(tauri::generate_context!())
+        .unwrap_or_else(|err| panic!("Failed to build application: {err}."))
         .run(application::callback);
 }

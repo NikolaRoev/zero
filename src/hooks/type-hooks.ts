@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { StorageKey } from "../data/storage";
 import type { Type } from "../data/data";
 import { arrayMove } from "@dnd-kit/sortable";
-import { message } from "@tauri-apps/api/dialog";
+import { message } from "@tauri-apps/plugin-dialog";
 
 
 
@@ -24,8 +24,8 @@ export default function useTypes() {
     function getTypes() {
         api.getTypes().then((value) => {
             setTypes(value);
-        }).catch(async (reason: string) => {
-            await message(reason, { title: "Failed to get Types.", type: "error" });
+        }).catch(async (reason: unknown) => {
+            await message(`${reason}`, { title: "Failed to get Types.", kind: "error" });
         });
     }
 
@@ -33,9 +33,9 @@ export default function useTypes() {
         api.addType(name).then((id) => {
             setTypes([...types, { id: id, name: name }]);
             callback();
-        }).catch(async (reason) => {
+        }).catch(async (reason: unknown) => {
             getTypes();
-            await message(`${reason}`, { title: "Failed to add Type.", type: "error" });
+            await message(`${reason}`, { title: "Failed to add Type.", kind: "error" });
         }).finally(() => { cleanUp(); });
     }
 
@@ -45,9 +45,9 @@ export default function useTypes() {
         api.removeType(id).then(() => {
             sessionStorage.removeItem(StorageKey.LibraryWorksFilter);
             sessionStorage.removeItem(StorageKey.AddWorkFormData);
-        }).catch(async (reason) => {
+        }).catch(async (reason: unknown) => {
             getTypes();
-            await message(`${reason}`, { title: "Failed to remove Type.", type: "error" });
+            await message(`${reason}`, { title: "Failed to remove Type.", kind: "error" });
         });
     }
 
@@ -59,9 +59,9 @@ export default function useTypes() {
             return type;
         }));
 
-        api.updateTypeName(id, name).catch(async (reason) => {
+        api.updateTypeName(id, name).catch(async (reason: unknown) => {
             getTypes();
-            await message(`${reason}`, { title: "Failed to update Type name.", type: "error" });
+            await message(`${reason}`, { title: "Failed to update Type name.", kind: "error" });
         });
     }
 
@@ -73,9 +73,9 @@ export default function useTypes() {
             return arrayMove(types, oldIndex, newIndex);
         });
 
-        api.reorderTypes(activeId, overId).catch(async (reason) => {
+        api.reorderTypes(activeId, overId).catch(async (reason: unknown) => {
             getTypes();
-            await message(`${reason}`, { title: "Failed to reorder types.", type: "error" });
+            await message(`${reason}`, { title: "Failed to reorder types.", kind: "error" });
         });
     }
 

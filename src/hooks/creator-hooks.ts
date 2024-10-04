@@ -1,7 +1,7 @@
 import * as api from "../data/api";
 import { useEffect, useState } from "react";
 import type { Creator } from "../data/data";
-import { message } from "@tauri-apps/api/dialog";
+import { message } from "@tauri-apps/plugin-dialog";
 
 
 export function useCreators() {
@@ -21,8 +21,8 @@ export function useCreators() {
     function getCreators() {
         api.getCreators().then((value) => {
             setCreators(new Map(value.map((v) => [v.id, v])));
-        }).catch(async (reason: string) => {
-            await message(reason, { title: "Failed to get Creators.", type: "error" });
+        }).catch(async (reason: unknown) => {
+            await message(`${reason}`, { title: "Failed to get Creators.", kind: "error" });
         });
     }
 
@@ -31,9 +31,9 @@ export function useCreators() {
             const creator = getCreator(id);
             creators.set(id, { ...creator, name: name });
             setCreators(new Map(creators));
-        }).catch(async (reason: string) => {
+        }).catch(async (reason: unknown) => {
             getCreators();
-            await message(reason, { title: "Failed to update Creator Name.", type: "error" });
+            await message(`${reason}`, { title: "Failed to update Creator Name.", kind: "error" });
         });
     }
 
