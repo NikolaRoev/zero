@@ -31,6 +31,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tauriScript: npm run build
+          tauriScript: npm run
           tagName: __VERSION__
           releaseName: __VERSION__

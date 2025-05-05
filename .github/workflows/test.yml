@@ -25,6 +25,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tauriScript: npm run build
+          tauriScript: npm run
       - run: npm run lint
       - run: npm run test
