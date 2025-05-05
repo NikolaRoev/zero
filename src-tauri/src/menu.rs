@@ -3,7 +3,7 @@ use tauri::menu::{Menu, MenuBuilder, MenuId, MenuItemBuilder, SubmenuBuilder};
 use tauri::{webview_version, Manager, Wry, VERSION};
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
-use tauri_plugin_shell::ShellExt;
+use tauri_plugin_opener::OpenerExt;
 use crate::api;
 use crate::{config::Config, database::Database};
 
@@ -44,11 +44,6 @@ pub fn create_main_menu(app: &tauri::App) -> Result<tauri::menu::Menu<Wry>, Box<
         )
         .accelerator("Ctrl+Shift+I")
         .build(app)?;
-    let check_for_updates = MenuItemBuilder::with_id(
-            "check_for_updates",
-            "Check for Updates..."
-        )
-        .build(app)?;
     let about = MenuItemBuilder::with_id(
             "about",
             "About"
@@ -60,7 +55,6 @@ pub fn create_main_menu(app: &tauri::App) -> Result<tauri::menu::Menu<Wry>, Box<
         .separator()
         .item(&dev_tools)
         .separator()
-        .item(&check_for_updates)
         .separator()
         .item(&about)
         .build()?;
@@ -140,25 +134,11 @@ pub fn event_handler(app: &tauri::AppHandle, event: tauri::menu::MenuEvent) {
             app.get_webview_window("main").unwrap().close().unwrap();
         }
         "repository" => {
-            if let Err(err) = app.shell().open("https://github.com/NikolaRoev/zero", None) {
+            if let Err(err) = app.opener().open_url("https://github.com/NikolaRoev/zero", None::<&str>) {
                 log::error!("Failed to open repository: {err}.");
             }
         }
         "dev_tools" => app.get_webview_window("main").unwrap().open_devtools(),
-        "check_for_updates" => {
-            //tauri::async_runtime::spawn(async move {
-            //    match event.window().app_handle().updater().check().await {
-            //        Ok(update) => {
-            //            if update.is_update_available() {
-            //                update.download_and_install().await.unwrap();
-            //            }
-            //        }
-            //        Err(e) => {
-            //            log::error!("failed to get update: {}", e);
-            //        }
-            //    }
-            //});
-        }
         "about" => {
             let message = format!(
                 "Version: {}\nTauri: {}\nWebView/WebKit: {}",

@@ -828,4 +828,22 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn can_reorder_works() -> Result<(), Box<dyn std::error::Error>> {
+        let database = &Context::new().database;
+
+        let status_id_0 = database.add("statuses", vec![("name", &"status0")])?;
+        let status_id_1 = database.add("statuses", vec![("name", &"status1")])?;
+
+        let statuses = database.get_statuses()?;
+        assert_eq!(statuses.first().unwrap().id, status_id_0);
+
+        database.reorder("statuses", &status_id_0, &status_id_1)?;
+
+        let statuses = database.get_statuses()?;
+        assert_eq!(statuses.first().unwrap().id, status_id_1);
+
+        Ok(())
+    }
 }
