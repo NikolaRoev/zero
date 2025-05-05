@@ -55,7 +55,6 @@ pub fn create_main_menu(app: &tauri::App) -> Result<tauri::menu::Menu<Wry>, Box<
         .separator()
         .item(&dev_tools)
         .separator()
-        .separator()
         .item(&about)
         .build()?;
 
